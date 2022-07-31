@@ -1,4 +1,4 @@
-var N = null;var sourcesIndex = {};
+var sourcesIndex = {};
 sourcesIndex["bonsaidb_counter_client"] = {"name":"","files":["main.rs"]};
 sourcesIndex["bonsaidb_counter_server"] = {"name":"","files":["main.rs"]};
 sourcesIndex["bonsaidb_counter_shared"] = {"name":"","files":["lib.rs"]};
