@@ -466,6 +466,7 @@
 <span id="461">461</span>
 <span id="462">462</span>
 <span id="463">463</span>
+<span id="464">464</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Cross-platform rendering types.</span>
 
 <span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">unsafe_code</span>)]</span>
@@ -508,6 +509,7 @@
     <span class="doccomment">/// Returns a new renderer instance with the state such that each operation</span>
     <span class="doccomment">/// executes as if the origin is `bounds.origin`. The returned instance&#39;s</span>
     <span class="doccomment">/// `size()` should equal `bounds.size`.</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">fn</span> <span class="ident">clip_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bounds</span>: <span class="ident">Rect</span><span class="op">&lt;</span><span class="ident">f32</span>, <span class="ident">Scaled</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// A [`Rect`] representing the area being drawn. This rect should be offset</span>

@@ -233,7 +233,7 @@
 
 <span class="kw">fn</span> <span class="ident">next_event</span>(
     <span class="ident">commands</span>: <span class="kw-2">&amp;</span><span class="ident">flume::Receiver</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span>,
-    <span class="ident">timers</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ScheduledTimer</span><span class="op">&gt;</span>,
+    <span class="ident">timers</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">ScheduledTimer</span>],
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Event</span>, <span class="ident">flume::RecvError</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">duration_until_next_timer</span>(<span class="ident">timers</span>) {
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">remaining_time</span>)) =&gt; <span class="kw">match</span> <span class="ident">commands</span>.<span class="ident">recv_timeout</span>(<span class="ident">remaining_time</span>) {
@@ -251,7 +251,7 @@
 <span class="doccomment">/// but the amount of elapsed time on this thread is such that when we&#39;re ready</span>
 <span class="doccomment">/// to try to sleep the thread, the next timer was ready to fire already. A</span>
 <span class="doccomment">/// result of `Ok(None)` means that there are no timers waiting.</span>
-<span class="kw">fn</span> <span class="ident">duration_until_next_timer</span>(<span class="ident">timers</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ScheduledTimer</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">duration_until_next_timer</span>(<span class="ident">timers</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">ScheduledTimer</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
 
     <span class="ident">timers</span>.<span class="ident">first</span>().<span class="ident">map_or</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>), <span class="op">|</span><span class="ident">timer</span><span class="op">|</span> {
