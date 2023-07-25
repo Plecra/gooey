@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ParagraphRemoval","Indicates whether a paragraph should be kept or removed."]],"struct":[["RichText","A multi-paragraph rich text data type."],["RichTextPosition","A location within a [`RichText`] object."]]});

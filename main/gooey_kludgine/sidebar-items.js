@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Kludgine",""]]});
+window.SIDEBAR_ITEMS = {"enum":["SurfaceEvent"],"fn":["run"],"struct":["Kludgine","KludgineRenderer","KludgineTransmogrifier"]};

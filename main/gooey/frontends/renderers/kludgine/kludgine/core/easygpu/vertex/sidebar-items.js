@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["VertexFormat",""]],"struct":[["VertexLayout","Describes a ‘VertexBuffer’ layout."]]});

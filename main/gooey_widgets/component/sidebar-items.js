@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ComponentCommand",""],["InternalEvent",""]],"struct":[["Component",""],["ComponentBuilder",""],["ComponentTransmogrifier",""],["ComponentUpdater",""],["EventMapper",""],["EventPoster",""],["MappedCallback",""]],"trait":[["AnyEventPoster",""],["Behavior",""],["Content",""],["ContentBuilder",""]]});

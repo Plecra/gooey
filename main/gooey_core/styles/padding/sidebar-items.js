@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Builder","Builds [`Padding`]."],["Padding","Adds padding (spacing) around a widget."]]});

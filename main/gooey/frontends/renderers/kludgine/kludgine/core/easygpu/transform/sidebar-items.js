@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ScreenTransformation",""]],"type":[["ScreenSpace",""],["WorldSpace",""]]});

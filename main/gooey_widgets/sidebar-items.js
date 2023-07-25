@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["browser",""],["button",""],["checkbox",""],["component",""],["container",""],["input",""],["label",""],["layout",""],["list",""],["navigator",""],["rasterized",""]]});
+window.SIDEBAR_ITEMS = {"fn":["raster_widgets","web_widgets","widgets"],"mod":["flex"],"struct":["Button","Label"],"trait":["LabelExt"]};

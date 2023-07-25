@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Command",""],["Event",""]],"struct":[["Builder",""],["Input",""],["InputTransmogrifier",""]]});

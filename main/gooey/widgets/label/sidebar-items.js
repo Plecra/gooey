@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Command",""]],"struct":[["Label",""],["LabelColor","The label’s text color."],["LabelTransmogrifier",""]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ButtonCommand",""],["InternalButtonEvent",""]],"struct":[["Builder",""],["Button",""],["ButtonColor","The button’s background color."],["ButtonImageSpacing",""],["ButtonTransmogrifier",""]]});

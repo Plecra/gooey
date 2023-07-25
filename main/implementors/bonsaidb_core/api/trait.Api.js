@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["bonsaidb_counter_shared"] = [{"text":"impl Api for <a class=\"struct\" href=\"bonsaidb_counter_shared/struct.IncrementCounter.html\" title=\"struct bonsaidb_counter_shared::IncrementCounter\">IncrementCounter</a>","synthetic":false,"types":["bonsaidb_counter_shared::IncrementCounter"]},{"text":"impl Api for <a class=\"struct\" href=\"bonsaidb_counter_shared/struct.CounterValue.html\" title=\"struct bonsaidb_counter_shared::CounterValue\">CounterValue</a>","synthetic":false,"types":["bonsaidb_counter_shared::CounterValue"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

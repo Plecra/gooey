@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["kludgine","A `Renderer` for `Gooey` that uses `Kludgine` to draw. Under the hood, `Kludgine` uses `wgpu`, and in the future we aim to support embedding `Gooey` into other `wgpu` applications."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Rect","A Rectangle defined by its top left corner, width and height."]]});

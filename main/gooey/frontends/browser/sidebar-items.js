@@ -1,1 +1,0 @@
-initSidebarItems({"macro":[["make_browser",""]],"mod":[["utils",""]],"struct":[["RegisteredTransmogrifier",""],["WebSys","`WebSys` is a [`Frontend`] implementor that implements Gooey interfaces through `web-sys` in a web browser."],["WidgetClosure",""]],"trait":[["AnyWebSysTransmogrifier",""],["ImageExt",""],["WebSysTransmogrifier",""]]});
