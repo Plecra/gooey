@@ -261,7 +261,6 @@
 <a href="#261" id="261">261</a>
 <a href="#262" id="262">262</a>
 <a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>gooey_core::style::FontSize;
 <span class="kw">use </span>gooey_core::{AnyCallback, Callback, Context, NewWidget, Value, Widget};
 
@@ -314,11 +313,9 @@
 
     <span class="kw">use </span>futures_util::StreamExt;
     <span class="kw">use </span>gooey_core::math::units::Px;
-    <span class="kw">use </span>gooey_core::reactor::Dynamic;
-    <span class="kw">use </span>gooey_core::style::{Dimension, FontSize, Length};
+    <span class="kw">use </span>gooey_core::style::{Dimension, DynamicStyle, FontSize, Length};
     <span class="kw">use </span>gooey_core::{Value, WidgetTransmogrifier};
     <span class="kw">use </span>gooey_web::WebApp;
-    <span class="kw">use </span>stylecs::Style;
     <span class="kw">use </span>wasm_bindgen::prelude::Closure;
     <span class="kw">use </span>wasm_bindgen::JsCast;
     <span class="kw">use </span>web_sys::{HtmlElement, Node};
@@ -331,7 +328,7 @@
         <span class="kw">fn </span>transmogrify(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             widget: <span class="kw-2">&amp;</span><span class="self">Self</span>::Widget,
-            style: Dynamic&lt;Style&gt;,
+            style: DynamicStyle,
             _context: <span class="kw-2">&amp;</span>gooey_web::WebContext,
         ) -&gt; Node {
             <span class="kw">let </span>label = widget.label.clone();
@@ -414,6 +411,7 @@
     <span class="kw">use </span>gooey_core::graphics::TextMetrics;
     <span class="kw">use </span>gooey_core::math::units::{Px, UPx};
     <span class="kw">use </span>gooey_core::math::{IntoSigned, IntoUnsigned, Point, Size};
+    <span class="kw">use </span>gooey_core::style::DynamicStyle;
     <span class="kw">use </span>gooey_core::{Value, WidgetTransmogrifier};
     <span class="kw">use </span>gooey_raster::{
         AnyRasterContext, ConstraintLimit, RasterContext, Rasterizable, RasterizedApp, Renderer,
@@ -438,7 +436,7 @@
         <span class="kw">fn </span>transmogrify(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             widget: <span class="kw-2">&amp;</span><span class="self">Self</span>::Widget,
-            _style: gooey_core::reactor::Dynamic&lt;stylecs::Style&gt;,
+            _style: DynamicStyle,
             context: <span class="kw-2">&amp;</span>RasterContext&lt;Surface&gt;,
         ) -&gt; Rasterizable {
             <span class="comment">// TODO apply style

@@ -101,6 +101,26 @@
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::any::type_name;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
@@ -110,7 +130,7 @@
 <span class="kw">use </span>gooey_core::style::Style;
 <span class="kw">use </span>gooey_core::window::{NewWindow, Window};
 <span class="kw">use </span>gooey_core::{BoxedWidget, Context, Frontend, Runtime, Widget, WidgetInstance, Widgets};
-<span class="kw">use </span>gooey_reactor::Dynamic;
+<span class="kw">use </span>gooey_reactor::{Dynamic, ScopeGuard};
 <span class="kw">use </span>web_sys::{window, Node};
 
 <span class="kw">pub fn </span>attach_to_body&lt;Widget&gt;(widgets: Arc&lt;Widgets&lt;WebApp&gt;&gt;, init: NewWindow&lt;Widget&gt;)
@@ -118,22 +138,23 @@
     </span>Widget: gooey_core::Widget,
 {
     console_error_panic_hook::set_once();
-    <span class="kw">let </span>(app, node) = WebApp::new(widgets, init);
+    <span class="kw">let </span>(app, widget) = WebApp::new(widgets, init);
 
     <span class="kw">let </span>document = window()
         .expect(<span class="string">&quot;no window&quot;</span>)
         .document()
         .expect(<span class="string">&quot;no document&quot;</span>);
     <span class="kw">if let </span><span class="prelude-val">Some</span>(body) = document.body() {
-        body.append_child(<span class="kw-2">&amp;</span>node)
+        body.append_child(<span class="kw-2">&amp;</span>widget.node)
             .expect(<span class="string">&quot;error adding node to document&quot;</span>);
     } <span class="kw">else </span>{
         document
-            .append_child(<span class="kw-2">&amp;</span>node)
+            .append_child(<span class="kw-2">&amp;</span>widget.node)
             .expect(<span class="string">&quot;error adding node to document&quot;</span>);
     };
 
     mem::forget(app);
+    mem::forget(widget);
 }
 
 <span class="attr">#[derive(Debug, Clone)]
@@ -143,14 +164,19 @@
 }
 
 <span class="kw">impl </span>WebApp {
-    <span class="kw">pub fn </span>new&lt;Widget&gt;(widgets: Arc&lt;Widgets&lt;WebApp&gt;&gt;, init: NewWindow&lt;Widget&gt;) -&gt; (<span class="self">Self</span>, Node)
+    <span class="kw">pub fn </span>new&lt;IntoWidget&gt;(
+        widgets: Arc&lt;Widgets&lt;WebApp&gt;&gt;,
+        init: NewWindow&lt;IntoWidget&gt;,
+    ) -&gt; (<span class="self">Self</span>, WebWidget&lt;IntoWidget::Widget&gt;)
     <span class="kw">where
-        </span>Widget: gooey_core::IntoNewWidget,
+        </span>IntoWidget: gooey_core::IntoNewWidget,
     {
         <span class="kw">let </span>runtime = Runtime::default();
 
         <span class="kw">let </span>app = <span class="self">Self </span>{ runtime, widgets };
+        <span class="kw">let </span>window_scope = Arc::new(app.runtime.root_scope().new_scope());
         <span class="kw">let </span>context = Context {
+            scope: <span class="kw-2">**</span>window_scope,
             frontend: Arc::new(app.clone()),
         };
         <span class="kw">let </span>window = Window::new(init.attributes, <span class="kw-2">&amp;</span>context);
@@ -160,21 +186,34 @@
 
         </span><span class="kw">let </span>node = app.widgets.instantiate(
             <span class="kw-2">&amp;</span>widget.widget,
-            <span class="kw-2">*</span>widget.style,
-            <span class="kw-2">&amp;</span>WebContext { app: app.clone() },
+            widget.style,
+            <span class="kw-2">&amp;</span>WebContext {
+                _scope: window_scope.clone(),
+
+                app: app.clone(),
+            },
         );
 
-        (app, node)
+        (
+            app,
+            WebWidget {
+                widget: widget.widget,
+                scope: window_scope,
+                node,
+            },
+        )
     }
+}
+
+<span class="kw">pub struct </span>WebWidget&lt;T&gt; {
+    <span class="kw">pub </span>widget: T,
+    <span class="kw">pub </span>scope: Arc&lt;ScopeGuard&gt;,
+    <span class="kw">pub </span>node: Node,
 }
 
 <span class="kw">impl </span>Frontend <span class="kw">for </span>WebApp {
     <span class="kw">type </span>Context = WebContext;
     <span class="kw">type </span>Instance = Node;
-
-    <span class="kw">fn </span>runtime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Runtime {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.runtime
-    }
 }
 
 <span class="kw">pub trait </span>WebTransmogrifier: RefUnwindSafe + UnwindSafe + Send + Sync + <span class="lifetime">&#39;static </span>{
@@ -195,13 +234,14 @@
 <span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>WebContext {
     app: WebApp,
+    _scope: Arc&lt;ScopeGuard&gt;,
 }
 
 <span class="kw">impl </span>WebContext {
     <span class="kw">pub fn </span>instantiate(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: <span class="kw-2">&amp;</span>WidgetInstance&lt;BoxedWidget&gt;) -&gt; Node {
         <span class="self">self</span>.app
             .widgets
-            .instantiate(<span class="kw-2">&amp;*</span>widget.widget, <span class="kw-2">*</span>widget.style, <span class="self">self</span>)
+            .instantiate(<span class="kw-2">&amp;*</span>widget.widget, widget.style, <span class="self">self</span>)
     }
 }
 </code></pre></div></section></main></body></html>

@@ -259,10 +259,9 @@
 <span class="attr">#[cfg(feature = <span class="string">&quot;web&quot;</span>)]
 </span><span class="kw">mod </span>web {
     <span class="kw">use </span>futures_util::StreamExt;
-    <span class="kw">use </span>gooey_core::reactor::Dynamic;
+    <span class="kw">use </span>gooey_core::style::DynamicStyle;
     <span class="kw">use </span>gooey_core::{Value, WidgetTransmogrifier};
     <span class="kw">use </span>gooey_web::WebApp;
-    <span class="kw">use </span>stylecs::Style;
     <span class="kw">use </span>wasm_bindgen::prelude::Closure;
     <span class="kw">use </span>wasm_bindgen::JsCast;
     <span class="kw">use </span>web_sys::HtmlButtonElement;
@@ -275,7 +274,7 @@
         <span class="kw">fn </span>transmogrify(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             widget: <span class="kw-2">&amp;</span><span class="self">Self</span>::Widget,
-            _style: Dynamic&lt;Style&gt;,
+            _style: DynamicStyle,
             _context: <span class="kw-2">&amp;</span>&lt;WebApp <span class="kw">as </span>gooey_core::Frontend&gt;::Context,
         ) -&gt; &lt;WebApp <span class="kw">as </span>gooey_core::Frontend&gt;::Instance {
             <span class="comment">// TODO apply style
@@ -323,6 +322,7 @@
     <span class="kw">use </span>gooey_core::graphics::TextMetrics;
     <span class="kw">use </span>gooey_core::math::units::{Px, UPx};
     <span class="kw">use </span>gooey_core::math::{IntoSigned, IntoUnsigned, Point, Size};
+    <span class="kw">use </span>gooey_core::style::DynamicStyle;
     <span class="kw">use </span>gooey_core::{Value, WidgetTransmogrifier};
     <span class="kw">use </span>gooey_raster::{
         AnyRasterContext, ConstraintLimit, RasterContext, Rasterizable, RasterizedApp, Renderer,
@@ -347,7 +347,7 @@
         <span class="kw">fn </span>transmogrify(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             widget: <span class="kw-2">&amp;</span><span class="self">Self</span>::Widget,
-            _style: gooey_core::reactor::Dynamic&lt;stylecs::Style&gt;,
+            _style: DynamicStyle,
             context: <span class="kw-2">&amp;</span>RasterContext&lt;Surface&gt;,
         ) -&gt; Rasterizable {
             <span class="comment">// TODO apply style

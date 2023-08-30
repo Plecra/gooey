@@ -251,6 +251,7 @@
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
 </pre></div><pre class="rust"><code><span class="kw">mod </span>layout;
 <span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::num::NonZeroUsize;
@@ -259,6 +260,7 @@
 <span class="kw">use </span>gooey_core::math::units::{Px, UPx};
 <span class="kw">use </span>gooey_core::math::{IntoSigned, Point, Rect, Size};
 <span class="kw">use </span>gooey_core::reactor::Dynamic;
+<span class="kw">use </span>gooey_core::style::DynamicStyle;
 <span class="kw">use </span>gooey_core::{Children, Value, WidgetTransmogrifier};
 <span class="kw">use </span>gooey_raster::{
     AnyRasterContext, ConstraintLimit, RasterContext, Rasterizable, RasterizedApp, Renderer,
@@ -331,7 +333,7 @@
     <span class="kw">fn </span>transmogrify(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         widget: <span class="kw-2">&amp;</span><span class="self">Self</span>::Widget,
-        style: gooey_core::reactor::Dynamic&lt;stylecs::Style&gt;,
+        style: DynamicStyle,
         context: <span class="kw-2">&amp;</span>RasterContext&lt;Surface&gt;,
     ) -&gt; Rasterizable {
         <span class="kw">let </span><span class="kw-2">mut </span>raster_children = RasterizedChildren::default();
