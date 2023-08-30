@@ -4,7 +4,7 @@
     fn <a href="#tymethod.transmogrify" class="fn">transmogrify</a>(
         &amp;self,
         widget: &amp;dyn <a class="trait" href="trait.AnyWidget.html" title="trait gooey_core::AnyWidget">AnyWidget</a>,
-        style: Dynamic&lt;<a class="struct" href="style/struct.Style.html" title="struct gooey_core::style::Style">Style</a>&gt;,
+        style: <a class="struct" href="../gooey_reactor/struct.Dynamic.html" title="struct gooey_reactor::Dynamic">Dynamic</a>&lt;<a class="struct" href="style/struct.Style.html" title="struct gooey_core::style::Style">Style</a>&gt;,
         context: &amp;F::<a class="associatedtype" href="trait.Frontend.html#associatedtype.Context" title="type gooey_core::Frontend::Context">Context</a>
     ) -&gt; F::<a class="associatedtype" href="trait.Frontend.html#associatedtype.Instance" title="type gooey_core::Frontend::Instance">Instance</a>;
 
@@ -13,7 +13,7 @@
 }</code></pre><h2 id="required-methods" class="small-section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><section id="tymethod.transmogrify" class="method"><a class="srclink rightside" href="../src/gooey_core/lib.rs.html#631-636">source</a><h4 class="code-header">fn <a href="#tymethod.transmogrify" class="fn">transmogrify</a>(
     &amp;self,
     widget: &amp;dyn <a class="trait" href="trait.AnyWidget.html" title="trait gooey_core::AnyWidget">AnyWidget</a>,
-    style: Dynamic&lt;<a class="struct" href="style/struct.Style.html" title="struct gooey_core::style::Style">Style</a>&gt;,
+    style: <a class="struct" href="../gooey_reactor/struct.Dynamic.html" title="struct gooey_reactor::Dynamic">Dynamic</a>&lt;<a class="struct" href="style/struct.Style.html" title="struct gooey_core::style::Style">Style</a>&gt;,
     context: &amp;F::<a class="associatedtype" href="trait.Frontend.html#associatedtype.Context" title="type gooey_core::Frontend::Context">Context</a>
 ) -&gt; F::<a class="associatedtype" href="trait.Frontend.html#associatedtype.Instance" title="type gooey_core::Frontend::Instance">Instance</a></h4></section></div><h2 id="provided-methods" class="small-section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><section id="method.widget_type_name" class="method"><a class="srclink rightside" href="../src/gooey_core/lib.rs.html#638-640">source</a><h4 class="code-header">fn <a href="#method.widget_type_name" class="fn">widget_type_name</a>(&amp;self) -&gt; &amp;'static <a class="primitive" href="https://doc.rust-lang.org/1.72.0/std/primitive.str.html">str</a></h4></section></div><h2 id="implementors" class="small-section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"><section id="impl-Transmogrify%3CF%3E-for-T" class="impl"><a class="srclink rightside" href="../src/gooey_core/lib.rs.html#643-660">source</a><a href="#impl-Transmogrify%3CF%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;F, T&gt; <a class="trait" href="trait.Transmogrify.html" title="trait gooey_core::Transmogrify">Transmogrify</a>&lt;F&gt; for T<span class="where fmt-newline">where
     T: <a class="trait" href="trait.WidgetTransmogrifier.html" title="trait gooey_core::WidgetTransmogrifier">WidgetTransmogrifier</a>&lt;F&gt;,
