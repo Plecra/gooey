@@ -1,6 +1,6 @@
 var sourcesIndex = JSON.parse('{\
 "gooey":["",[],["lib.rs"]],\
-"gooey_core":["",[["style",[],["classes.rs"]]],["graphics.rs","lib.rs","style.rs"]],\
+"gooey_core":["",[["style",[],["classes.rs"]]],["graphics.rs","lib.rs","style.rs","window.rs"]],\
 "gooey_kludgine":["",[],["lib.rs"]],\
 "gooey_macros":["",[],["lib.rs"]],\
 "gooey_raster":["",[],["lib.rs"]],\

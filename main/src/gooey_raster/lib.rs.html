@@ -275,6 +275,21 @@
 <a href="#275" id="275">275</a>
 <a href="#276" id="276">276</a>
 <a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::marker::PhantomData;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
@@ -432,7 +447,7 @@
 <span class="kw">where
     </span>Surface: <span class="kw">crate</span>::Surface,
 {
-    widgets: Widgets&lt;RasterizedApp&lt;Surface&gt;&gt;,
+    widgets: Arc&lt;Widgets&lt;RasterizedApp&lt;Surface&gt;&gt;&gt;,
     surface: Surface::Context,
     handle: Arc&lt;<span class="kw">dyn </span>SurfaceHandle&gt;,
 }
@@ -442,7 +457,7 @@
     </span>Surface: <span class="kw">crate</span>::Surface,
 {
     <span class="kw">pub fn </span>new(
-        widgets: Widgets&lt;RasterizedApp&lt;Surface&gt;&gt;,
+        widgets: Arc&lt;Widgets&lt;RasterizedApp&lt;Surface&gt;&gt;&gt;,
         surface: Surface::Context,
         handle: Arc&lt;<span class="kw">dyn </span>SurfaceHandle&gt;,
     ) -&gt; <span class="self">Self </span>{
@@ -457,7 +472,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.surface
     }
 
-    <span class="kw">pub const fn </span>widgets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Widgets&lt;RasterizedApp&lt;Surface&gt;&gt; {
+    <span class="kw">pub fn </span>widgets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Widgets&lt;RasterizedApp&lt;Surface&gt;&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.widgets
     }
 
@@ -481,6 +496,18 @@
 {
     <span class="kw">fn </span>invalidate(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="self">self</span>.handle.invalidate()
+    }
+
+    <span class="kw">fn </span>window_title_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.handle.window_title_set()
+    }
+
+    <span class="kw">fn </span>window_position_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.handle.window_position_set()
+    }
+
+    <span class="kw">fn </span>window_size_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.handle.window_size_set()
     }
 }
 
@@ -527,6 +554,9 @@
 }
 
 <span class="kw">pub trait </span>SurfaceHandle: Debug + RefUnwindSafe + UnwindSafe + Sync + Send + <span class="lifetime">&#39;static </span>{
+    <span class="kw">fn </span>window_title_set(<span class="kw-2">&amp;</span><span class="self">self</span>);
+    <span class="kw">fn </span>window_position_set(<span class="kw-2">&amp;</span><span class="self">self</span>);
+    <span class="kw">fn </span>window_size_set(<span class="kw-2">&amp;</span><span class="self">self</span>);
     <span class="kw">fn </span>invalidate(<span class="kw-2">&amp;</span><span class="self">self</span>);
     <span class="comment">// fn invalidate_rect(&amp;self, rect: Rect&lt;UPx&gt;);
 </span>}

@@ -263,28 +263,106 @@
 <a href="#263" id="263">263</a>
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
-<span class="kw">use </span>std::marker::PhantomData;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
-<span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>gooey_core::graphics::{Drawable, Options, TextMetrics};
 <span class="kw">use </span>gooey_core::math::units::UPx;
 <span class="kw">use </span>gooey_core::math::{IntoSigned, Point, Rect, ScreenUnit};
+<span class="kw">use </span>gooey_core::window::{NewWindow, Window, WindowAttributes, WindowLevel};
 <span class="kw">use </span>gooey_core::{Context, IntoNewWidget, NewWidget, Runtime, Widgets};
 <span class="kw">use </span>gooey_raster::{DrawableState, RasterContext, Rasterizable, RasterizedApp, Surface};
+<span class="kw">use </span>kludgine::app::winit::dpi::{PhysicalPosition, PhysicalSize};
 <span class="kw">use </span>kludgine::app::winit::event::ElementState;
-<span class="kw">use </span>kludgine::app::WindowBehavior;
+<span class="kw">use </span>kludgine::app::{winit, WindowBehavior};
 <span class="kw">use </span>kludgine::render::Drawing;
 <span class="kw">use </span>kludgine::shapes::Shape;
 <span class="kw">use </span>kludgine::text::TextOrigin;
 <span class="kw">use </span>kludgine::{Clipped, Color};
 
-<span class="kw">pub fn </span>run&lt;Widget, Initializer&gt;(widgets: Widgets&lt;RasterizedApp&lt;Kludgine&gt;&gt;, init: Initializer) -&gt; !
+<span class="kw">pub fn </span>run&lt;Widget&gt;(widgets: Arc&lt;Widgets&lt;RasterizedApp&lt;Kludgine&gt;&gt;&gt;, init: NewWindow&lt;Widget&gt;) -&gt; !
 <span class="kw">where
-    </span>Initializer: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; Widget + UnwindSafe + Send + <span class="lifetime">&#39;static</span>,
-    Widget: gooey_core::Widget,
+    </span>Widget: gooey_core::Widget,
 {
     GooeyWindow::run_with((widgets, init))
 }
@@ -378,17 +456,20 @@
 
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">pub enum </span>SurfaceEvent {
+    WindowTitleChanged,
+    WindowLocationChanged,
+    WindowSizeChanged,
     Invalidate,
     <span class="comment">// InvalidateRect(Rect&lt;UPx&gt;),
 </span>}
 
-<span class="kw">struct </span>GooeyWindow&lt;Initializer, Widget&gt; {
+<span class="kw">struct </span>GooeyWindow&lt;Widget&gt; {
     _root: NewWidget&lt;Widget&gt;,
     rasterizable: Rasterizable,
     context: RasterContext&lt;Kludgine&gt;,
     _runtime: Runtime,
     drawing: Drawing,
-    widget: PhantomData&lt;Initializer&gt;,
+    window: Window,
 }
 
 <span class="attr">#[derive(Debug)]
@@ -399,28 +480,42 @@
         <span class="kw">let </span>_result = <span class="self">self</span>.<span class="number">0</span>.send(SurfaceEvent::Invalidate);
     }
 
+    <span class="kw">fn </span>window_title_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">let </span>_result = <span class="self">self</span>.<span class="number">0</span>.send(SurfaceEvent::WindowTitleChanged);
+    }
+
+    <span class="kw">fn </span>window_position_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="macro">todo!</span>()
+    }
+
+    <span class="kw">fn </span>window_size_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="macro">todo!</span>()
+    }
     <span class="comment">// fn invalidate_rect(&amp;self, rect: Rect&lt;UPx&gt;) {
     //     let _result = self.0.send(SurfaceEvent::InvalidateRect(rect));
     // }
 </span>}
 
-<span class="kw">impl</span>&lt;Initializer, Widget&gt; kludgine::app::WindowBehavior&lt;SurfaceEvent&gt;
-    <span class="kw">for </span>GooeyWindow&lt;Initializer, Widget&gt;
+<span class="kw">impl</span>&lt;Widget&gt; kludgine::app::WindowBehavior&lt;SurfaceEvent&gt; <span class="kw">for </span>GooeyWindow&lt;Widget&gt;
 <span class="kw">where
-    </span>Initializer: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; Widget + UnwindSafe + Send + <span class="lifetime">&#39;static</span>,
-    Widget: gooey_core::Widget,
+    </span>Widget: gooey_core::Widget,
 {
-    <span class="kw">type </span>Context = (Widgets&lt;RasterizedApp&lt;Kludgine&gt;&gt;, Initializer);
+    <span class="kw">type </span>Context = (Arc&lt;Widgets&lt;RasterizedApp&lt;Kludgine&gt;&gt;&gt;, NewWindow&lt;Widget&gt;);
 
     <span class="kw">fn </span>initialize(
         window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, SurfaceEvent&gt;,
         _graphics: <span class="kw-2">&amp;mut </span>kludgine::Graphics&lt;<span class="lifetime">&#39;_</span>&gt;,
-        (widgets, init): <span class="self">Self</span>::Context,
+        (widgets, window_init): <span class="self">Self</span>::Context,
     ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>runtime = Runtime::default();
         <span class="kw">let </span>handle = Arc::new(Handle(window.handle()));
         <span class="kw">let </span>context = Context::root(RasterizedApp::&lt;Kludgine&gt;::new(handle.clone()), <span class="kw-2">&amp;</span>runtime);
-        <span class="kw">let </span>root = init(<span class="kw-2">&amp;</span>context).into_new(<span class="kw-2">&amp;</span>context);
+        <span class="kw">let </span>running_window = Window {
+            inner_size: context.new_dynamic(window.inner_size()),
+            location: context.new_dynamic(window.location()),
+            title: context.new_dynamic(window.title()),
+        };
+        <span class="kw">let </span>root = (window_init.init)(<span class="kw-2">&amp;</span>context, <span class="kw-2">&amp;</span>running_window).into_new(<span class="kw-2">&amp;</span>context);
         <span class="kw">let </span>context = RasterContext::new(widgets, (), handle);
         <span class="kw">let </span>rasterizable = context
             .widgets()
@@ -431,15 +526,19 @@
             <span class="kw">move </span>|<span class="kw">_</span>| handle.invalidate()
         });
 
-        <span class="comment">// let root = app.instantiate(&amp;root.widget, *root.style, &amp;RasterContext);
-        </span><span class="kw">let </span>drawing = Drawing::default();
+        running_window.title.for_each({
+            <span class="kw">let </span>handle = context.handle().clone();
+            <span class="kw">move </span>|<span class="kw">_</span>| handle.window_title_set()
+        });
+
+        <span class="kw">let </span>drawing = Drawing::default();
         <span class="self">Self </span>{
             _root: root,
             rasterizable,
             context,
             _runtime: runtime,
             drawing,
-            widget: PhantomData,
+            window: running_window,
         }
     }
 
@@ -459,6 +558,49 @@
         );
     }
 
+    <span class="kw">fn </span>initial_window_attributes(
+        context: <span class="kw-2">&amp;</span><span class="self">Self</span>::Context,
+    ) -&gt; kludgine::app::WindowAttributes&lt;SurfaceEvent&gt; {
+        <span class="kw">let </span>WindowAttributes {
+            inner_size,
+            location,
+            resizable,
+            title,
+            window_level,
+            ..
+            <span class="comment">// min_inner_size,
+            // max_inner_size,
+            // enabled_buttons,
+            // maximized,
+            // visible,
+            // transparent,
+            // decorations,
+            // resize_increments,
+            // content_protected,
+            // active,
+        </span>} = <span class="kw-2">&amp;</span>context.<span class="number">1</span>.attributes;
+
+        kludgine::app::WindowAttributes {
+            inner_size: inner_size.map(|inner_size| {
+                winit::dpi::Size::Physical(PhysicalSize::new(
+                    inner_size.width.<span class="number">0</span>,
+                    inner_size.height.<span class="number">0</span>,
+                ))
+            }),
+            location: location.map(|position| {
+                winit::dpi::Position::Physical(PhysicalPosition::new(position.x.<span class="number">0</span>, position.y.<span class="number">0</span>))
+            }),
+            resizable: <span class="kw-2">*</span>resizable,
+            window_level: <span class="kw">match </span>window_level {
+                WindowLevel::AlwaysOnBottom =&gt; winit::window::WindowLevel::AlwaysOnBottom,
+                WindowLevel::Normal =&gt; winit::window::WindowLevel::Normal,
+                WindowLevel::AlwaysOnTop =&gt; winit::window::WindowLevel::AlwaysOnTop,
+            },
+            title: title.clone(),
+            ..kludgine::app::WindowAttributes::default()
+        }
+    }
+
     <span class="kw">fn </span>render&lt;<span class="lifetime">&#39;pass</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;pass </span><span class="kw-2">mut </span><span class="self">self</span>,
         _window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, SurfaceEvent&gt;,
@@ -473,16 +615,32 @@
     }
 
     <span class="kw">fn </span>event(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: SurfaceEvent, <span class="kw-2">mut </span>window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, SurfaceEvent&gt;) {
-        <span class="kw">let </span>SurfaceEvent::Invalidate = event;
-        window.set_needs_redraw();
+        <span class="kw">match </span>event {
+            SurfaceEvent::WindowTitleChanged =&gt; {
+                <span class="self">self</span>.window.title.map_ref(|title| window.set_title(title));
+            }
+            SurfaceEvent::WindowLocationChanged =&gt; {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(location) = <span class="self">self</span>.window.location.get() {
+                    window.set_location(location);
+                }
+            }
+            SurfaceEvent::WindowSizeChanged =&gt; {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.window.inner_size.get() {
+                    window.set_inner_size(size);
+                }
+            }
+            SurfaceEvent::Invalidate =&gt; {
+                window.set_needs_redraw();
+            }
+        }
     }
 
     <span class="kw">fn </span>mouse_input(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, SurfaceEvent&gt;,
-        _device_id: kludgine::app::winit::event::DeviceId,
+        _device_id: winit::event::DeviceId,
         state: ElementState,
-        _button: kludgine::app::winit::event::MouseButton,
+        _button: winit::event::MouseButton,
     ) {
         <span class="kw">match </span>state {
             ElementState::Pressed =&gt; <span class="self">self</span>.rasterizable.mouse_down(
@@ -500,7 +658,7 @@
     <span class="kw">fn </span>cursor_left(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         _window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, SurfaceEvent&gt;,
-        _device_id: kludgine::app::winit::event::DeviceId,
+        _device_id: winit::event::DeviceId,
     ) {
         <span class="self">self</span>.rasterizable.cursor_moved(<span class="prelude-val">None</span>, <span class="kw-2">&amp;mut </span><span class="self">self</span>.context);
     }
@@ -508,8 +666,8 @@
     <span class="kw">fn </span>cursor_moved(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, SurfaceEvent&gt;,
-        _device_id: kludgine::app::winit::event::DeviceId,
-        position: kludgine::app::winit::dpi::PhysicalPosition&lt;f64&gt;,
+        _device_id: winit::event::DeviceId,
+        position: winit::dpi::PhysicalPosition&lt;f64&gt;,
     ) {
         <span class="kw">let </span>position = position.into();
         <span class="kw">if </span>Rect::from(window.inner_size())

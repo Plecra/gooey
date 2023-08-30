@@ -853,6 +853,9 @@
 <a href="#853" id="853">853</a>
 <a href="#854" id="854">854</a>
 <a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Core types and functionality for Gooey applications.
 </span><span class="attr">#![forbid(unsafe_code)]
 #![warn(
@@ -872,6 +875,7 @@
 <span class="kw">pub use </span>{figures <span class="kw">as </span>math, gooey_reactor <span class="kw">as </span>reactor};
 <span class="kw">pub mod </span>graphics;
 <span class="kw">pub mod </span>style;
+<span class="kw">pub mod </span>window;
 <span class="comment">// mod tree;
 </span><span class="kw">pub use </span>gooey_macros::Widget;
 <span class="kw">use </span>gooey_reactor::{Dynamic, Reactor, Scope, ScopeGuard};
@@ -1423,7 +1427,9 @@
         style: Dynamic&lt;Style&gt;,
         context: <span class="kw-2">&amp;</span>F::Context,
     ) -&gt; F::Instance {
-        <span class="kw">let </span><span class="prelude-val">Some</span>(transmogrifier) = <span class="self">self</span>.by_name.get(<span class="kw-2">&amp;</span>widget.name()) <span class="kw">else </span>{ <span class="macro">unreachable!</span>(<span class="string">&quot;{} not registered&quot;</span>, widget.name()) };
+        <span class="kw">let </span><span class="prelude-val">Some</span>(transmogrifier) = <span class="self">self</span>.by_name.get(<span class="kw-2">&amp;</span>widget.name()) <span class="kw">else </span>{
+            <span class="macro">unreachable!</span>(<span class="string">&quot;{} not registered&quot;</span>, widget.name())
+        };
         transmogrifier.<span class="number">0</span>.transmogrify(widget, style, context)
     }
 
