@@ -87,7 +87,7 @@
 <span class="kw">use </span>gooey_core::Context;
 <span class="attr">#[cfg(feature = <span class="string">&quot;raster&quot;</span>)]
 </span><span class="kw">pub use </span>gooey_raster <span class="kw">as </span>raster;
-<span class="attr">#[cfg(feature = <span class="string">&quot;web&quot;</span>)]
+<span class="attr">#[cfg(all(feature = <span class="string">&quot;web&quot;</span>, target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub use </span>gooey_web <span class="kw">as </span>web;
 <span class="kw">pub use </span>{gooey_core <span class="kw">as </span>core, gooey_widgets <span class="kw">as </span>widgets};
 
