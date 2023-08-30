@@ -110,14 +110,14 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>gooey_core::style::Style;
+<span class="kw">use </span>gooey_core::window::{NewWindow, Window};
 <span class="kw">use </span>gooey_core::{BoxedWidget, Context, Frontend, Runtime, Widget, WidgetInstance, Widgets};
 <span class="kw">use </span>gooey_reactor::{Dynamic, ScopeGuard};
 <span class="kw">use </span>web_sys::{window, Node};
 
-<span class="kw">pub fn </span>attach_to_body&lt;Widget, Initializer&gt;(widgets: Widgets&lt;WebApp&gt;, init: Initializer)
+<span class="kw">pub fn </span>attach_to_body&lt;Widget&gt;(widgets: Arc&lt;Widgets&lt;WebApp&gt;&gt;, init: NewWindow&lt;Widget&gt;)
 <span class="kw">where
-    </span>Initializer: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; Widget,
-    Widget: gooey_core::Widget,
+    </span>Widget: gooey_core::Widget,
 {
     console_error_panic_hook::set_once();
     <span class="kw">let </span>(app, node) = WebApp::new(widgets, init);
@@ -145,23 +145,23 @@
 }
 
 <span class="kw">impl </span>WebApp {
-    <span class="kw">pub fn </span>new&lt;Widget, Initializer&gt;(widgets: Widgets&lt;WebApp&gt;, init: Initializer) -&gt; (<span class="self">Self</span>, Node)
+    <span class="kw">pub fn </span>new&lt;Widget&gt;(widgets: Arc&lt;Widgets&lt;WebApp&gt;&gt;, init: NewWindow&lt;Widget&gt;) -&gt; (<span class="self">Self</span>, Node)
     <span class="kw">where
-        </span>Initializer: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; Widget,
-        Widget: gooey_core::IntoNewWidget,
+        </span>Widget: gooey_core::IntoNewWidget,
     {
         <span class="kw">let </span>runtime = Runtime::default();
 
-        <span class="kw">let </span>app = <span class="self">Self </span>{
-            runtime,
-            widgets: Arc::new(widgets),
-        };
+        <span class="kw">let </span>app = <span class="self">Self </span>{ runtime, widgets };
         <span class="kw">let </span>context = Context {
             scope: <span class="kw-2">***</span>app.runtime.root_scope(),
             frontend: Arc::new(app.clone()),
         };
-        <span class="kw">let </span>widget = init(<span class="kw-2">&amp;</span>context).into_new(<span class="kw-2">&amp;</span>context);
-        <span class="kw">let </span>node = app.widgets.instantiate(
+        <span class="kw">let </span>window = Window::new(init.attributes, <span class="kw-2">&amp;</span>context);
+        <span class="kw">let </span>widget = (init.init)(<span class="kw-2">&amp;</span>context, <span class="kw-2">&amp;</span>window).into_new(<span class="kw-2">&amp;</span>context);
+
+        <span class="comment">// TODO support title/size
+
+        </span><span class="kw">let </span>node = app.widgets.instantiate(
             <span class="kw-2">&amp;</span>widget.widget,
             <span class="kw-2">*</span>widget.style,
             <span class="kw-2">&amp;</span>WebContext {
