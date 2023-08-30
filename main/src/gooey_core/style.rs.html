@@ -587,7 +587,6 @@
 <a href="#587" id="587">587</a>
 <a href="#588" id="588">588</a>
 <a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling Gooey applications.
 
 </span><span class="kw">use </span>core::slice;
@@ -1143,9 +1142,8 @@
 <span class="attr">#[test]
 </span><span class="kw">fn </span>dynamic_style_updates() {
     <span class="kw">let </span>reactor = gooey_reactor::Reactor::default();
-    <span class="kw">let </span>scope = reactor.new_scope();
-    <span class="kw">let </span>font_size = scope.new_dynamic(FontSize::from(Px(<span class="number">13</span>)));
-    <span class="kw">let </span>style = DynamicStyle(scope.new_dynamic(Style::new()))
+    <span class="kw">let </span>font_size = reactor.new_dynamic(FontSize::from(Px(<span class="number">13</span>)));
+    <span class="kw">let </span>style = DynamicStyle(reactor.new_dynamic(Style::new()))
         .with(font_size)
         .with(BackgroundColor(Color::Rgba {
             r: <span class="number">255</span>,

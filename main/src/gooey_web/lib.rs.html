@@ -101,8 +101,6 @@
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::any::type_name;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
@@ -112,7 +110,7 @@
 <span class="kw">use </span>gooey_core::style::Style;
 <span class="kw">use </span>gooey_core::window::{NewWindow, Window};
 <span class="kw">use </span>gooey_core::{BoxedWidget, Context, Frontend, Runtime, Widget, WidgetInstance, Widgets};
-<span class="kw">use </span>gooey_reactor::{Dynamic, ScopeGuard};
+<span class="kw">use </span>gooey_reactor::Dynamic;
 <span class="kw">use </span>web_sys::{window, Node};
 
 <span class="kw">pub fn </span>attach_to_body&lt;Widget&gt;(widgets: Arc&lt;Widgets&lt;WebApp&gt;&gt;, init: NewWindow&lt;Widget&gt;)
@@ -153,7 +151,6 @@
 
         <span class="kw">let </span>app = <span class="self">Self </span>{ runtime, widgets };
         <span class="kw">let </span>context = Context {
-            scope: <span class="kw-2">***</span>app.runtime.root_scope(),
             frontend: Arc::new(app.clone()),
         };
         <span class="kw">let </span>window = Window::new(init.attributes, <span class="kw-2">&amp;</span>context);
@@ -164,11 +161,7 @@
         </span><span class="kw">let </span>node = app.widgets.instantiate(
             <span class="kw-2">&amp;</span>widget.widget,
             <span class="kw-2">*</span>widget.style,
-            <span class="kw-2">&amp;</span>WebContext {
-                _scope: app.runtime.root_scope().clone(),
-
-                app: app.clone(),
-            },
+            <span class="kw-2">&amp;</span>WebContext { app: app.clone() },
         );
 
         (app, node)
@@ -178,6 +171,10 @@
 <span class="kw">impl </span>Frontend <span class="kw">for </span>WebApp {
     <span class="kw">type </span>Context = WebContext;
     <span class="kw">type </span>Instance = Node;
+
+    <span class="kw">fn </span>runtime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Runtime {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.runtime
+    }
 }
 
 <span class="kw">pub trait </span>WebTransmogrifier: RefUnwindSafe + UnwindSafe + Send + Sync + <span class="lifetime">&#39;static </span>{
@@ -198,7 +195,6 @@
 <span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>WebContext {
     app: WebApp,
-    _scope: Arc&lt;ScopeGuard&gt;,
 }
 
 <span class="kw">impl </span>WebContext {

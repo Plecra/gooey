@@ -340,8 +340,6 @@
 <a href="#340" id="340">340</a>
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::Arc;
@@ -467,7 +465,6 @@
     _root: NewWidget&lt;Widget&gt;,
     rasterizable: Rasterizable,
     context: RasterContext&lt;Kludgine&gt;,
-    _runtime: Runtime,
     drawing: Drawing,
     window: Window,
 }
@@ -484,12 +481,12 @@
         <span class="kw">let </span>_result = <span class="self">self</span>.<span class="number">0</span>.send(SurfaceEvent::WindowTitleChanged);
     }
 
-    <span class="kw">fn </span>window_position_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="macro">todo!</span>()
+    <span class="kw">fn </span>window_location_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">let </span>_result = <span class="self">self</span>.<span class="number">0</span>.send(SurfaceEvent::WindowLocationChanged);
     }
 
     <span class="kw">fn </span>window_size_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="macro">todo!</span>()
+        <span class="kw">let </span>_result = <span class="self">self</span>.<span class="number">0</span>.send(SurfaceEvent::WindowSizeChanged);
     }
     <span class="comment">// fn invalidate_rect(&amp;self, rect: Rect&lt;UPx&gt;) {
     //     let _result = self.0.send(SurfaceEvent::InvalidateRect(rect));
@@ -509,7 +506,7 @@
     ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>runtime = Runtime::default();
         <span class="kw">let </span>handle = Arc::new(Handle(window.handle()));
-        <span class="kw">let </span>context = Context::root(RasterizedApp::&lt;Kludgine&gt;::new(handle.clone()), <span class="kw-2">&amp;</span>runtime);
+        <span class="kw">let </span>context = Context::root(RasterizedApp::&lt;Kludgine&gt;::new(handle.clone(), runtime));
         <span class="kw">let </span>running_window = Window {
             inner_size: context.new_dynamic(window.inner_size()),
             location: context.new_dynamic(window.location()),
@@ -536,7 +533,6 @@
             _root: root,
             rasterizable,
             context,
-            _runtime: runtime,
             drawing,
             window: running_window,
         }
