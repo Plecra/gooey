@@ -80,6 +80,7 @@
 <a href="#80" id="80">80</a>
 <a href="#81" id="81">81</a>
 <a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::window::{NewWindow, Window, WindowBuilder};
 <span class="kw">use </span>core::{Frontend, Widgets};
 <span class="kw">use </span>std::sync::Arc;
@@ -116,7 +117,8 @@
 <span class="kw">where
     </span>A: Frontend,
 {
-    <span class="kw">pub fn </span>new(widgets: Widgets&lt;A&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>new(widgets: Widgets&lt;A&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             widgets: Arc::new(widgets),
         }

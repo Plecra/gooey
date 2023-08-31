@@ -222,6 +222,8 @@
 <a href="#222" id="222">222</a>
 <a href="#223" id="223">223</a>
 <a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>gooey_core::style::Color;
 <span class="kw">use </span>gooey_core::{AnyCallback, Callback, Value, Widget};
 
@@ -242,12 +244,14 @@
         }
     }
 
-    <span class="kw">pub fn </span>label(<span class="kw-2">mut </span><span class="self">self</span>, label: <span class="kw">impl </span>Into&lt;Value&lt;String&gt;&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>label(<span class="kw-2">mut </span><span class="self">self</span>, label: <span class="kw">impl </span>Into&lt;Value&lt;String&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.label = label.into();
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>on_click&lt;CB: AnyCallback&lt;()&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, cb: CB) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>on_click&lt;CB: AnyCallback&lt;()&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, cb: CB) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.on_click = <span class="prelude-val">Some</span>(Callback::new(cb));
         <span class="self">self
     </span>}
@@ -357,7 +361,7 @@
                     <span class="kw">move </span>|<span class="kw">_</span>| {
                         handle.invalidate();
                     }
-                })
+                });
             }
             Rasterizable::new(ButtonRasterizer {
                 button: widget.clone(),

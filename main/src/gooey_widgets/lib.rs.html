@@ -58,6 +58,9 @@
 <a href="#58" id="58">58</a>
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
 </pre></div><pre class="rust"><code><span class="kw">mod </span>button;
 <span class="kw">pub mod </span>flex;
 <span class="kw">mod </span>label;
@@ -72,6 +75,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::label::LabelTransmogrifier;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;web&quot;</span>)]
+#[must_use]
 </span><span class="kw">pub fn </span>web_widgets() -&gt; gooey_core::Widgets&lt;gooey_web::WebApp&gt; {
     <span class="kw">let _ </span>= console_log::init();
     gooey_core::Widgets::default()
@@ -81,11 +85,13 @@
 }
 
 <span class="attr">#[cfg(all(feature = <span class="string">&quot;web&quot;</span>, target_arch = <span class="string">&quot;wasm32&quot;</span>))]
+#[must_use]
 </span><span class="kw">pub fn </span>widgets() -&gt; gooey_core::Widgets&lt;gooey_web::WebApp&gt; {
     web_widgets()
 }
 
 <span class="attr">#[cfg(not(all(feature = <span class="string">&quot;web&quot;</span>, target_arch = <span class="string">&quot;wasm32&quot;</span>)))]
+#[must_use]
 </span><span class="kw">pub fn </span>raster_widgets&lt;Surface&gt;() -&gt; gooey_core::Widgets&lt;gooey_raster::RasterizedApp&lt;Surface&gt;&gt;
 <span class="kw">where
     </span>Surface: gooey_raster::Surface,
@@ -97,6 +103,7 @@
 }
 
 <span class="attr">#[cfg(not(all(feature = <span class="string">&quot;web&quot;</span>, target_arch = <span class="string">&quot;wasm32&quot;</span>)))]
+#[must_use]
 </span><span class="kw">pub fn </span>widgets&lt;Surface&gt;() -&gt; gooey_core::Widgets&lt;gooey_raster::RasterizedApp&lt;Surface&gt;&gt;
 <span class="kw">where
     </span>Surface: gooey_raster::Surface,
@@ -113,9 +120,8 @@
 
 <span class="kw">fn </span>control_text_color(state: State) -&gt; Color {
     <span class="kw">match </span>state {
-        State::Normal =&gt; Color::rgba(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>),
+        State::Normal | State::Active =&gt; Color::rgba(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>),
         State::Hover =&gt; Color::rgba(<span class="number">20</span>, <span class="number">20</span>, <span class="number">20</span>, <span class="number">255</span>),
-        State::Active =&gt; Color::rgba(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>),
     }
 }
 </code></pre></div></section></main></body></html>

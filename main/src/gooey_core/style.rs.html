@@ -940,8 +940,8 @@
                     // the classes.
                     </span><span class="kw">let </span><span class="prelude-val">Some</span>(id) = ids.next() <span class="kw">else </span>{
                         <span class="self">self</span>.state = MatchState::Classes(classes.clone());
-                        <span class="kw">continue
-                    </span>};
+                        <span class="kw">continue</span>;
+                    };
                     <span class="comment">// Only return matches if the pattern has no id, no widget,
                     // and its classes fully match.
                     </span><span class="kw">let </span>pattern = <span class="kw-2">&amp;</span><span class="self">self</span>.library.patterns[id.<span class="number">0</span>];

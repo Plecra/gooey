@@ -171,6 +171,10 @@
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>gooey_core::math::units::UPx;
 <span class="kw">use </span>gooey_core::math::{Point, Size};
 <span class="kw">use </span>gooey_core::style::StyleComponent;
@@ -211,19 +215,23 @@
 }
 
 <span class="kw">impl </span>FlexDirection {
-    <span class="kw">pub const fn </span>columns() -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub const fn </span>columns() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Column { reverse: <span class="bool-val">false </span>}
     }
 
-    <span class="kw">pub const fn </span>columns_rev() -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub const fn </span>columns_rev() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Column { reverse: <span class="bool-val">true </span>}
     }
 
-    <span class="kw">pub const fn </span>rows() -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub const fn </span>rows() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Row { reverse: <span class="bool-val">false </span>}
     }
 
-    <span class="kw">pub const fn </span>rows_rev() -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub const fn </span>rows_rev() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Row { reverse: <span class="bool-val">true </span>}
     }
 

@@ -121,6 +121,8 @@
 <a href="#121" id="121">121</a>
 <a href="#122" id="122">122</a>
 <a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::any::type_name;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
@@ -164,7 +166,8 @@
 }
 
 <span class="kw">impl </span>WebApp {
-    <span class="kw">pub fn </span>new&lt;IntoWidget&gt;(
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>new&lt;IntoWidget&gt;(
         widgets: Arc&lt;Widgets&lt;WebApp&gt;&gt;,
         init: NewWindow&lt;IntoWidget&gt;,
     ) -&gt; (<span class="self">Self</span>, WebWidget&lt;IntoWidget::Widget&gt;)
@@ -238,7 +241,8 @@
 }
 
 <span class="kw">impl </span>WebContext {
-    <span class="kw">pub fn </span>instantiate(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: <span class="kw-2">&amp;</span>WidgetInstance&lt;BoxedWidget&gt;) -&gt; Node {
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>instantiate(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: <span class="kw-2">&amp;</span>WidgetInstance&lt;BoxedWidget&gt;) -&gt; Node {
         <span class="self">self</span>.app
             .widgets
             .instantiate(<span class="kw-2">&amp;*</span>widget.widget, widget.style, <span class="self">self</span>)

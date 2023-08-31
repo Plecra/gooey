@@ -348,10 +348,10 @@
 }
 
 <span class="kw">impl </span>ConstraintLimit {
-    <span class="kw">pub fn </span>max(<span class="self">self</span>) -&gt; UPx {
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>max(<span class="self">self</span>) -&gt; UPx {
         <span class="kw">match </span><span class="self">self </span>{
-            ConstraintLimit::Known(v) =&gt; v,
-            ConstraintLimit::ClippedAfter(v) =&gt; v,
+            ConstraintLimit::Known(v) | ConstraintLimit::ClippedAfter(v) =&gt; v,
         }
     }
 }
@@ -383,19 +383,19 @@
     }
 
     <span class="kw">fn </span>draw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, renderer: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Renderer, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
-        T::draw(<span class="self">self</span>, renderer, context)
+        T::draw(<span class="self">self</span>, renderer, context);
     }
 
     <span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
-        T::mouse_down(<span class="self">self</span>, location, context)
+        T::mouse_down(<span class="self">self</span>, location, context);
     }
 
     <span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
-        T::mouse_up(<span class="self">self</span>, location, context)
+        T::mouse_up(<span class="self">self</span>, location, context);
     }
 
     <span class="kw">fn </span>cursor_moved(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
-        T::cursor_moved(<span class="self">self</span>, location, context)
+        T::cursor_moved(<span class="self">self</span>, location, context);
     }
 }
 
@@ -495,19 +495,19 @@
     </span>Surface: <span class="kw">crate</span>::Surface,
 {
     <span class="kw">fn </span>invalidate(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="self">self</span>.handle.invalidate()
+        <span class="self">self</span>.handle.invalidate();
     }
 
     <span class="kw">fn </span>window_title_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="self">self</span>.handle.window_title_set()
+        <span class="self">self</span>.handle.window_title_set();
     }
 
     <span class="kw">fn </span>window_position_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="self">self</span>.handle.window_position_set()
+        <span class="self">self</span>.handle.window_position_set();
     }
 
     <span class="kw">fn </span>window_size_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="self">self</span>.handle.window_size_set()
+        <span class="self">self</span>.handle.window_size_set();
     }
 }
 
@@ -519,7 +519,7 @@
         f.debug_struct(<span class="string">&quot;RasterContext&quot;</span>)
             .field(<span class="string">&quot;widgets&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.widgets)
             .field(<span class="string">&quot;handle&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.handle)
-            .finish()
+            .finish_non_exhaustive()
     }
 }
 
