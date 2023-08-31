@@ -290,15 +290,17 @@
 <a href="#290" id="290">290</a>
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::marker::PhantomData;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::panic::{RefUnwindSafe, UnwindSafe};
 <span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>gooey_core::events::MouseEvent;
 <span class="kw">use </span>gooey_core::graphics::Drawable;
 <span class="kw">use </span>gooey_core::math::units::{Lp, Px, UPx};
-<span class="kw">use </span>gooey_core::math::{Point, Rect, Size};
+<span class="kw">use </span>gooey_core::math::{Rect, Size};
 <span class="kw">use </span>gooey_core::style::DynamicStyle;
 <span class="kw">use </span>gooey_core::{
     AnyWidget, BoxedWidget, Frontend, Transmogrify, Widget, WidgetInstance, WidgetTransmogrifier,
@@ -364,9 +366,9 @@
         context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext,
     ) -&gt; Size&lt;UPx&gt;;
     <span class="kw">fn </span>draw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, renderer: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Renderer, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext);
-    <span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext);
-    <span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext);
-    <span class="kw">fn </span>cursor_moved(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext);
+    <span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext);
+    <span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext);
+    <span class="kw">fn </span>cursor_moved(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext);
 }
 
 <span class="kw">impl</span>&lt;T&gt; AnyWidgetRasterizer <span class="kw">for </span>T
@@ -386,16 +388,16 @@
         T::draw(<span class="self">self</span>, renderer, context);
     }
 
-    <span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
-        T::mouse_down(<span class="self">self</span>, location, context);
+    <span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
+        T::mouse_down(<span class="self">self</span>, event, context);
     }
 
-    <span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
-        T::mouse_up(<span class="self">self</span>, location, context);
+    <span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
+        T::mouse_up(<span class="self">self</span>, event, context);
     }
 
-    <span class="kw">fn </span>cursor_moved(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
-        T::cursor_moved(<span class="self">self</span>, location, context);
+    <span class="kw">fn </span>cursor_moved(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
+        T::cursor_moved(<span class="self">self</span>, event, context);
     }
 }
 
@@ -572,11 +574,11 @@
     <span class="kw">fn </span>draw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, renderer: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Renderer, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext);
 
     <span class="attr">#[allow(unused_variables)]
-    </span><span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {}
+    </span><span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {}
     <span class="attr">#[allow(unused_variables)]
-    </span><span class="kw">fn </span>cursor_moved(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {}
+    </span><span class="kw">fn </span>cursor_moved(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {}
     <span class="attr">#[allow(unused_variables)]
-    </span><span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {}
+    </span><span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {}
 }
 
 <span class="kw">pub trait </span>AnyRasterContext: SurfaceHandle {

@@ -123,6 +123,8 @@
 <a href="#123" id="123">123</a>
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::any::type_name;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
@@ -134,6 +136,8 @@
 <span class="kw">use </span>gooey_core::{BoxedWidget, Context, Frontend, Runtime, Widget, WidgetInstance, Widgets};
 <span class="kw">use </span>gooey_reactor::{Dynamic, ScopeGuard};
 <span class="kw">use </span>web_sys::{window, Node};
+
+<span class="kw">pub mod </span>utils;
 
 <span class="kw">pub fn </span>attach_to_body&lt;Widget&gt;(widgets: Arc&lt;Widgets&lt;WebApp&gt;&gt;, init: NewWindow&lt;Widget&gt;)
 <span class="kw">where

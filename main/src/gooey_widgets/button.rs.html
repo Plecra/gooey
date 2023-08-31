@@ -222,18 +222,18 @@
 <a href="#222" id="222">222</a>
 <a href="#223" id="223">223</a>
 <a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>gooey_core::style::Color;
+</pre></div><pre class="rust"><code><span class="kw">use </span>gooey_core::events::MouseEvent;
+<span class="kw">use </span>gooey_core::style::Color;
 <span class="kw">use </span>gooey_core::{AnyCallback, Callback, Value, Widget};
 
 <span class="kw">use </span><span class="kw">crate</span>::State;
 
 <span class="attr">#[derive(Debug, Default, Clone, Widget)]
 #[widget(authority = gooey)]
+#[must_use]
 </span><span class="kw">pub struct </span>Button {
     <span class="kw">pub </span>label: Value&lt;String&gt;,
-    <span class="kw">pub </span>on_click: <span class="prelude-ty">Option</span>&lt;Callback&lt;()&gt;&gt;,
+    <span class="kw">pub </span>on_click: <span class="prelude-ty">Option</span>&lt;Callback&lt;MouseEvent&gt;&gt;,
 }
 
 <span class="kw">impl </span>Button {
@@ -244,14 +244,12 @@
         }
     }
 
-    <span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>label(<span class="kw-2">mut </span><span class="self">self</span>, label: <span class="kw">impl </span>Into&lt;Value&lt;String&gt;&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>label(<span class="kw-2">mut </span><span class="self">self</span>, label: <span class="kw">impl </span>Into&lt;Value&lt;String&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.label = label.into();
         <span class="self">self
     </span>}
 
-    <span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>on_click&lt;CB: AnyCallback&lt;()&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, cb: CB) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>on_click&lt;CB: AnyCallback&lt;MouseEvent&gt;&gt;(<span class="kw-2">mut </span><span class="self">self</span>, cb: CB) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.on_click = <span class="prelude-val">Some</span>(Callback::new(cb));
         <span class="self">self
     </span>}
@@ -265,6 +263,7 @@
     <span class="kw">use </span>futures_util::StreamExt;
     <span class="kw">use </span>gooey_core::style::DynamicStyle;
     <span class="kw">use </span>gooey_core::{Value, WidgetTransmogrifier};
+    <span class="kw">use </span>gooey_web::utils::mouse_event_from_web;
     <span class="kw">use </span>gooey_web::WebApp;
     <span class="kw">use </span>wasm_bindgen::prelude::Closure;
     <span class="kw">use </span>wasm_bindgen::JsCast;
@@ -307,8 +306,8 @@
             }
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>on_click) = on_click {
-                <span class="kw">let </span>closure = Closure::new(<span class="kw">move </span>|| {
-                    on_click.invoke(());
+                <span class="kw">let </span>closure = Closure::new(<span class="kw">move </span>|event: web_sys::MouseEvent| {
+                    on_click.invoke(mouse_event_from_web(<span class="kw-2">&amp;</span>event));
                 });
                 button
                     .add_event_listener_with_callback(<span class="string">&quot;click&quot;</span>, closure.as_ref().unchecked_ref())
@@ -323,6 +322,7 @@
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;raster&quot;</span>)]
 </span><span class="kw">mod </span>raster {
+    <span class="kw">use </span>gooey_core::events::MouseEvent;
     <span class="kw">use </span>gooey_core::graphics::TextMetrics;
     <span class="kw">use </span>gooey_core::math::units::{Px, UPx};
     <span class="kw">use </span>gooey_core::math::{IntoSigned, IntoUnsigned, Point, Size};
@@ -406,25 +406,21 @@
             });
         }
 
-        <span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
+        <span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
             <span class="self">self</span>.tracking_click += <span class="number">1</span>;
             <span class="self">self</span>.state = State::Active;
             context.invalidate();
         }
 
-        <span class="kw">fn </span>cursor_moved(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-            location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;,
-            context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext,
-        ) {
+        <span class="kw">fn </span>cursor_moved(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
             <span class="kw">let </span>hover_state = <span class="kw">if </span><span class="self">self</span>.tracking_click &gt; <span class="number">0 </span>{
                 State::Active
             } <span class="kw">else </span>{
                 State::Hover
             };
-            <span class="kw">let </span>changed = location.is_some() != (<span class="self">self</span>.state == hover_state);
+            <span class="kw">let </span>changed = event.position.is_some() != (<span class="self">self</span>.state == hover_state);
             <span class="kw">if </span>changed {
-                <span class="kw">if </span>location.is_some() {
+                <span class="kw">if </span>event.position.is_some() {
                     <span class="self">self</span>.state = hover_state;
                 } <span class="kw">else </span>{
                     <span class="self">self</span>.state = State::Normal;
@@ -433,10 +429,10 @@
             }
         }
 
-        <span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
+        <span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
             <span class="self">self</span>.tracking_click -= <span class="number">1</span>;
             <span class="kw">if let </span>(State::Active, <span class="prelude-val">Some</span>(click)) = (<span class="self">self</span>.state, <span class="kw-2">&amp;mut </span><span class="self">self</span>.button.on_click) {
-                click.invoke(());
+                click.invoke(event);
                 <span class="self">self</span>.state = State::Normal;
                 context.invalidate();
             }

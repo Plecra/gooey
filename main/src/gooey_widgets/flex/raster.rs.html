@@ -245,20 +245,14 @@
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
-<a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
 </pre></div><pre class="rust"><code><span class="kw">mod </span>layout;
 <span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::num::NonZeroUsize;
 
 <span class="kw">use </span>alot::LotId;
-<span class="kw">use </span>gooey_core::math::units::{Px, UPx};
-<span class="kw">use </span>gooey_core::math::{IntoSigned, Point, Rect, Size};
+<span class="kw">use </span>gooey_core::events::MouseEvent;
+<span class="kw">use </span>gooey_core::math::units::UPx;
+<span class="kw">use </span>gooey_core::math::{IntoSigned, Rect, Size};
 <span class="kw">use </span>gooey_core::reactor::Dynamic;
 <span class="kw">use </span>gooey_core::style::DynamicStyle;
 <span class="kw">use </span>gooey_core::{Children, Value, WidgetTransmogrifier};
@@ -431,7 +425,7 @@
         }
     }
 
-    <span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
+    <span class="kw">fn </span>mouse_down(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
         <span class="kw">for </span>(layout, (id, rasterizable)) <span class="kw">in </span><span class="self">self</span>.flex.iter().zip(<span class="self">self</span>.children.iter_mut()) {
             <span class="kw">let </span>rect = Rect::new(
                 <span class="self">self</span>.flex.orientation.make_point(layout.offset, UPx(<span class="number">0</span>)),
@@ -440,20 +434,16 @@
                     .make_size(layout.size, <span class="self">self</span>.flex.other),
             )
             .into_signed();
-            <span class="kw">let </span>relative = location - rect.origin;
-            <span class="kw">if </span>relative.x &gt;= <span class="number">0
-                </span>&amp;&amp; relative.y &gt;= <span class="number">0
-                </span>&amp;&amp; relative.x &lt; rect.size.width
-                &amp;&amp; relative.y &lt; rect.size.height
-            {
+            <span class="kw">let </span>relative = event.relative(rect);
+            <span class="kw">if </span>relative.is_some() {
                 <span class="self">self</span>.mouse_tracking = <span class="prelude-val">Some</span>(<span class="kw-2">*</span>id);
-                rasterizable.mouse_down(relative, context);
+                rasterizable.mouse_down(event.with_position(relative), context);
                 <span class="kw">break</span>;
             }
         }
     }
 
-    <span class="kw">fn </span>cursor_moved(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
+    <span class="kw">fn </span>cursor_moved(<span class="kw-2">&amp;mut </span><span class="self">self</span>, event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
         <span class="kw">for </span>(layout, (id, rasterizable)) <span class="kw">in </span><span class="self">self</span>.flex.iter().zip(<span class="self">self</span>.children.iter_mut()) {
             <span class="kw">let </span>rect = Rect::new(
                 <span class="self">self</span>.flex.orientation.make_point(layout.offset, UPx(<span class="number">0</span>)),
@@ -462,22 +452,17 @@
                     .make_size(layout.size, <span class="self">self</span>.flex.other),
             )
             .into_signed();
-            <span class="kw">let </span>relative = location.map(|location| location - rect.origin);
-            <span class="kw">if </span>relative.map_or(<span class="bool-val">false</span>, |relative| {
-                relative.x &gt;= <span class="number">0
-                    </span>&amp;&amp; relative.y &gt;= <span class="number">0
-                    </span>&amp;&amp; relative.x &lt; rect.size.width
-                    &amp;&amp; relative.y &lt; rect.size.height
-            }) {
-                rasterizable.cursor_moved(relative, context);
+            <span class="kw">let </span>relative = event.relative(rect);
+            <span class="kw">if </span>relative.is_some() {
+                rasterizable.cursor_moved(event.clone().with_position(relative), context);
                 <span class="self">self</span>.hovering.insert(<span class="kw-2">*</span>id);
             } <span class="kw">else if </span><span class="self">self</span>.hovering.remove(id) {
-                rasterizable.cursor_moved(<span class="prelude-val">None</span>, context);
+                rasterizable.cursor_moved(event.clone().with_position(<span class="prelude-val">None</span>), context);
             }
         }
     }
 
-    <span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
+    <span class="kw">fn </span>mouse_up(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>event: MouseEvent, context: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>AnyRasterContext) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>((layout, (<span class="kw">_</span>, rasterizable))) = <span class="self">self
             </span>.flex
             .iter()
@@ -491,17 +476,18 @@
                     .make_size(layout.size, <span class="self">self</span>.flex.other),
             )
             .into_signed();
-            <span class="kw">let </span>relative = location.map(|location| location - rect.origin);
+            <span class="kw">let </span>relative = event.position.map(|location| location - rect.origin);
             <span class="kw">if </span>relative.map_or(<span class="bool-val">false</span>, |relative| {
                 relative.x &gt;= <span class="number">0
                     </span>&amp;&amp; relative.y &gt;= <span class="number">0
                     </span>&amp;&amp; relative.x &lt; rect.size.width
                     &amp;&amp; relative.y &lt; rect.size.height
             }) {
-                rasterizable.mouse_up(relative, context);
+                event.position = relative;
             } <span class="kw">else </span>{
-                rasterizable.mouse_up(<span class="prelude-val">None</span>, context);
+                event.position = <span class="prelude-val">None</span>;
             }
+            rasterizable.mouse_up(event, context);
         }
         <span class="self">self</span>.mouse_tracking = <span class="prelude-val">None</span>;
     }

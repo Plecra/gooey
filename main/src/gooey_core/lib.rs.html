@@ -850,6 +850,7 @@
 <a href="#850" id="850">850</a>
 <a href="#851" id="851">851</a>
 <a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Core types and functionality for Gooey applications.
 
 </span><span class="kw">use </span>std::any::{type_name, Any};
@@ -861,6 +862,7 @@
 
 <span class="kw">use </span>alot::OrderedLots;
 <span class="kw">pub use </span>{figures <span class="kw">as </span>math, gooey_reactor <span class="kw">as </span>reactor};
+<span class="kw">pub mod </span>events;
 <span class="kw">pub mod </span>graphics;
 <span class="kw">pub mod </span>style;
 <span class="kw">pub mod </span>window;
@@ -1053,11 +1055,11 @@
         widget_fn: WidgetFn,
     ) -&gt; WidgetInstance&lt;NewWidget::Widget&gt;
     <span class="kw">where
-        </span>WidgetFn: FnOnce(Context) -&gt; NewWidget,
+        </span>WidgetFn: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; NewWidget,
         NewWidget: IntoNewWidget,
     {
         <span class="kw">let </span>scope = <span class="self">self</span>.scope.new_scope();
-        <span class="kw">let </span>widget = widget_fn(Context {
+        <span class="kw">let </span>widget = widget_fn(<span class="kw-2">&amp;</span>Context {
             frontend: <span class="self">self</span>.frontend.clone(),
             scope: <span class="kw-2">*</span>scope,
         })
@@ -1538,7 +1540,7 @@
     <span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>with&lt;NewWidget, WidgetFn&gt;(<span class="kw-2">mut </span><span class="self">self</span>, widget_fn: WidgetFn) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>WidgetFn: FnOnce(Context) -&gt; NewWidget,
+        </span>WidgetFn: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; NewWidget,
         NewWidget: IntoNewWidget,
     {
         <span class="self">self</span>.push(widget_fn);
@@ -1548,7 +1550,7 @@
     <span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>with_named&lt;NewWidget, WidgetFn&gt;(<span class="kw-2">mut </span><span class="self">self</span>, name: Name, widget_fn: WidgetFn) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>WidgetFn: FnOnce(Context) -&gt; NewWidget,
+        </span>WidgetFn: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; NewWidget,
         NewWidget: IntoNewWidget,
     {
         <span class="self">self</span>.push_named(name, widget_fn);
@@ -1557,7 +1559,7 @@
 
     <span class="kw">pub fn </span>push&lt;NewWidget, WidgetFn&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, widget_fn: WidgetFn)
     <span class="kw">where
-        </span>WidgetFn: FnOnce(Context) -&gt; NewWidget,
+        </span>WidgetFn: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; NewWidget,
         NewWidget: IntoNewWidget,
     {
         <span class="kw">let </span>widget = <span class="self">self</span>.context.new_widget(widget_fn);
@@ -1569,7 +1571,7 @@
 
     <span class="kw">pub fn </span>push_named&lt;NewWidget, WidgetFn&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: Name, widget_fn: WidgetFn)
     <span class="kw">where
-        </span>WidgetFn: FnOnce(Context) -&gt; NewWidget,
+        </span>WidgetFn: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; NewWidget,
         NewWidget: IntoNewWidget,
     {
         <span class="kw">let </span>widget = <span class="self">self</span>.context.new_widget(widget_fn);
@@ -1582,7 +1584,7 @@
 
     <span class="kw">pub fn </span>insert&lt;NewWidget, WidgetFn&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize, widget_fn: WidgetFn)
     <span class="kw">where
-        </span>WidgetFn: FnOnce(Context) -&gt; NewWidget,
+        </span>WidgetFn: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; NewWidget,
         NewWidget: IntoNewWidget,
     {
         <span class="kw">let </span>widget = <span class="self">self</span>.context.new_widget(widget_fn);
@@ -1601,7 +1603,7 @@
         name: Name,
         widget_fn: WidgetFn,
     ) <span class="kw">where
-        </span>WidgetFn: FnOnce(Context) -&gt; NewWidget,
+        </span>WidgetFn: FnOnce(<span class="kw-2">&amp;</span>Context) -&gt; NewWidget,
         NewWidget: IntoNewWidget,
     {
         <span class="kw">let </span>widget = <span class="self">self</span>.context.new_widget(widget_fn);
