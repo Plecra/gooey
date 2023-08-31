@@ -563,7 +563,7 @@
         <span class="kw">let </span>context = Context::root(RasterizedApp::&lt;Kludgine&gt;::new(handle.clone()), <span class="kw-2">&amp;</span>runtime);
         <span class="kw">let </span>running_window = Window {
             inner_size: context.new_dynamic(window.inner_size()),
-            position: context.new_dynamic(window.location()),
+            position: context.new_dynamic(window.position()),
             title: context.new_dynamic(window.title()),
         };
         <span class="kw">let </span>root = (window_init.init)(<span class="kw-2">&amp;</span>context, <span class="kw-2">&amp;</span>running_window).into_new(<span class="kw-2">&amp;</span>context);
@@ -639,7 +639,7 @@
                     inner_size.height.<span class="number">0</span>,
                 ))
             }),
-            location: position.map(|position| {
+            position: position.map(|position| {
                 winit::dpi::Position::Physical(PhysicalPosition::new(position.x.<span class="number">0</span>, position.y.<span class="number">0</span>))
             }),
             resizable: <span class="kw-2">*</span>resizable,
@@ -673,7 +673,7 @@
             }
             SurfaceEvent::WindowPositionChanged =&gt; {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(position) = <span class="self">self</span>.window.position.get() {
-                    window.set_location(position);
+                    window.set_position(position);
                 }
             }
             SurfaceEvent::WindowSizeChanged =&gt; {
