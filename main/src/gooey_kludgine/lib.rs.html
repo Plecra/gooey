@@ -507,7 +507,7 @@
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">pub enum </span>SurfaceEvent {
     WindowTitleChanged,
-    WindowLocationChanged,
+    WindowPositionChanged,
     WindowSizeChanged,
     Invalidate,
     <span class="comment">// InvalidateRect(Rect&lt;UPx&gt;),
@@ -536,11 +536,11 @@
     }
 
     <span class="kw">fn </span>window_position_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="macro">todo!</span>()
+        <span class="kw">let </span>_result = <span class="self">self</span>.<span class="number">0</span>.send(SurfaceEvent::WindowPositionChanged);
     }
 
     <span class="kw">fn </span>window_size_set(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="macro">todo!</span>()
+        <span class="kw">let </span>_result = <span class="self">self</span>.<span class="number">0</span>.send(SurfaceEvent::WindowSizeChanged);
     }
     <span class="comment">// fn invalidate_rect(&amp;self, rect: Rect&lt;UPx&gt;) {
     //     let _result = self.0.send(SurfaceEvent::InvalidateRect(rect));
@@ -563,7 +563,7 @@
         <span class="kw">let </span>context = Context::root(RasterizedApp::&lt;Kludgine&gt;::new(handle.clone()), <span class="kw-2">&amp;</span>runtime);
         <span class="kw">let </span>running_window = Window {
             inner_size: context.new_dynamic(window.inner_size()),
-            location: context.new_dynamic(window.location()),
+            position: context.new_dynamic(window.location()),
             title: context.new_dynamic(window.title()),
         };
         <span class="kw">let </span>root = (window_init.init)(<span class="kw-2">&amp;</span>context, <span class="kw-2">&amp;</span>running_window).into_new(<span class="kw-2">&amp;</span>context);
@@ -615,7 +615,7 @@
     ) -&gt; kludgine::app::WindowAttributes&lt;SurfaceEvent&gt; {
         <span class="kw">let </span>WindowAttributes {
             inner_size,
-            location,
+            position,
             resizable,
             title,
             window_level,
@@ -639,7 +639,7 @@
                     inner_size.height.<span class="number">0</span>,
                 ))
             }),
-            location: location.map(|position| {
+            location: position.map(|position| {
                 winit::dpi::Position::Physical(PhysicalPosition::new(position.x.<span class="number">0</span>, position.y.<span class="number">0</span>))
             }),
             resizable: <span class="kw-2">*</span>resizable,
@@ -671,9 +671,9 @@
             SurfaceEvent::WindowTitleChanged =&gt; {
                 <span class="self">self</span>.window.title.map_ref(|title| window.set_title(title));
             }
-            SurfaceEvent::WindowLocationChanged =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(location) = <span class="self">self</span>.window.location.get() {
-                    window.set_location(location);
+            SurfaceEvent::WindowPositionChanged =&gt; {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(position) = <span class="self">self</span>.window.position.get() {
+                    window.set_location(position);
                 }
             }
             SurfaceEvent::WindowSizeChanged =&gt; {

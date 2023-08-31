@@ -189,8 +189,8 @@
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>location(<span class="kw-2">mut </span><span class="self">self</span>, location: Point&lt;Px&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.attributes.location = <span class="prelude-val">Some</span>(location);
+    <span class="kw">pub fn </span>position(<span class="kw-2">mut </span><span class="self">self</span>, position: Point&lt;Px&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.attributes.position = <span class="prelude-val">Some</span>(position);
         <span class="self">self
     </span>}
 
@@ -220,7 +220,7 @@
     <span class="kw">pub </span>inner_size: <span class="prelude-ty">Option</span>&lt;Size&lt;UPx&gt;&gt;,
     <span class="kw">pub </span>min_inner_size: <span class="prelude-ty">Option</span>&lt;Size&lt;UPx&gt;&gt;,
     <span class="kw">pub </span>max_inner_size: <span class="prelude-ty">Option</span>&lt;Size&lt;UPx&gt;&gt;,
-    <span class="kw">pub </span>location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;,
+    <span class="kw">pub </span>position: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;,
     <span class="kw">pub </span>resizable: bool,
     <span class="kw">pub </span>enabled_buttons: WindowButtons,
     <span class="kw">pub </span>title: String,
@@ -244,7 +244,7 @@
             inner_size: <span class="prelude-val">None</span>,
             min_inner_size: <span class="prelude-val">None</span>,
             max_inner_size: <span class="prelude-val">None</span>,
-            location: <span class="prelude-val">None</span>,
+            position: <span class="prelude-val">None</span>,
             resizable: <span class="bool-val">true</span>,
             enabled_buttons: WindowButtons::all(),
             title: <span class="string">&quot;Gooey&quot;</span>.to_owned(),
@@ -316,7 +316,7 @@
 
 <span class="kw">pub struct </span>Window {
     <span class="kw">pub </span>inner_size: Dynamic&lt;Size&lt;UPx&gt;&gt;,
-    <span class="kw">pub </span>location: Dynamic&lt;Point&lt;Px&gt;&gt;,
+    <span class="kw">pub </span>position: Dynamic&lt;Point&lt;Px&gt;&gt;,
     <span class="kw">pub </span>title: Dynamic&lt;String&gt;,
 }
 
@@ -325,7 +325,7 @@
     </span><span class="kw">pub fn </span>new(attrs: WindowAttributes, cx: <span class="kw-2">&amp;</span>Context) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             inner_size: cx.new_dynamic(attrs.inner_size.unwrap_or_default()),
-            location: cx.new_dynamic(attrs.location.unwrap_or_default()),
+            position: cx.new_dynamic(attrs.position.unwrap_or_default()),
             title: cx.new_dynamic(attrs.title),
         }
     }

@@ -476,7 +476,7 @@
                     .make_size(layout.size, <span class="self">self</span>.flex.other),
             )
             .into_signed();
-            <span class="kw">let </span>relative = event.position.map(|location| location - rect.origin);
+            <span class="kw">let </span>relative = event.position.map(|position| position - rect.origin);
             <span class="kw">if </span>relative.map_or(<span class="bool-val">false</span>, |relative| {
                 relative.x &gt;= <span class="number">0
                     </span>&amp;&amp; relative.y &gt;= <span class="number">0
