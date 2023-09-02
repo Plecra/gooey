@@ -391,6 +391,11 @@
 <a href="#391" id="391">391</a>
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::Arc;
@@ -400,7 +405,7 @@
 <span class="kw">use </span>gooey_core::math::units::UPx;
 <span class="kw">use </span>gooey_core::math::{IntoSigned, Point, Rect, ScreenUnit};
 <span class="kw">use </span>gooey_core::window::{NewWindow, Window, WindowAttributes, WindowLevel};
-<span class="kw">use </span>gooey_core::{Context, IntoNewWidget, NewWidget, Runtime, Widgets};
+<span class="kw">use </span>gooey_core::{Context, EventLoopError, IntoNewWidget, NewWidget, Runtime, Widgets};
 <span class="kw">use </span>gooey_raster::{DrawableState, RasterContext, Rasterizable, RasterizedApp, Surface};
 <span class="kw">use </span>kludgine::app::winit::dpi::{PhysicalPosition, PhysicalSize};
 <span class="kw">use </span>kludgine::app::winit::event::{ElementState, MouseButton};
@@ -410,11 +415,14 @@
 <span class="kw">use </span>kludgine::text::TextOrigin;
 <span class="kw">use </span>kludgine::{Clipped, Color};
 
-<span class="kw">pub fn </span>run&lt;Widget&gt;(widgets: Arc&lt;Widgets&lt;RasterizedApp&lt;Kludgine&gt;&gt;&gt;, init: NewWindow&lt;Widget&gt;) -&gt; !
+<span class="kw">pub fn </span>run&lt;Widget&gt;(
+    widgets: Arc&lt;Widgets&lt;RasterizedApp&lt;Kludgine&gt;&gt;&gt;,
+    init: NewWindow&lt;Widget&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;(), EventLoopError&gt;
 <span class="kw">where
     </span>Widget: gooey_core::Widget,
 {
-    GooeyWindow::run_with((widgets, init))
+    GooeyWindow::run_with((widgets, init)).map_err(EventLoopError::new)
 }
 
 <span class="attr">#[derive(Debug)]
@@ -701,6 +709,8 @@
             MouseButton::Left =&gt; MouseButtons::LEFT,
             MouseButton::Right =&gt; MouseButtons::RIGHT,
             MouseButton::Middle =&gt; MouseButtons::MIDDLE,
+            MouseButton::Back =&gt; MouseButtons::BACK,
+            MouseButton::Forward =&gt; MouseButtons::FORWARD,
             MouseButton::Other(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(<span class="string">&quot;handle {button:?}&quot;</span>),
         };
         <span class="kw">match </span>state {
