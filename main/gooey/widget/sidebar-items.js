@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["HANDLED","IGNORED"],"struct":["Callback","EventHandled","EventIgnored","ManagedWidget","WidgetInstance","Widgets"],"trait":["MakeWidget","Widget"],"type":["EventHandling"]};
+window.SIDEBAR_ITEMS = {"constant":["HANDLED","IGNORED"],"enum":["ChildWidget"],"struct":["Callback","EventHandled","EventIgnored","ManagedWidget","WidgetGuard","WidgetInstance","Widgets"],"trait":["MakeWidget","Widget"],"type":["EventHandling"]};

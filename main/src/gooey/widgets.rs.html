@@ -19,24 +19,32 @@
 <a href="#19" id="19">19</a>
 <a href="#20" id="20">20</a>
 <a href="#21" id="21">21</a>
+<a href="#22" id="22">22</a>
+<a href="#23" id="23">23</a>
+<a href="#24" id="24">24</a>
+<a href="#25" id="25">25</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Built-in [`Widget`](crate::widget::Widget) implementations.
 
-</span><span class="kw">pub mod </span>button;
+</span><span class="kw">mod </span>align;
+<span class="kw">pub mod </span>button;
 <span class="kw">mod </span>canvas;
+<span class="kw">mod </span>expand;
 <span class="kw">mod </span>input;
 <span class="kw">mod </span>label;
+<span class="kw">mod </span>resize;
 <span class="kw">pub mod </span>scroll;
-<span class="kw">mod </span>spacing;
 <span class="kw">pub mod </span>stack;
 <span class="kw">mod </span>style;
 <span class="kw">mod </span>tilemap;
 
+<span class="kw">pub use </span>align::Align;
 <span class="kw">pub use </span>button::Button;
 <span class="kw">pub use </span>canvas::Canvas;
+<span class="kw">pub use </span>expand::Expand;
 <span class="kw">pub use </span>input::Input;
 <span class="kw">pub use </span>label::Label;
+<span class="kw">pub use </span>resize::Resize;
 <span class="kw">pub use </span>scroll::Scroll;
-<span class="kw">pub use </span>spacing::Spacing;
 <span class="kw">pub use </span>stack::Stack;
 <span class="kw">pub use </span>style::Style;
 <span class="kw">pub use </span>tilemap::TileMap;

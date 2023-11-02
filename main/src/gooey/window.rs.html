@@ -507,6 +507,19 @@
 <a href="#507" id="507">507</a>
 <a href="#508" id="508">508</a>
 <a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
+<a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -525,7 +538,7 @@
 <span class="kw">use </span>kludgine::app::winit::keyboard::KeyCode;
 <span class="kw">use </span>kludgine::app::WindowBehavior <span class="kw">as _</span>;
 <span class="kw">use </span>kludgine::figures::units::Px;
-<span class="kw">use </span>kludgine::figures::Point;
+<span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Rect, Size};
 <span class="kw">use </span>kludgine::render::Drawing;
 <span class="kw">use </span>kludgine::Kludgine;
 
@@ -535,7 +548,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, Widget, WidgetInstance, HANDLED, IGNORED};
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
-<span class="kw">use </span><span class="kw">crate</span>::Run;
+<span class="kw">use crate</span>::{ConstraintLimit, Run};
 
 <span class="doccomment">/// A currently running Gooey window.
 </span><span class="kw">pub type </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; = kludgine::app::Window&lt;<span class="lifetime">&#39;window</span>, WindowCommand&gt;;
@@ -707,11 +720,24 @@
         graphics.reset_text_attributes();
         <span class="self">self</span>.root.tree.reset_render_order();
         <span class="kw">let </span>graphics = <span class="self">self</span>.contents.new_frame(graphics);
-        GraphicsContext {
+        <span class="kw">let </span><span class="kw-2">mut </span>context = GraphicsContext {
             widget: WidgetContext::new(<span class="kw-2">&amp;</span><span class="self">self</span>.root, <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, <span class="kw-2">&amp;mut </span>window),
             graphics: Exclusive::Owned(Graphics::new(graphics)),
+        };
+        <span class="kw">let </span>window_size = context.graphics.size();
+        <span class="kw">let </span>actual_size = context.measure(Size::new(
+            ConstraintLimit::ClippedAfter(window_size.width),
+            ConstraintLimit::ClippedAfter(window_size.height),
+        ));
+        <span class="kw">let </span>render_size = actual_size.min(window_size);
+
+        <span class="kw">if </span>render_size.width &lt; window_size.width || render_size.height &lt; window_size.height {
+            context
+                .clipped_to(Rect::from(render_size.into_signed()))
+                .redraw();
+        } <span class="kw">else </span>{
+            context.redraw();
         }
-        .redraw();
     }
 
     <span class="kw">fn </span>render&lt;<span class="lifetime">&#39;pass</span>&gt;(
