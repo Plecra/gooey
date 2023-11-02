@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Linear"],"struct":["Animation","AnimationHandle","BoxedAnimation","Chain","DynamicTransition","RunningAnimation","RunningChain","TransitioningDynamic","ZeroToOne"],"trait":["Animate","AnimateTarget","AnimationTarget","BoxAnimate","Easing","IntoAnimate","LinearInterpolate","Spawn"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["HANDLED","IGNORED"],"struct":["Callback","EventHandled","EventIgnored","ManagedWidget","WidgetInstance","Widgets"],"trait":["MakeWidget","Widget"],"type":["EventHandling"]};

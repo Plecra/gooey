@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["HighlightColor","IntrinsicPadding","LineHeight","TextColor","TextSize"]};

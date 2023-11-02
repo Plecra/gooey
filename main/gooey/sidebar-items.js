@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["App"]};
+window.SIDEBAR_ITEMS = {"enum":["ConstraintLimit"],"macro":["styles","widgets"],"mod":["animation","context","styles","value","widget","widgets","window"],"struct":["Graphics","InputState","Name","Tick"],"trait":["Run","WithClone"],"type":["Result"]};

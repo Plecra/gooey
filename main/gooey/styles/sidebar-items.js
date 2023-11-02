@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Component","Dimension","FlexibleDimension","Global"],"mod":["components"],"struct":["ComponentName","CustomComponent","Edges","Group","Styles","StylesIntoIter"],"trait":["ComponentDefaultvalue","ComponentDefinition","ComponentGroup","ComponentType","NamedComponent"]};

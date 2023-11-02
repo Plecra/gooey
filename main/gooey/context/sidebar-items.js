@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Exclusive"],"struct":["EventContext","GraphicsContext","WidgetContext"],"trait":["AsEventContext"]};

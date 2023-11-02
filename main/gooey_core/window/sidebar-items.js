@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["WindowLevel"],"struct":["NewWindow","Window","WindowAttributes","WindowBuilder","WindowButtons"],"type":["WindowInitializer"]};

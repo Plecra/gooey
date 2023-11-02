@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["mouse_event_from_web"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Value"],"struct":["Dynamic","DynamicReader","Generation"],"trait":["IntoValue"]};

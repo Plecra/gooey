@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["Dynamic","Reactor","Scope","ScopeGuard","ValueIterator","ValueStream"]};
