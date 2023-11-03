@@ -120,26 +120,20 @@
 <a href="#120" id="120">120</a>
 <a href="#121" id="121">121</a>
 <a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
 </pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../.crate-docs.md&quot;</span>)]
 #![warn(clippy::pedantic, missing_docs)]
 #![allow(clippy::module_name_repetitions, clippy::missing_errors_doc)]
 
-</span><span class="kw">pub mod </span>animation;
+#[macro_use]
+</span><span class="kw">mod </span>utils;
+
+<span class="kw">pub mod </span>animation;
 <span class="kw">pub mod </span>context;
 <span class="kw">mod </span>graphics;
 <span class="kw">mod </span>names;
 <span class="kw">pub mod </span>styles;
 <span class="kw">mod </span>tick;
 <span class="kw">mod </span>tree;
-<span class="kw">mod </span>utils;
 <span class="kw">pub mod </span>value;
 <span class="kw">pub mod </span>widget;
 <span class="kw">pub mod </span>widgets;
@@ -218,7 +212,10 @@
     }};
 }
 
-<span class="attr">#[macro_export]
+<span class="doccomment">/// Counts the number of expressions passed to it.
+///
+/// This is used inside of Gooey macros to preallocate collections.
+</span><span class="attr">#[macro_export]
 #[doc(hidden)]
 </span><span class="macro">macro_rules! </span>count {
     (<span class="macro-nonterminal">$value</span>:expr ;) =&gt; {
@@ -244,18 +241,5 @@
     ($(<span class="macro-nonterminal">$component</span>:expr =&gt; <span class="macro-nonterminal">$value</span>:expr),* ,) =&gt; {{
         <span class="macro-nonterminal">$</span><span class="macro">crate::styles!</span>($(<span class="macro-nonterminal">$component </span>=&gt; <span class="macro-nonterminal">$value</span>),<span class="kw-2">*</span>)
     }};
-}
-
-<span class="attr">#[doc(hidden)]
-#[macro_export]
-</span><span class="macro">macro_rules! </span>impl_all_tuples {
-    (<span class="macro-nonterminal">$macro_name</span>:ident) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>);
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>, T1 <span class="number">1</span>);
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>, T1 <span class="number">1</span>, T2 <span class="number">2</span>);
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>, T1 <span class="number">1</span>, T2 <span class="number">2</span>, T3 <span class="number">3</span>);
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>, T1 <span class="number">1</span>, T2 <span class="number">2</span>, T3 <span class="number">3</span>, T4 <span class="number">4</span>);
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>, T1 <span class="number">1</span>, T2 <span class="number">2</span>, T3 <span class="number">3</span>, T4 <span class="number">4</span>, T5 <span class="number">5</span>);
-    }
 }
 </code></pre></div></section></main></body></html>

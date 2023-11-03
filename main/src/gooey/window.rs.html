@@ -819,7 +819,7 @@
         <span class="kw">if </span>!handled {
             <span class="kw">match </span>input.physical_key {
                 KeyCode::KeyW
-                    <span class="kw">if </span>window.modifiers().state().primary() &amp;&amp; <span class="macro">dbg!</span>(input.state).is_pressed() =&gt;
+                    <span class="kw">if </span>window.modifiers().state().primary() &amp;&amp; input.state.is_pressed() =&gt;
                 {
                     <span class="kw">if </span><span class="self">self</span>.request_close(<span class="kw-2">&amp;mut </span>window) {
                         window.set_needs_redraw();
