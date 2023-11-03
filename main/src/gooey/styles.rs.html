@@ -615,6 +615,9 @@
 <a href="#615" id="615">615</a>
 <a href="#616" id="616">616</a>
 <a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::borrow::Cow;
@@ -622,6 +625,7 @@
 <span class="kw">use </span>std::ops::Add;
 <span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span><span class="kw">crate</span>::animation::{EasingFunction, ZeroToOne};
 <span class="kw">use </span><span class="kw">crate</span>::names::Name;
 <span class="kw">use </span><span class="kw">crate</span>::utils::Lazy;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
@@ -762,9 +766,11 @@
     <span class="doccomment">/// A single-dimension measurement.
     </span>Dimension(Dimension),
     <span class="doccomment">/// A percentage between 0.0 and 1.0.
-    </span>Percent(f32),
+    </span>Percent(ZeroToOne),
     <span class="doccomment">/// A custom component type.
     </span>Custom(CustomComponent),
+    <span class="doccomment">/// An easing function for animations.
+    </span>Easing(EasingFunction),
 }
 
 <span class="kw">impl </span>From&lt;Color&gt; <span class="kw">for </span>Component {

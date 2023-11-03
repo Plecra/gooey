@@ -342,6 +342,8 @@
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
 <a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -358,7 +360,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, AnimationTarget, Spawn};
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::names::Name;
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, IntrinsicPadding, TextColor};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{Easing, HighlightColor, IntrinsicPadding, TextColor};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, ComponentGroup, ComponentName, NamedComponent};
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{Callback, EventHandling, Widget, HANDLED, IGNORED};
@@ -410,6 +412,7 @@
             <span class="kw-2">&amp;</span>ButtonActiveBackground,
             <span class="kw-2">&amp;</span>ButtonBackground,
             <span class="kw-2">&amp;</span>ButtonHoverBackground,
+            <span class="kw-2">&amp;</span>Easing,
         ]);
         <span class="kw">let </span>background_color = <span class="kw">if </span>context.active() {
             styles.get_or_default(<span class="kw-2">&amp;</span>ButtonActiveBackground)
@@ -424,6 +427,7 @@
                 <span class="self">self</span>.background_color_animation = dynamic
                     .transition_to(background_color)
                     .over(Duration::from_millis(<span class="number">150</span>))
+                    .with_easing(styles.get_or_default(<span class="kw-2">&amp;</span>Easing))
                     .spawn();
             }
             (<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(dynamic)) =&gt; {

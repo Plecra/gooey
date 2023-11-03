@@ -225,7 +225,7 @@
         <span class="kw">let </span>(left, right, width) = horizontal.measure(available_space.width, content_size.width);
         <span class="kw">let </span>(top, bottom, height) = vertical.measure(available_space.height, content_size.height);
 
-        <span class="macro">dbg!</span>(Layout {
+        Layout {
             margin: Edges {
                 left,
                 right,
@@ -233,7 +233,7 @@
                 bottom,
             },
             content: Size::new(width, height),
-        })
+        }
     }
 }
 

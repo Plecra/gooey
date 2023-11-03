@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["HighlightColor","IntrinsicPadding","LineHeight","TextColor","TextSize"]};
+window.SIDEBAR_ITEMS = {"struct":["Easing","EasingIn","EasingOut","HighlightColor","IntrinsicPadding","LineHeight","TextColor","TextSize"]};
