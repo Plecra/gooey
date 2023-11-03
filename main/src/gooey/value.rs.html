@@ -537,6 +537,12 @@
 <a href="#537" id="537">537</a>
 <a href="#538" id="538">538</a>
 <a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::fmt::Debug;
@@ -607,7 +613,7 @@
     /// code may produce slightly more readable code.
     ///
     /// ```rust
-    /// let value = gooey::dynamic::Dynamic::new(1);
+    /// let value = gooey::value::Dynamic::new(1);
     ///
     /// // Using with_clone
     /// value.with_clone(|value| {
@@ -675,12 +681,18 @@
 
     <span class="doccomment">/// Returns a new reference-based reader for this dynamic value.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>create_ref_reader(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; DynamicReader&lt;T&gt; {
+    </span><span class="kw">pub fn </span>create_reader(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; DynamicReader&lt;T&gt; {
         <span class="self">self</span>.state().readers += <span class="number">1</span>;
         DynamicReader {
             source: <span class="self">self</span>.<span class="number">0</span>.clone(),
             read_generation: <span class="self">self</span>.<span class="number">0</span>.state().wrapped.generation,
         }
+    }
+
+    <span class="doccomment">/// Converts this [`Dynamic`] into a reader.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>into_reader(<span class="self">self</span>) -&gt; DynamicReader&lt;T&gt; {
+        <span class="self">self</span>.create_reader()
     }
 
     <span class="kw">fn </span>state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MutexGuard&lt;<span class="lifetime">&#39;_</span>, State&lt;T&gt;&gt; {
@@ -732,7 +744,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; From&lt;Dynamic&lt;T&gt;&gt; <span class="kw">for </span>DynamicReader&lt;T&gt; {
     <span class="kw">fn </span>from(value: Dynamic&lt;T&gt;) -&gt; <span class="self">Self </span>{
-        value.create_ref_reader()
+        value.create_reader()
     }
 }
 
@@ -914,7 +926,7 @@
     /// updated or there are no remaining writers for the value.
     ///
     /// Returns true if a newly updated value was discovered.
-    </span><span class="kw">pub fn </span>block_until_updated_async(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BlockUntilUpdatedFuture&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>wait_until_updated(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BlockUntilUpdatedFuture&lt;<span class="lifetime">&#39;_</span>, T&gt; {
         BlockUntilUpdatedFuture(<span class="self">self</span>)
     }
 }
@@ -963,7 +975,7 @@
 <span class="attr">#[test]
 </span><span class="kw">fn </span>disconnecting_reader_from_dynamic() {
     <span class="kw">let </span>value = Dynamic::new(<span class="number">1</span>);
-    <span class="kw">let </span><span class="kw-2">mut </span>ref_reader = value.create_ref_reader();
+    <span class="kw">let </span><span class="kw-2">mut </span>ref_reader = value.create_reader();
     drop(value);
     <span class="macro">assert!</span>(!ref_reader.block_until_updated());
 }
