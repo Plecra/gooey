@@ -318,8 +318,6 @@
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::time::Duration;
@@ -340,36 +338,13 @@
     ComponentDefinition, ComponentGroup, ComponentName, Dimension, NamedComponent,
 };
 <span class="kw">use </span><span class="kw">crate</span>::value::Dynamic;
-<span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, MakeWidget, ManagedWidget, Widget, WidgetInstance, HANDLED};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, MakeWidget, Widget, WidgetRef, HANDLED};
 <span class="kw">use crate</span>::{ConstraintLimit, Name};
-
-<span class="attr">#[derive(Debug)]
-</span><span class="kw">enum </span>ChildWidget {
-    Instance(WidgetInstance),
-    Managed(ManagedWidget),
-    Mounting,
-}
-
-<span class="kw">impl </span>ChildWidget {
-    <span class="kw">pub fn </span>managed(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; ManagedWidget {
-        <span class="kw">if </span><span class="macro">matches!</span>(<span class="self">self</span>, ChildWidget::Instance(<span class="kw">_</span>)) {
-            <span class="kw">let </span>ChildWidget::Instance(instance) = std::mem::replace(<span class="self">self</span>, ChildWidget::Mounting)
-            <span class="kw">else </span>{
-                <span class="macro">unreachable!</span>(<span class="string">&quot;just matched&quot;</span>)
-            };
-            <span class="kw-2">*</span><span class="self">self </span>= ChildWidget::Managed(context.push_child(instance));
-        }
-        <span class="kw">let </span>ChildWidget::Managed(managed) = <span class="self">self </span><span class="kw">else </span>{
-            <span class="macro">unreachable!</span>(<span class="string">&quot;always converted&quot;</span>)
-        };
-        managed.clone()
-    }
-}
 
 <span class="doccomment">/// A widget that supports scrolling its contents.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Scroll {
-    contents: ChildWidget,
+    contents: WidgetRef,
     content_size: Size&lt;Px&gt;,
     control_size: Size&lt;Px&gt;,
     scroll: Dynamic&lt;Point&lt;Px&gt;&gt;,
@@ -377,13 +352,16 @@
     max_scroll: Dynamic&lt;Point&lt;Px&gt;&gt;,
     scrollbar_opacity: Dynamic&lt;ZeroToOne&gt;,
     scrollbar_opacity_animation: AnimationHandle,
+    horizontal_bar: ScrollbarInfo,
+    vertical_bar: ScrollbarInfo,
+    bar_width: Px,
 }
 
 <span class="kw">impl </span>Scroll {
     <span class="doccomment">/// Returns a new scroll widget containing `contents`.
     </span><span class="kw">fn </span>construct(contents: <span class="kw">impl </span>MakeWidget, enabled: Point&lt;bool&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            contents: ChildWidget::Instance(contents.make_widget()),
+            contents: WidgetRef::new(contents),
             enabled,
             content_size: Size::default(),
             control_size: Size::default(),
@@ -391,6 +369,9 @@
             max_scroll: Dynamic::new(Point::default()),
             scrollbar_opacity: Dynamic::default(),
             scrollbar_opacity_animation: AnimationHandle::new(),
+            horizontal_bar: ScrollbarInfo::default(),
+            vertical_bar: ScrollbarInfo::default(),
+            bar_width: Px::default(),
         }
     }
 
@@ -411,12 +392,14 @@
         <span class="self">Self</span>::construct(contents, Point::new(<span class="bool-val">false</span>, <span class="bool-val">true</span>))
     }
 
-    <span class="kw">fn </span>constrain_scroll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="kw">fn </span>constrain_scroll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; (Point&lt;Px&gt;, Point&lt;Px&gt;) {
         <span class="kw">let </span>scroll = <span class="self">self</span>.scroll.get();
-        <span class="kw">let </span>clamped = scroll.max(<span class="self">self</span>.max_scroll.get()).min(Point::default());
+        <span class="kw">let </span>max_scroll = <span class="self">self</span>.max_scroll.get();
+        <span class="kw">let </span>clamped = scroll.max(max_scroll).min(Point::default());
         <span class="kw">if </span>clamped != scroll {
             <span class="self">self</span>.scroll.set(clamped);
         }
+        (clamped, max_scroll)
     }
 
     <span class="kw">fn </span>show_scrollbars(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
@@ -457,18 +440,62 @@
 
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::context::GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         context.redraw_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>.scrollbar_opacity);
-        <span class="self">self</span>.constrain_scroll();
         <span class="kw">let </span><span class="prelude-val">Some</span>(visible_rect) = context.graphics.visible_rect() <span class="kw">else </span>{
             <span class="kw">return</span>;
         };
         <span class="kw">let </span>visible_bottom_right = visible_rect.into_signed().extent();
+
+        <span class="kw">let </span>managed = <span class="self">self</span>.contents.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
+        context.for_other(managed).redraw();
+
+        <span class="kw">if </span><span class="self">self</span>.horizontal_bar.amount_hidden &gt; <span class="number">0 </span>{
+            context.graphics.draw_shape(
+                <span class="kw-2">&amp;</span>Shape::filled_rect(
+                    Rect::new(
+                        Point::new(
+                            <span class="self">self</span>.horizontal_bar.offset,
+                            <span class="self">self</span>.control_size.height - <span class="self">self</span>.bar_width,
+                        ),
+                        Size::new(<span class="self">self</span>.horizontal_bar.size, <span class="self">self</span>.bar_width),
+                    ),
+                    Color::new_f32(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="kw-2">*</span><span class="self">self</span>.scrollbar_opacity.get()),
+                ),
+                Point::default(),
+                <span class="prelude-val">None</span>,
+                <span class="prelude-val">None</span>,
+            );
+        }
+
+        <span class="kw">if </span><span class="self">self</span>.vertical_bar.amount_hidden &gt; <span class="number">0 </span>{
+            context.graphics.draw_shape(
+                <span class="kw-2">&amp;</span>Shape::filled_rect(
+                    Rect::new(
+                        Point::new(
+                            visible_bottom_right.x - <span class="self">self</span>.bar_width,
+                            <span class="self">self</span>.vertical_bar.offset,
+                        ),
+                        Size::new(<span class="self">self</span>.bar_width, <span class="self">self</span>.vertical_bar.size),
+                    ),
+                    Color::new_f32(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="kw-2">*</span><span class="self">self</span>.scrollbar_opacity.get()),
+                ),
+                Point::default(),
+                <span class="prelude-val">None</span>,
+                <span class="prelude-val">None</span>,
+            );
+        }
+    }
+
+    <span class="kw">fn </span>layout(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        available_space: Size&lt;<span class="kw">crate</span>::ConstraintLimit&gt;,
+        context: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::context::LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>ScrollBarThickness]);
-        <span class="kw">let </span>bar_width = styles
+        <span class="self">self</span>.bar_width = styles
             .get_or_default(<span class="kw-2">&amp;</span>ScrollBarThickness)
             .into_px(context.graphics.scale());
 
-        <span class="kw">let </span><span class="kw-2">mut </span>scroll = <span class="self">self</span>.scroll.get();
-        <span class="kw">let </span>current_max_scroll = <span class="self">self</span>.max_scroll.get();
+        <span class="kw">let </span>(<span class="kw-2">mut </span>scroll, current_max_scroll) = <span class="self">self</span>.constrain_scroll();
 
         <span class="kw">let </span>control_size = context.graphics.region().size;
         <span class="kw">let </span>max_extents = Size::new(
@@ -483,25 +510,32 @@
                 ConstraintLimit::Known(control_size.height.into_unsigned())
             },
         );
-        <span class="kw">let </span>managed = <span class="self">self</span>.contents.managed(<span class="kw-2">&amp;mut </span>context.as_event_context());
+        <span class="kw">let </span>managed = <span class="self">self</span>.contents.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         <span class="kw">let </span>new_content_size = context
-            .for_other(<span class="kw-2">&amp;</span>managed)
-            .measure(max_extents)
+            .for_other(managed.clone())
+            .layout(max_extents)
             .into_signed();
 
-        <span class="kw">let </span>horizontal_bar = scrollbar_region(scroll.x, new_content_size.width, control_size.width);
+        <span class="self">self</span>.horizontal_bar =
+            scrollbar_region(scroll.x, new_content_size.width, control_size.width);
         <span class="kw">let </span>max_scroll_x = <span class="kw">if </span><span class="self">self</span>.enabled.x {
-            -horizontal_bar.amount_hidden
+            -<span class="self">self</span>.horizontal_bar.amount_hidden
         } <span class="kw">else </span>{
             Px(<span class="number">0</span>)
         };
 
-        <span class="kw">let </span>vertical_bar = scrollbar_region(scroll.y, new_content_size.height, control_size.height);
+        <span class="self">self</span>.vertical_bar =
+            scrollbar_region(scroll.y, new_content_size.height, control_size.height);
         <span class="kw">let </span>max_scroll_y = <span class="kw">if </span><span class="self">self</span>.enabled.y {
-            -vertical_bar.amount_hidden
+            -<span class="self">self</span>.vertical_bar.amount_hidden
         } <span class="kw">else </span>{
             Px(<span class="number">0</span>)
         };
+        <span class="kw">let </span>new_max_scroll = Point::new(max_scroll_x, max_scroll_y);
+        <span class="kw">if </span>current_max_scroll != new_max_scroll {
+            <span class="self">self</span>.max_scroll.set(new_max_scroll);
+            scroll = scroll.max(new_max_scroll);
+        }
 
         <span class="comment">// Preserve the current scroll if the widget has resized
         </span><span class="kw">if </span><span class="self">self</span>.content_size.width != new_content_size.width
@@ -520,54 +554,16 @@
             scroll.y = max_scroll_y * scroll_pct;
         }
         <span class="self">self</span>.scroll.update(scroll);
+        <span class="self">self</span>.control_size = control_size;
+        <span class="self">self</span>.content_size = new_content_size;
 
         <span class="kw">let </span>region = Rect::new(
             scroll,
             <span class="self">self</span>.content_size
                 .min(Size::new(Px::MAX, Px::MAX) - scroll.max(Point::default())),
         );
-        context.for_child(<span class="kw-2">&amp;</span>managed, region).redraw();
+        context.set_child_layout(<span class="kw-2">&amp;</span>managed, region);
 
-        <span class="kw">if </span>max_scroll_x != <span class="number">0 </span>{
-            context.graphics.draw_shape(
-                <span class="kw-2">&amp;</span>Shape::filled_rect(
-                    Rect::new(
-                        Point::new(horizontal_bar.offset, control_size.height - bar_width),
-                        Size::new(horizontal_bar.size, bar_width),
-                    ),
-                    Color::new_f32(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="kw-2">*</span><span class="self">self</span>.scrollbar_opacity.get()),
-                ),
-                Point::default(),
-                <span class="prelude-val">None</span>,
-                <span class="prelude-val">None</span>,
-            );
-        }
-
-        <span class="kw">if </span>max_scroll_y != <span class="number">0 </span>{
-            context.graphics.draw_shape(
-                <span class="kw-2">&amp;</span>Shape::filled_rect(
-                    Rect::new(
-                        Point::new(visible_bottom_right.x - bar_width, vertical_bar.offset),
-                        Size::new(bar_width, vertical_bar.size),
-                    ),
-                    Color::new_f32(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="kw-2">*</span><span class="self">self</span>.scrollbar_opacity.get()),
-                ),
-                Point::default(),
-                <span class="prelude-val">None</span>,
-                <span class="prelude-val">None</span>,
-            );
-        }
-
-        <span class="self">self</span>.control_size = control_size;
-        <span class="self">self</span>.max_scroll
-            .update(Point::new(max_scroll_x, max_scroll_y));
-    }
-
-    <span class="kw">fn </span>measure(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        available_space: Size&lt;<span class="kw">crate</span>::ConstraintLimit&gt;,
-        _context: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::context::GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
-    ) -&gt; Size&lt;UPx&gt; {
         Size::new(available_space.width.max(), available_space.height.max())
     }
 
@@ -595,7 +591,7 @@
     }
 }
 
-<span class="attr">#[derive(Default)]
+<span class="attr">#[derive(Debug, Default)]
 </span><span class="kw">struct </span>ScrollbarInfo {
     offset: Px,
     amount_hidden: Px,

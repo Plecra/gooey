@@ -46,16 +46,16 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::UPx;
 <span class="kw">use </span>kludgine::figures::Size;
 
-<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::Styles;
-<span class="kw">use </span><span class="kw">crate</span>::widget::{ChildWidget, MakeWidget, Widget};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, Widget, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A widget that applies a set of [`Styles`] to all contained widgets.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Style {
     styles: Styles,
-    child: ChildWidget,
+    child: WidgetRef,
 }
 
 <span class="kw">impl </span>Style {
@@ -64,7 +64,7 @@
     </span><span class="kw">pub fn </span>new(styles: <span class="kw">impl </span>Into&lt;Styles&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             styles: styles.into(),
-            child: ChildWidget::new(child),
+            child: WidgetRef::new(child),
         }
     }
 }
@@ -76,16 +76,16 @@
 
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        context.for_other(<span class="kw-2">&amp;</span>child).redraw();
+        context.for_other(child).redraw();
     }
 
-    <span class="kw">fn </span>measure(
+    <span class="kw">fn </span>layout(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
-        context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        context.for_other(<span class="kw-2">&amp;</span>child).measure(available_space)
+        context.for_other(child).layout(available_space)
     }
 }
 </code></pre></div></section></main></body></html>

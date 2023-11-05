@@ -102,9 +102,9 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::UPx;
 <span class="kw">use </span>kludgine::figures::{Fraction, IntoUnsigned, ScreenScale, Size};
 
-<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, GraphicsContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
-<span class="kw">use </span><span class="kw">crate</span>::widget::{ChildWidget, MakeWidget, Widget};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, Widget, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A widget that resizes its contained widget to an explicit size.
@@ -114,13 +114,13 @@
     </span><span class="kw">pub </span>width: <span class="prelude-ty">Option</span>&lt;Dimension&gt;,
     <span class="doccomment">/// If present, the height to apply to the child widget.
     </span><span class="kw">pub </span>height: <span class="prelude-ty">Option</span>&lt;Dimension&gt;,
-    child: ChildWidget,
+    child: WidgetRef,
 }
 
 <span class="kw">impl </span>Resize {
     <span class="doccomment">/// Returns a reference to the child widget.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>child(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ChildWidget {
+    </span><span class="kw">pub fn </span>child(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>WidgetRef {
         <span class="kw-2">&amp;</span><span class="self">self</span>.child
     }
 
@@ -131,7 +131,7 @@
         </span>T: Into&lt;Dimension&gt;,
     {
         <span class="self">Self </span>{
-            child: ChildWidget::new(child),
+            child: WidgetRef::new(child),
             width: <span class="prelude-val">Some</span>(size.width.into()),
             height: <span class="prelude-val">Some</span>(size.height.into()),
         }
@@ -141,7 +141,7 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>width(width: <span class="kw">impl </span>Into&lt;Dimension&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            child: ChildWidget::new(child),
+            child: WidgetRef::new(child),
             width: <span class="prelude-val">Some</span>(width.into()),
             height: <span class="prelude-val">None</span>,
         }
@@ -151,7 +151,7 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>height(height: <span class="kw">impl </span>Into&lt;Dimension&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            child: ChildWidget::new(child),
+            child: WidgetRef::new(child),
             width: <span class="prelude-val">None</span>,
             height: <span class="prelude-val">Some</span>(height.into()),
         }
@@ -161,13 +161,13 @@
 <span class="kw">impl </span>Widget <span class="kw">for </span>Resize {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        context.for_other(<span class="kw-2">&amp;</span>child).redraw();
+        context.for_other(child).redraw();
     }
 
-    <span class="kw">fn </span>measure(
+    <span class="kw">fn </span>layout(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
-        context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">if let </span>(<span class="prelude-val">Some</span>(width), <span class="prelude-val">Some</span>(height)) = (<span class="self">self</span>.width, <span class="self">self</span>.height) {
             Size::new(
@@ -184,7 +184,7 @@
                 ),
             );
             <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-            context.for_other(<span class="kw-2">&amp;</span>child).measure(available_space)
+            context.for_other(child).layout(available_space)
         }
     }
 }

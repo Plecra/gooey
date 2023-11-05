@@ -670,10 +670,6 @@
 <a href="#670" id="670">670</a>
 <a href="#671" id="671">671</a>
 <a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
-<a href="#675" id="675">675</a>
-<a href="#676" id="676">676</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines an array of [`Widgets`] into one.
 </span><span class="comment">// TODO on scale change, all Lp children need to resize
 
@@ -683,10 +679,10 @@
 <span class="kw">use </span>kludgine::figures::units::{Lp, UPx};
 <span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size};
 
-<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Generation, IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{ChildWidget, ManagedWidget, Widget, Widgets};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{Children, ManagedWidget, Widget, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Expand, Resize};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -697,7 +693,7 @@
     <span class="doccomment">/// The direction to display the children using.
     </span><span class="kw">pub </span>direction: Value&lt;StackDirection&gt;,
     <span class="doccomment">/// The children widgets that belong to this array.
-    </span><span class="kw">pub </span>children: Value&lt;Widgets&gt;,
+    </span><span class="kw">pub </span>children: Value&lt;Children&gt;,
     layout: Layout,
     layout_generation: <span class="prelude-ty">Option</span>&lt;Generation&gt;,
     <span class="comment">// TODO Refactor synced_children into its own type.
@@ -708,7 +704,7 @@
     <span class="doccomment">/// Returns a new widget with the given direction and widgets.
     </span><span class="kw">pub fn </span>new(
         direction: <span class="kw">impl </span>IntoValue&lt;StackDirection&gt;,
-        widgets: <span class="kw">impl </span>IntoValue&lt;Widgets&gt;,
+        widgets: <span class="kw">impl </span>IntoValue&lt;Children&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>direction = direction.into_value();
 
@@ -724,19 +720,19 @@
     }
 
     <span class="doccomment">/// Returns a new instance that displays `widgets` in a series of columns.
-    </span><span class="kw">pub fn </span>columns(widgets: <span class="kw">impl </span>IntoValue&lt;Widgets&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>columns(widgets: <span class="kw">impl </span>IntoValue&lt;Children&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(StackDirection::columns(), widgets)
     }
 
     <span class="doccomment">/// Returns a new instance that displays `widgets` in a series of rows.
-    </span><span class="kw">pub fn </span>rows(widgets: <span class="kw">impl </span>IntoValue&lt;Widgets&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>rows(widgets: <span class="kw">impl </span>IntoValue&lt;Children&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(StackDirection::rows(), widgets)
     }
 
     <span class="kw">fn </span>synchronize_children(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>current_generation = <span class="self">self</span>.children.generation();
         <span class="kw">if </span>current_generation.map_or_else(
-            || <span class="self">self</span>.children.map(Widgets::len) != <span class="self">self</span>.layout.children.len(),
+            || <span class="self">self</span>.children.map(Children::len) != <span class="self">self</span>.layout.children.len(),
             |gen| <span class="prelude-val">Some</span>(gen) != <span class="self">self</span>.layout_generation,
         ) {
             <span class="self">self</span>.layout_generation = <span class="self">self</span>.children.generation();
@@ -781,7 +777,7 @@
                                     (child, StackDimension::Exact(size))
                                 } <span class="kw">else </span>{
                                     (
-                                        ChildWidget::Unmounted(widget.clone()),
+                                        WidgetRef::Unmounted(widget.clone()),
                                         StackDimension::FitContent,
                                     )
                                 };
@@ -807,58 +803,49 @@
 
 <span class="kw">impl </span>Widget <span class="kw">for </span>Stack {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="self">self</span>.synchronize_children(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        <span class="self">self</span>.layout.update(
-            Size::new(
-                ConstraintLimit::Known(context.graphics.size().width),
-                ConstraintLimit::Known(context.graphics.size().height),
-            ),
-            context.graphics.scale(),
-            |child_index, constraints| {
-                context
-                    .for_other(<span class="kw-2">&amp;</span><span class="self">self</span>.synced_children[child_index])
-                    .measure(constraints)
-            },
-        );
-
-        <span class="kw">for </span>(index, layout) <span class="kw">in </span><span class="self">self</span>.layout.iter().enumerate() {
-            <span class="kw">let </span>child = <span class="kw-2">&amp;</span><span class="self">self</span>.synced_children[index];
-            <span class="kw">if </span>layout.size &gt; <span class="number">0 </span>{
-                context
-                    .for_child(
-                        child,
-                        Rect::new(
-                            <span class="self">self</span>.layout
-                                .orientation
-                                .make_point(layout.offset, UPx(<span class="number">0</span>))
-                                .into_signed(),
-                            <span class="self">self</span>.layout
-                                .orientation
-                                .make_size(layout.size, <span class="self">self</span>.layout.other)
-                                .into_signed(),
-                        ),
-                    )
-                    .redraw();
-            }
+        <span class="kw">for </span>child <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.synced_children {
+            context.for_other(child.clone()).redraw();
         }
     }
 
-    <span class="kw">fn </span>measure(
+    <span class="kw">fn </span>layout(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
-        context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
         <span class="self">self</span>.synchronize_children(<span class="kw-2">&amp;mut </span>context.as_event_context());
 
-        <span class="self">self</span>.layout.update(
+        <span class="kw">let </span>content_size = <span class="self">self</span>.layout.update(
             available_space,
             context.graphics.scale(),
-            |child_index, constraints| {
-                context
-                    .for_other(<span class="kw-2">&amp;</span><span class="self">self</span>.synced_children[child_index])
-                    .measure(constraints)
+            |child_index, constraints, persist| {
+                <span class="kw">let </span><span class="kw-2">mut </span>context = context.for_other(<span class="self">self</span>.synced_children[child_index].clone());
+                <span class="kw">if </span>!persist {
+                    context = context.as_temporary();
+                }
+                context.layout(constraints)
             },
-        )
+        );
+
+        <span class="kw">for </span>(layout, child) <span class="kw">in </span><span class="self">self</span>.layout.iter().zip(<span class="kw-2">&amp;</span><span class="self">self</span>.synced_children) {
+            <span class="kw">if </span>layout.size &gt; <span class="number">0 </span>{
+                context.set_child_layout(
+                    child,
+                    Rect::new(
+                        <span class="self">self</span>.layout
+                            .orientation
+                            .make_point(layout.offset, UPx(<span class="number">0</span>))
+                            .into_signed(),
+                        <span class="self">self</span>.layout
+                            .orientation
+                            .make_size(layout.size, <span class="self">self</span>.layout.other)
+                            .into_signed(),
+                    ),
+                );
+            }
+        }
+
+        content_size
     }
 }
 
@@ -1063,7 +1050,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available: Size&lt;ConstraintLimit&gt;,
         scale: Fraction,
-        <span class="kw-2">mut </span>measure: <span class="kw">impl </span>FnMut(usize, Size&lt;ConstraintLimit&gt;) -&gt; Size&lt;UPx&gt;,
+        <span class="kw-2">mut </span>measure: <span class="kw">impl </span>FnMut(usize, Size&lt;ConstraintLimit&gt;, bool) -&gt; Size&lt;UPx&gt;,
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>(space_constraint, other_constraint) = <span class="self">self</span>.orientation.split_size(available);
         <span class="kw">let </span>available_space = space_constraint.max();
@@ -1079,6 +1066,7 @@
                     index,
                     <span class="self">self</span>.orientation
                         .make_size(ConstraintLimit::ClippedAfter(remaining), other_constraint),
+                    <span class="bool-val">false</span>,
                 ));
                 <span class="self">self</span>.layouts[index].size = measured;
                 remaining = remaining.saturating_sub(measured);
@@ -1123,6 +1111,7 @@
                     ConstraintLimit::Known(<span class="self">self</span>.layouts[index].size.into_px(scale).into_unsigned()),
                     other_constraint,
                 ),
+                <span class="bool-val">true</span>,
             ));
             <span class="self">self</span>.other = <span class="self">self</span>.other.max(measured);
         }
@@ -1201,22 +1190,25 @@
             flex.push(child.dimension, Fraction::ONE);
         }
 
-        <span class="kw">let </span>computed_size = flex.update(available, Fraction::ONE, |index, constraints| {
-            <span class="kw">let </span>(measured_constraint, _other_constraint) = orientation.split_size(constraints);
-            <span class="kw">let </span>child = <span class="kw-2">&amp;</span>children[index];
-            <span class="kw">let </span>maximum_measured = measured_constraint.max();
-            <span class="kw">let </span>(measured, other) = <span class="kw">match </span>(child.size.cmp(<span class="kw-2">&amp;</span>maximum_measured), child.divisible_by) {
-                (Ordering::Greater, <span class="prelude-val">Some</span>(divisible_by)) =&gt; {
-                    <span class="kw">let </span>available_divided = maximum_measured / divisible_by;
-                    <span class="kw">let </span>rows = ((child.size + divisible_by - <span class="number">1</span>) / divisible_by + available_divided
-                        - <span class="number">1</span>)
-                        / available_divided;
-                    (available_divided * divisible_by, child.other * rows)
-                }
-                <span class="kw">_ </span>=&gt; (child.size, child.other),
-            };
-            orientation.make_size(measured, other)
-        });
+        <span class="kw">let </span>computed_size =
+            flex.update(available, Fraction::ONE, |index, constraints, _persist| {
+                <span class="kw">let </span>(measured_constraint, _other_constraint) = orientation.split_size(constraints);
+                <span class="kw">let </span>child = <span class="kw-2">&amp;</span>children[index];
+                <span class="kw">let </span>maximum_measured = measured_constraint.max();
+                <span class="kw">let </span>(measured, other) =
+                    <span class="kw">match </span>(child.size.cmp(<span class="kw-2">&amp;</span>maximum_measured), child.divisible_by) {
+                        (Ordering::Greater, <span class="prelude-val">Some</span>(divisible_by)) =&gt; {
+                            <span class="kw">let </span>available_divided = maximum_measured / divisible_by;
+                            <span class="kw">let </span>rows = ((child.size + divisible_by - <span class="number">1</span>) / divisible_by
+                                + available_divided
+                                - <span class="number">1</span>)
+                                / available_divided;
+                            (available_divided * divisible_by, child.other * rows)
+                        }
+                        <span class="kw">_ </span>=&gt; (child.size, child.other),
+                    };
+                orientation.make_size(measured, other)
+            });
         <span class="macro">assert_eq!</span>(computed_size, expected_size);
         <span class="kw">let </span><span class="kw-2">mut </span>offset = UPx(<span class="number">0</span>);
         <span class="kw">for </span>((index, <span class="kw-2">&amp;</span>child), <span class="kw-2">&amp;</span>expected) <span class="kw">in </span>flex.iter().enumerate().zip(expected) {

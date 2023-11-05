@@ -334,16 +334,6 @@
 <a href="#334" id="334">334</a>
 <a href="#335" id="335">335</a>
 <a href="#336" id="336">336</a>
-<a href="#337" id="337">337</a>
-<a href="#338" id="338">338</a>
-<a href="#339" id="339">339</a>
-<a href="#340" id="340">340</a>
-<a href="#341" id="341">341</a>
-<a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
-<a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -358,7 +348,7 @@
 <span class="kw">use </span>kludgine::Color;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, AnimationTarget, Spawn};
-<span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, WidgetContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::names::Name;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{Easing, HighlightColor, IntrinsicPadding, TextColor};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, ComponentGroup, ComponentName, NamedComponent};
@@ -513,13 +503,8 @@
         _button: MouseButton,
         context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) {
-        <span class="kw">let </span>changed = <span class="kw">if </span>Rect::from(
-            context
-                .last_rendered_at()
-                .expect(<span class="string">&quot;must have been rendered&quot;</span>)
-                .size,
-        )
-        .contains(location)
+        <span class="kw">let </span>changed = <span class="kw">if </span>Rect::from(context.last_layout().expect(<span class="string">&quot;must have been rendered&quot;</span>).size)
+            .contains(location)
         {
             context.activate()
         } <span class="kw">else </span>{
@@ -543,13 +528,8 @@
             context.deactivate();
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(location) = location {
-                <span class="kw">if </span>Rect::from(
-                    context
-                        .last_rendered_at()
-                        .expect(<span class="string">&quot;must have been rendered&quot;</span>)
-                        .size,
-                )
-                .contains(location)
+                <span class="kw">if </span>Rect::from(context.last_layout().expect(<span class="string">&quot;must have been rendered&quot;</span>).size)
+                    .contains(location)
                 {
                     context.focus();
 
@@ -559,10 +539,10 @@
         }
     }
 
-    <span class="kw">fn </span>measure(
+    <span class="kw">fn </span>layout(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;<span class="kw">crate</span>::ConstraintLimit&gt;,
-        context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>padding = context
             .query_style(<span class="kw-2">&amp;</span>IntrinsicPadding)

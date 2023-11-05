@@ -522,6 +522,58 @@
 <a href="#522" id="522">522</a>
 <a href="#523" id="523">523</a>
 <a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -537,9 +589,10 @@
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{Point, Rect, Size};
 
-<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::Styles;
 <span class="kw">use </span><span class="kw">crate</span>::tree::{Tree, WidgetId};
+<span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::Style;
 <span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, Window, WindowBehavior};
 <span class="kw">use crate</span>::{ConstraintLimit, Run};
@@ -552,12 +605,12 @@
     <span class="doccomment">/// Redraw the contents of this widget.
     </span><span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;);
 
-    <span class="doccomment">/// Measure this widget and returns the ideal size based on its contents and
+    <span class="doccomment">/// Layout this widget and returns the ideal size based on its contents and
     /// the `available_space`.
-    </span><span class="kw">fn </span>measure(
+    </span><span class="kw">fn </span>layout(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
-        context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt;;
 
     <span class="doccomment">/// The widget has been mounted into a parent widget.
@@ -581,6 +634,14 @@
     <span class="doccomment">/// The widget is no longer being hovered.
     </span><span class="attr">#[allow(unused_variables)]
     </span><span class="kw">fn </span>unhover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {}
+
+    <span class="doccomment">/// This widget has been targeted to be focused. If this function returns
+    /// true, the widget will be focused. If false, Gooey will continue
+    /// searching for another focus target.
+    </span><span class="attr">#[allow(unused_variables)]
+    </span><span class="kw">fn </span>accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
+        <span class="bool-val">false
+    </span>}
 
     <span class="doccomment">/// The widget has received focus for user input.
     </span><span class="attr">#[allow(unused_variables)]
@@ -669,6 +730,21 @@
     ) -&gt; EventHandling {
         IGNORED
     }
+}
+
+<span class="kw">impl</span>&lt;T&gt; Run <span class="kw">for </span>T
+<span class="kw">where
+    </span>T: MakeWidget,
+{
+    <span class="kw">fn </span>run(<span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result {
+        <span class="self">self</span>.make_widget().run()
+    }
+}
+
+<span class="doccomment">/// A type that can create a widget.
+</span><span class="kw">pub trait </span>MakeWidget: Sized {
+    <span class="doccomment">/// Returns a new widget.
+    </span><span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance;
 
     <span class="doccomment">/// Associates `styles` with this widget.
     ///
@@ -679,25 +755,13 @@
     {
         Style::new(styles, <span class="self">self</span>)
     }
-}
 
-<span class="kw">impl</span>&lt;T&gt; Run <span class="kw">for </span>T
-<span class="kw">where
-    </span>T: Widget,
-{
-    <span class="kw">fn </span>run(<span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result {
-        WidgetInstance::new(<span class="self">self</span>).run()
-    }
-}
-
-<span class="doccomment">/// A type that can create a widget.
-</span><span class="kw">pub trait </span>MakeWidget: Sized {
-    <span class="doccomment">/// Returns a new widget.
-    </span><span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance;
-
-    <span class="doccomment">/// Runs the widget this type creates as an application.
-    </span><span class="kw">fn </span>run(<span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result {
-        <span class="self">self</span>.make_widget().run()
+    <span class="doccomment">/// Sets the widget that should be focused next.
+    ///
+    /// Gooey automatically determines reverse tab order by using this same
+    /// relationship.
+    </span><span class="kw">fn </span>with_next_focus(<span class="self">self</span>, next_focus: <span class="kw">impl </span>IntoValue&lt;<span class="prelude-ty">Option</span>&lt;WidgetInstance&gt;&gt;) -&gt; WidgetInstance {
+        <span class="self">self</span>.make_widget().with_next_focus(next_focus)
     }
 }
 
@@ -708,6 +772,12 @@
     <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
         WidgetInstance::new(<span class="self">self</span>)
     }
+}
+
+<span class="kw">impl </span>MakeWidget <span class="kw">for </span>WidgetInstance {
+    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
+        <span class="self">self
+    </span>}
 }
 
 <span class="doccomment">/// A type that represents whether an event has been handled or ignored.
@@ -747,7 +817,10 @@
 
 <span class="doccomment">/// An instance of a [`Widget`].
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>WidgetInstance(Arc&lt;Mutex&lt;<span class="kw">dyn </span>AnyWidget&gt;&gt;);
+</span><span class="kw">pub struct </span>WidgetInstance {
+    widget: Arc&lt;Mutex&lt;<span class="kw">dyn </span>AnyWidget&gt;&gt;,
+    next_focus: Value&lt;<span class="prelude-ty">Option</span>&lt;Arc&lt;Mutex&lt;<span class="kw">dyn </span>AnyWidget&gt;&gt;&gt;&gt;,
+}
 
 <span class="kw">impl </span>WidgetInstance {
     <span class="doccomment">/// Returns a new instance containing `widget`.
@@ -755,19 +828,46 @@
     </span><span class="kw">where
         </span>W: Widget,
     {
-        <span class="self">Self</span>(Arc::new(Mutex::new(widget)))
+        <span class="self">Self </span>{
+            widget: Arc::new(Mutex::new(widget)),
+            next_focus: Value::default(),
+        }
     }
+
+    <span class="doccomment">/// Sets the widget that should be focused next.
+    ///
+    /// Gooey automatically determines reverse tab order by using this same
+    /// relationship.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_next_focus(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        next_focus: <span class="kw">impl </span>IntoValue&lt;<span class="prelude-ty">Option</span>&lt;WidgetInstance&gt;&gt;,
+    ) -&gt; WidgetInstance {
+        <span class="self">self</span>.next_focus = <span class="kw">match </span>next_focus.into_value() {
+            Value::Constant(maybe_widget) =&gt; {
+                Value::Constant(maybe_widget.map(|widget| widget.widget))
+            }
+            Value::Dynamic(dynamic) =&gt; Value::Dynamic(
+                dynamic
+                    .map_each(|instance| instance.as_ref().map(|instance| instance.widget.clone())),
+            ),
+        };
+        <span class="self">self
+    </span>}
 
     <span class="doccomment">/// Locks the widget for exclusive access. Locking widgets should only be
     /// done for brief moments of time when you are certain no deadlocks can
     /// occur due to other widget locks being held.
     </span><span class="kw">pub fn </span>lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; WidgetGuard&lt;<span class="lifetime">&#39;_</span>&gt; {
-        WidgetGuard(<span class="self">self</span>.<span class="number">0</span>.lock().map_or_else(PoisonError::into_inner, |g| g))
+        WidgetGuard(
+            <span class="self">self</span>.widget
+                .lock()
+                .map_or_else(PoisonError::into_inner, |g| g),
+        )
     }
-}
 
-<span class="kw">impl </span>Run <span class="kw">for </span>WidgetInstance {
-    <span class="kw">fn </span>run(<span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result {
+    <span class="doccomment">/// Runs this widget instance as an application.
+    </span><span class="kw">pub fn </span>run(<span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result {
         Window::&lt;WidgetInstance&gt;::new(<span class="self">self</span>).run()
     }
 }
@@ -776,7 +876,7 @@
 
 <span class="kw">impl </span>PartialEq <span class="kw">for </span>WidgetInstance {
     <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
-        Arc::ptr_eq(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span>other.<span class="number">0</span>)
+        Arc::ptr_eq(<span class="kw-2">&amp;</span><span class="self">self</span>.widget, <span class="kw-2">&amp;</span>other.widget)
     }
 }
 
@@ -860,14 +960,14 @@
         <span class="self">self</span>.widget.lock()
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>note_rendered_rect(<span class="kw-2">&amp;</span><span class="self">self</span>, rect: Rect&lt;Px&gt;) {
-        <span class="self">self</span>.tree.note_rendered_rect(<span class="self">self</span>.id, rect);
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_layout(<span class="kw-2">&amp;</span><span class="self">self</span>, rect: Rect&lt;Px&gt;) {
+        <span class="self">self</span>.tree.set_layout(<span class="self">self</span>.id, rect);
     }
 
     <span class="doccomment">/// Returns the region that the widget was last rendered at.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>last_rendered_at(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Rect&lt;Px&gt;&gt; {
-        <span class="self">self</span>.tree.last_rendered_at(<span class="self">self</span>.id)
+    </span><span class="kw">pub fn </span>last_layout(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Rect&lt;Px&gt;&gt; {
+        <span class="self">self</span>.tree.layout(<span class="self">self</span>.id)
     }
 
     <span class="doccomment">/// Returns true if this widget is the currently active widget.
@@ -902,6 +1002,10 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>attach_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, styles: Styles) {
         <span class="self">self</span>.tree.attach_styles(<span class="self">self</span>.id, styles);
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset_child_layouts(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.tree.reset_child_layouts(<span class="self">self</span>.id);
     }
 }
 
@@ -950,11 +1054,11 @@
 <span class="doccomment">/// A list of [`Widget`]s.
 </span><span class="attr">#[derive(Debug, Default)]
 #[must_use]
-</span><span class="kw">pub struct </span>Widgets {
+</span><span class="kw">pub struct </span>Children {
     ordered: Vec&lt;WidgetInstance&gt;,
 }
 
-<span class="kw">impl </span>Widgets {
+<span class="kw">impl </span>Children {
     <span class="doccomment">/// Returns an empty list.
     </span><span class="kw">pub const fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
@@ -1000,7 +1104,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;W&gt; FromIterator&lt;W&gt; <span class="kw">for </span>Widgets
+<span class="kw">impl</span>&lt;W&gt; FromIterator&lt;W&gt; <span class="kw">for </span>Children
 <span class="kw">where
     </span>W: MakeWidget,
 {
@@ -1011,7 +1115,7 @@
     }
 }
 
-<span class="kw">impl </span>Deref <span class="kw">for </span>Widgets {
+<span class="kw">impl </span>Deref <span class="kw">for </span>Children {
     <span class="kw">type </span>Target = [WidgetInstance];
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
@@ -1021,14 +1125,14 @@
 
 <span class="doccomment">/// A child widget
 </span><span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub enum </span>ChildWidget {
+</span><span class="kw">pub enum </span>WidgetRef {
     <span class="doccomment">/// An unmounted child widget
     </span>Unmounted(WidgetInstance),
     <span class="doccomment">/// A mounted child widget
     </span>Mounted(ManagedWidget),
 }
 
-<span class="kw">impl </span>ChildWidget {
+<span class="kw">impl </span>WidgetRef {
     <span class="doccomment">/// Returns a new unmounted child
     </span><span class="kw">pub fn </span>new(widget: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Unmounted(widget.make_widget())
@@ -1036,8 +1140,8 @@
 
     <span class="doccomment">/// Returns this child, mounting it in the process if necessary.
     </span><span class="kw">pub fn </span>mounted(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; ManagedWidget {
-        <span class="kw">if let </span>ChildWidget::Unmounted(instance) = <span class="self">self </span>{
-            <span class="kw-2">*</span><span class="self">self </span>= ChildWidget::Mounted(context.push_child(instance.clone()));
+        <span class="kw">if let </span>WidgetRef::Unmounted(instance) = <span class="self">self </span>{
+            <span class="kw-2">*</span><span class="self">self </span>= WidgetRef::Mounted(context.push_child(instance.clone()));
         }
 
         <span class="kw">let </span><span class="self">Self</span>::Mounted(widget) = <span class="self">self </span><span class="kw">else </span>{

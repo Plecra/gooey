@@ -164,28 +164,21 @@
 <a href="#164" id="164">164</a>
 <a href="#165" id="165">165</a>
 <a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span>kludgine::figures::units::UPx;
 <span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size};
 
-<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, GraphicsContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Edges, FlexibleDimension};
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{ChildWidget, MakeWidget, Widget};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, Widget, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A widget aligns its contents to its container&#39;s boundaries.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Align {
-    child: ChildWidget,
+    child: WidgetRef,
     edges: Value&lt;Edges&lt;FlexibleDimension&gt;&gt;,
 }
 
@@ -194,7 +187,7 @@
     /// `margin`.
     </span><span class="kw">pub fn </span>new(margin: <span class="kw">impl </span>IntoValue&lt;Edges&lt;FlexibleDimension&gt;&gt;, widget: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            child: ChildWidget::new(widget),
+            child: WidgetRef::new(widget),
             edges: margin.into_value(),
         }
     }
@@ -208,7 +201,7 @@
     <span class="kw">fn </span>measure(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
-        context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Layout {
         <span class="kw">let </span>margin = <span class="self">self</span>.edges.get();
         <span class="kw">let </span>vertical = FrameInfo::new(context.graphics.scale(), margin.top, margin.bottom);
@@ -220,7 +213,7 @@
         );
 
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        <span class="kw">let </span>content_size = context.for_other(<span class="kw-2">&amp;</span>child).measure(content_available);
+        <span class="kw">let </span>content_size = context.for_other(child).layout(content_available);
 
         <span class="kw">let </span>(left, right, width) = horizontal.measure(available_space.width, content_size.width);
         <span class="kw">let </span>(top, bottom, height) = vertical.measure(available_space.height, content_size.height);
@@ -300,36 +293,29 @@
 
 <span class="kw">impl </span>Widget <span class="kw">for </span>Align {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="kw">let </span>layout = <span class="self">self</span>.measure(
-            Size::new(
-                ConstraintLimit::Known(context.graphics.size().width),
-                ConstraintLimit::Known(context.graphics.size().height),
-            ),
-            context,
-        );
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        context
-            .for_child(
-                <span class="kw-2">&amp;</span>child,
-                Rect::new(
-                    Point::new(
-                        layout.margin.left.into_signed(),
-                        layout.margin.top.into_signed(),
-                    ),
-                    layout.content.into_signed(),
-                ),
-            )
-            .redraw();
+        context.for_other(child).redraw();
     }
 
-    <span class="kw">fn </span>measure(
+    <span class="kw">fn </span>layout(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
-        context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="self">self</span>.measure(available_space, context)
-            .size()
-            .into_unsigned()
+        <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
+        <span class="kw">let </span>layout = <span class="self">self</span>.measure(available_space, context);
+        context.set_child_layout(
+            <span class="kw-2">&amp;</span>child,
+            Rect::new(
+                Point::new(
+                    layout.margin.left.into_signed(),
+                    layout.margin.top.into_signed(),
+                ),
+                layout.content.into_signed(),
+            ),
+        );
+
+        layout.size().into_unsigned()
     }
 }
 

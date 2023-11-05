@@ -159,13 +159,15 @@
 <a href="#159" id="159">159</a>
 <a href="#160" id="160">160</a>
 <a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 </span><span class="kw">use </span>std::borrow::Cow;
 
 <span class="kw">use </span>kludgine::figures::units::Lp;
 <span class="kw">use </span>kludgine::Color;
 
-<span class="kw">use </span><span class="kw">crate</span>::animation::{EaseInQuadradic, EaseOutQuadradic, EasingFunction};
+<span class="kw">use </span><span class="kw">crate</span>::animation::easings::{EaseInQuadradic, EaseOutQuadradic};
+<span class="kw">use </span><span class="kw">crate</span>::animation::EasingFunction;
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, ComponentName, Dimension, Global, NamedComponent};
 
 <span class="doccomment">/// The [`Dimension`] to use as the size to render text.
