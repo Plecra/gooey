@@ -574,6 +574,24 @@
 <a href="#574" id="574">574</a>
 <a href="#575" id="575">575</a>
 <a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -760,7 +778,7 @@
     ///
     /// Gooey automatically determines reverse tab order by using this same
     /// relationship.
-    </span><span class="kw">fn </span>with_next_focus(<span class="self">self</span>, next_focus: <span class="kw">impl </span>IntoValue&lt;<span class="prelude-ty">Option</span>&lt;WidgetInstance&gt;&gt;) -&gt; WidgetInstance {
+    </span><span class="kw">fn </span>with_next_focus(<span class="self">self</span>, next_focus: <span class="kw">impl </span>IntoValue&lt;<span class="prelude-ty">Option</span>&lt;WidgetId&gt;&gt;) -&gt; WidgetInstance {
         <span class="self">self</span>.make_widget().with_next_focus(next_focus)
     }
 }
@@ -818,8 +836,9 @@
 <span class="doccomment">/// An instance of a [`Widget`].
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>WidgetInstance {
+    id: WidgetId,
     widget: Arc&lt;Mutex&lt;<span class="kw">dyn </span>AnyWidget&gt;&gt;,
-    next_focus: Value&lt;<span class="prelude-ty">Option</span>&lt;Arc&lt;Mutex&lt;<span class="kw">dyn </span>AnyWidget&gt;&gt;&gt;&gt;,
+    next_focus: Value&lt;<span class="prelude-ty">Option</span>&lt;WidgetId&gt;&gt;,
 }
 
 <span class="kw">impl </span>WidgetInstance {
@@ -829,9 +848,16 @@
         </span>W: Widget,
     {
         <span class="self">Self </span>{
+            id: WidgetId::unique(),
             widget: Arc::new(Mutex::new(widget)),
             next_focus: Value::default(),
         }
+    }
+
+    <span class="doccomment">/// Returns the unique id of this widget instance.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; WidgetId {
+        <span class="self">self</span>.id
     }
 
     <span class="doccomment">/// Sets the widget that should be focused next.
@@ -841,17 +867,9 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>with_next_focus(
         <span class="kw-2">mut </span><span class="self">self</span>,
-        next_focus: <span class="kw">impl </span>IntoValue&lt;<span class="prelude-ty">Option</span>&lt;WidgetInstance&gt;&gt;,
+        next_focus: <span class="kw">impl </span>IntoValue&lt;<span class="prelude-ty">Option</span>&lt;WidgetId&gt;&gt;,
     ) -&gt; WidgetInstance {
-        <span class="self">self</span>.next_focus = <span class="kw">match </span>next_focus.into_value() {
-            Value::Constant(maybe_widget) =&gt; {
-                Value::Constant(maybe_widget.map(|widget| widget.widget))
-            }
-            Value::Dynamic(dynamic) =&gt; Value::Dynamic(
-                dynamic
-                    .map_each(|instance| instance.as_ref().map(|instance| instance.widget.clone())),
-            ),
-        };
+        <span class="self">self</span>.next_focus = next_focus.into_value();
         <span class="self">self
     </span>}
 
@@ -937,7 +955,6 @@
 <span class="doccomment">/// A [`Widget`] that has been attached to a widget hierarchy.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ManagedWidget {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) id: WidgetId,
     <span class="kw">pub</span>(<span class="kw">crate</span>) widget: WidgetInstance,
     <span class="kw">pub</span>(<span class="kw">crate</span>) tree: Tree,
 }
@@ -945,7 +962,6 @@
 <span class="kw">impl </span>Debug <span class="kw">for </span>ManagedWidget {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
         f.debug_struct(<span class="string">&quot;ManagedWidget&quot;</span>)
-            .field(<span class="string">&quot;id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.id)
             .field(<span class="string">&quot;widget&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.widget)
             .finish_non_exhaustive()
     }
@@ -961,51 +977,71 @@
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_layout(<span class="kw-2">&amp;</span><span class="self">self</span>, rect: Rect&lt;Px&gt;) {
-        <span class="self">self</span>.tree.set_layout(<span class="self">self</span>.id, rect);
+        <span class="self">self</span>.tree.set_layout(<span class="self">self</span>.id(), rect);
+    }
+
+    <span class="doccomment">/// Returns the unique id of this widget instance.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; WidgetId {
+        <span class="self">self</span>.widget.id
+    }
+
+    <span class="doccomment">/// Returns the next widget to focus after this widget.
+    ///
+    /// This function returns the value set in
+    /// [`MakeWidget::with_next_focus()`].
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>next_focus(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+        <span class="self">self</span>.widget
+            .next_focus
+            .get()
+            .and_then(|next_focus| <span class="self">self</span>.tree.widget(next_focus))
     }
 
     <span class="doccomment">/// Returns the region that the widget was last rendered at.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>last_layout(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Rect&lt;Px&gt;&gt; {
-        <span class="self">self</span>.tree.layout(<span class="self">self</span>.id)
+        <span class="self">self</span>.tree.layout(<span class="self">self</span>.id())
     }
 
     <span class="doccomment">/// Returns true if this widget is the currently active widget.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>active(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.tree.active_widget() == <span class="prelude-val">Some</span>(<span class="self">self</span>.id)
+        <span class="self">self</span>.tree.active_widget() == <span class="prelude-val">Some</span>(<span class="self">self</span>.id())
     }
 
     <span class="doccomment">/// Returns true if this widget is currently the hovered widget.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>hovered(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.tree.is_hovered(<span class="self">self</span>.id)
+        <span class="self">self</span>.tree.is_hovered(<span class="self">self</span>.id())
     }
 
     <span class="doccomment">/// Returns true if this widget that is directly beneath the cursor.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>primary_hover(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.tree.hovered_widget() == <span class="prelude-val">Some</span>(<span class="self">self</span>.id)
+        <span class="self">self</span>.tree.hovered_widget() == <span class="prelude-val">Some</span>(<span class="self">self</span>.id())
     }
 
     <span class="doccomment">/// Returns true if this widget is the currently focused widget.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>focused(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.tree.focused_widget() == <span class="prelude-val">Some</span>(<span class="self">self</span>.id)
+        <span class="self">self</span>.tree.focused_widget() == <span class="prelude-val">Some</span>(<span class="self">self</span>.id())
     }
 
     <span class="doccomment">/// Returns the parent of this widget.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>parent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
-        <span class="self">self</span>.tree.parent(<span class="self">self</span>.id).map(|id| <span class="self">self</span>.tree.widget(id))
+        <span class="self">self</span>.tree
+            .parent(<span class="self">self</span>.id())
+            .and_then(|id| <span class="self">self</span>.tree.widget(id))
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>attach_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, styles: Styles) {
-        <span class="self">self</span>.tree.attach_styles(<span class="self">self</span>.id, styles);
+        <span class="self">self</span>.tree.attach_styles(<span class="self">self</span>.id(), styles);
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset_child_layouts(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="self">self</span>.tree.reset_child_layouts(<span class="self">self</span>.id);
+        <span class="self">self</span>.tree.reset_child_layouts(<span class="self">self</span>.id());
     }
 }
 

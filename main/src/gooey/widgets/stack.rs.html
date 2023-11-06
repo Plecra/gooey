@@ -706,7 +706,7 @@
         direction: <span class="kw">impl </span>IntoValue&lt;StackDirection&gt;,
         widgets: <span class="kw">impl </span>IntoValue&lt;Children&gt;,
     ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>direction = direction.into_value();
+        <span class="kw">let </span>direction = direction.into_value();
 
         <span class="kw">let </span>initial_direction = direction.get();
 

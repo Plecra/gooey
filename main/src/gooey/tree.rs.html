@@ -336,11 +336,25 @@
 <a href="#336" id="336">336</a>
 <a href="#337" id="337">337</a>
 <a href="#338" id="338">338</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
+<span class="kw">use </span>std::sync::atomic::{<span class="self">self</span>, AtomicU64};
 <span class="kw">use </span>std::sync::{Arc, Mutex, PoisonError};
 
-<span class="kw">use </span>alot::{LotId, Lots};
 <span class="kw">use </span>kludgine::figures::units::Px;
 <span class="kw">use </span>kludgine::figures::{Point, Rect};
 
@@ -359,19 +373,22 @@
         parent: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ManagedWidget&gt;,
     ) -&gt; ManagedWidget {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
-        <span class="kw">let </span>id = WidgetId(data.nodes.push(Node {
-            widget: widget.clone(),
-            children: Vec::new(),
-            parent: parent.map(|parent| parent.id),
-            layout: <span class="prelude-val">None</span>,
-            styles: <span class="prelude-val">None</span>,
-        }));
+        <span class="kw">let </span>id = widget.id();
+        data.nodes.insert(
+            id,
+            Node {
+                widget: widget.clone(),
+                children: Vec::new(),
+                parent: parent.map(ManagedWidget::id),
+                layout: <span class="prelude-val">None</span>,
+                styles: <span class="prelude-val">None</span>,
+            },
+        );
         <span class="kw">if let </span><span class="prelude-val">Some</span>(parent) = parent {
-            <span class="kw">let </span>parent = <span class="kw-2">&amp;mut </span>data.nodes[parent.id.<span class="number">0</span>];
+            <span class="kw">let </span>parent = data.nodes.get_mut(<span class="kw-2">&amp;</span>parent.id()).expect(<span class="string">&quot;missing parent&quot;</span>);
             parent.children.push(id);
         }
         ManagedWidget {
-            id,
             widget,
             tree: <span class="self">self</span>.clone(),
         }
@@ -379,26 +396,31 @@
 
     <span class="kw">pub fn </span>remove_child(<span class="kw-2">&amp;</span><span class="self">self</span>, child: <span class="kw-2">&amp;</span>ManagedWidget, parent: <span class="kw-2">&amp;</span>ManagedWidget) {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
-        data.remove_child(child.id, parent.id);
+        data.remove_child(child.id(), parent.id());
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_layout(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: WidgetId, rect: Rect&lt;Px&gt;) {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
-        rect.extents();
-        data.nodes[widget.<span class="number">0</span>].layout = <span class="prelude-val">Some</span>(rect);
+
         data.render_order.push(widget);
-        <span class="kw">let </span><span class="kw-2">mut </span>children_to_offset = data.nodes[widget.<span class="number">0</span>].children.clone();
+        <span class="kw">let </span>node = data.nodes.get_mut(<span class="kw-2">&amp;</span>widget).expect(<span class="string">&quot;missing widget&quot;</span>);
+        node.layout = <span class="prelude-val">Some</span>(rect);
+        <span class="kw">let </span><span class="kw-2">mut </span>children_to_offset = node.children.clone();
         <span class="kw">while let </span><span class="prelude-val">Some</span>(child) = children_to_offset.pop() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(layout) = <span class="kw-2">&amp;mut </span>data.nodes[child.<span class="number">0</span>].layout {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(layout) = data
+                .nodes
+                .get_mut(<span class="kw-2">&amp;</span>child)
+                .and_then(|child| child.layout.as_mut())
+            {
                 layout.origin += rect.origin;
-                children_to_offset.extend(data.nodes[child.<span class="number">0</span>].children.iter().copied());
+                children_to_offset.extend(data.nodes[<span class="kw-2">&amp;</span>child].children.iter().copied());
             }
         }
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>layout(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: WidgetId) -&gt; <span class="prelude-ty">Option</span>&lt;Rect&lt;Px&gt;&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
-        data.nodes[widget.<span class="number">0</span>].layout
+        data.nodes[<span class="kw-2">&amp;</span>widget].layout
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset_render_order(<span class="kw-2">&amp;</span><span class="self">self</span>) {
@@ -408,20 +430,20 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset_child_layouts(<span class="kw-2">&amp;</span><span class="self">self</span>, parent: WidgetId) {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
-        <span class="kw">let </span>children = data.nodes[parent.<span class="number">0</span>].children.clone();
+        <span class="kw">let </span>children = data.nodes[<span class="kw-2">&amp;</span>parent].children.clone();
         <span class="kw">for </span>child <span class="kw">in </span>children {
-            data.nodes[child.<span class="number">0</span>].layout = <span class="prelude-val">None</span>;
+            data.nodes.get_mut(<span class="kw-2">&amp;</span>child).expect(<span class="string">&quot;missing widget&quot;</span>).layout = <span class="prelude-val">None</span>;
         }
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>hover(<span class="kw-2">&amp;</span><span class="self">self</span>, new_hover: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ManagedWidget&gt;) -&gt; HoverResults {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
         <span class="kw">let </span>hovered = new_hover
-            .map(|new_hover| data.widget_hierarchy(new_hover.id, <span class="self">self</span>))
+            .map(|new_hover| data.widget_hierarchy(new_hover.id(), <span class="self">self</span>))
             .unwrap_or_default();
         <span class="kw">let </span>unhovered = <span class="kw">match </span>data.update_tracked_widget(new_hover, <span class="self">self</span>, |data| <span class="kw-2">&amp;mut </span>data.hover) {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(old_hover)) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>old_hovered = data.widget_hierarchy(old_hover.id, <span class="self">self</span>);
+                <span class="kw">let </span><span class="kw-2">mut </span>old_hovered = data.widget_hierarchy(old_hover.id(), <span class="self">self</span>);
                 <span class="comment">// For any widgets that were shared, remove them, as they don&#39;t
                 // need to have their events fired again.
                 </span><span class="kw">let </span><span class="kw-2">mut </span>new_index = <span class="number">0</span>;
@@ -449,7 +471,7 @@
         data.update_tracked_widget(new_active, <span class="self">self</span>, |data| <span class="kw-2">&amp;mut </span>data.active)
     }
 
-    <span class="kw">pub fn </span>widget(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId) -&gt; ManagedWidget {
+    <span class="kw">pub fn </span>widget(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
         data.widget(id, <span class="self">self</span>)
     }
@@ -475,7 +497,7 @@
             <span class="kw">if </span>hovered == id {
                 <span class="kw">return </span><span class="bool-val">true</span>;
             }
-            search = data.nodes[hovered.<span class="number">0</span>].parent;
+            search = data.nodes[<span class="kw-2">&amp;</span>hovered].parent;
         }
 
         <span class="bool-val">false
@@ -492,11 +514,10 @@
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
         <span class="kw">let </span><span class="kw-2">mut </span>hits = Vec::new();
         <span class="kw">for </span>id <span class="kw">in </span>data.render_order.iter().rev() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(last_rendered) = data.nodes[id.<span class="number">0</span>].layout {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(last_rendered) = data.nodes[id].layout {
                 <span class="kw">if </span>last_rendered.contains(point) {
                     hits.push(ManagedWidget {
-                        id: <span class="kw-2">*</span>id,
-                        widget: data.nodes[id.<span class="number">0</span>].widget.clone(),
+                        widget: data.nodes[id].widget.clone(),
                         tree: <span class="self">self</span>.clone(),
                     });
                 }
@@ -507,12 +528,12 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parent(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId) -&gt; <span class="prelude-ty">Option</span>&lt;WidgetId&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
-        data.nodes[id.<span class="number">0</span>].parent
+        data.nodes.get(<span class="kw-2">&amp;</span>id).expect(<span class="string">&quot;missing widget&quot;</span>).parent
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>attach_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId, styles: Styles) {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
-        data.nodes[id.<span class="number">0</span>].styles = <span class="prelude-val">Some</span>(styles);
+        data.nodes.get_mut(<span class="kw-2">&amp;</span>id).expect(<span class="string">&quot;missing widget&quot;</span>).styles = <span class="prelude-val">Some</span>(styles);
     }
 
     <span class="kw">pub fn </span>query_styles(
@@ -523,7 +544,7 @@
         <span class="self">self</span>.data
             .lock()
             .map_or_else(PoisonError::into_inner, |g| g)
-            .query_styles(perspective.id, query)
+            .query_styles(perspective.id(), query)
     }
 
     <span class="kw">pub fn </span>query_style&lt;Component: ComponentDefinition&gt;(
@@ -534,7 +555,7 @@
         <span class="self">self</span>.data
             .lock()
             .map_or_else(PoisonError::into_inner, |g| g)
-            .query_style(perspective.id, component)
+            .query_style(perspective.id(), component)
     }
 }
 
@@ -545,7 +566,7 @@
 
 <span class="attr">#[derive(Default)]
 </span><span class="kw">struct </span>TreeData {
-    nodes: Lots&lt;Node&gt;,
+    nodes: HashMap&lt;WidgetId, Node&gt;,
     active: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
     focus: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
     hover: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
@@ -553,17 +574,16 @@
 }
 
 <span class="kw">impl </span>TreeData {
-    <span class="kw">fn </span>widget(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId, tree: <span class="kw-2">&amp;</span>Tree) -&gt; ManagedWidget {
-        ManagedWidget {
-            id,
-            widget: <span class="self">self</span>.nodes[id.<span class="number">0</span>].widget.clone(),
+    <span class="kw">fn </span>widget(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId, tree: <span class="kw-2">&amp;</span>Tree) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+        <span class="prelude-val">Some</span>(ManagedWidget {
+            widget: <span class="self">self</span>.nodes.get(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>.widget.clone(),
             tree: tree.clone(),
-        }
+        })
     }
 
     <span class="kw">fn </span>remove_child(<span class="kw-2">&amp;mut </span><span class="self">self</span>, child: WidgetId, parent: WidgetId) {
-        <span class="kw">let </span>removed_node = <span class="self">self</span>.nodes.remove(child.<span class="number">0</span>).expect(<span class="string">&quot;widget already removed&quot;</span>);
-        <span class="kw">let </span>parent = <span class="kw-2">&amp;mut </span><span class="self">self</span>.nodes[parent.<span class="number">0</span>];
+        <span class="kw">let </span>removed_node = <span class="self">self</span>.nodes.remove(<span class="kw-2">&amp;</span>child).expect(<span class="string">&quot;widget already removed&quot;</span>);
+        <span class="kw">let </span>parent = <span class="self">self</span>.nodes.get_mut(<span class="kw-2">&amp;</span>parent).expect(<span class="string">&quot;missing widget&quot;</span>);
         <span class="kw">let </span>index = parent
             .children
             .iter()
@@ -574,16 +594,16 @@
         <span class="kw">let </span><span class="kw-2">mut </span>detached_nodes = removed_node.children;
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>(node) = detached_nodes.pop() {
-            <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.nodes.remove(node.<span class="number">0</span>).expect(<span class="string">&quot;detached node missing&quot;</span>);
+            <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.nodes.remove(<span class="kw-2">&amp;</span>node).expect(<span class="string">&quot;detached node missing&quot;</span>);
             detached_nodes.append(<span class="kw-2">&amp;mut </span>node.children);
         }
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>widget_hierarchy(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>widget: WidgetId, tree: <span class="kw-2">&amp;</span>Tree) -&gt; Vec&lt;ManagedWidget&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>hierarchy = Vec::new();
-        <span class="kw">loop </span>{
-            hierarchy.push(<span class="self">self</span>.widget(widget, tree));
-            <span class="kw">let </span><span class="prelude-val">Some</span>(parent) = <span class="self">self</span>.nodes[widget.<span class="number">0</span>].parent <span class="kw">else </span>{
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(managed) = <span class="self">self</span>.widget(widget, tree) {
+            hierarchy.push(managed);
+            <span class="kw">let </span><span class="prelude-val">Some</span>(parent) = <span class="self">self</span>.nodes[<span class="kw-2">&amp;</span>widget].parent <span class="kw">else </span>{
                 <span class="kw">break</span>;
             };
             widget = parent;
@@ -601,13 +621,12 @@
         property: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span><span class="self">Self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;, ()&gt; {
         <span class="kw">match </span>(
-            mem::replace(property(<span class="self">self</span>), new_widget.map(|w| w.id)),
+            mem::replace(property(<span class="self">self</span>), new_widget.map(ManagedWidget::id)),
             new_widget,
         ) {
-            (<span class="prelude-val">Some</span>(old_widget), <span class="prelude-val">Some</span>(new_widget)) <span class="kw">if </span>old_widget == new_widget.id =&gt; <span class="prelude-val">Err</span>(()),
+            (<span class="prelude-val">Some</span>(old_widget), <span class="prelude-val">Some</span>(new_widget)) <span class="kw">if </span>old_widget == new_widget.id() =&gt; <span class="prelude-val">Err</span>(()),
             (<span class="prelude-val">Some</span>(old_widget), <span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(ManagedWidget {
-                id: old_widget,
-                widget: <span class="self">self</span>.nodes[old_widget.<span class="number">0</span>].widget.clone(),
+                widget: <span class="self">self</span>.nodes[<span class="kw-2">&amp;</span>old_widget].widget.clone(),
                 tree: tree.clone(),
             })),
             (<span class="prelude-val">None</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
@@ -622,7 +641,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>query = query.iter().map(|n| n.name()).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
         <span class="kw">let </span><span class="kw-2">mut </span>resolved = Styles::new();
         <span class="kw">while </span>!query.is_empty() {
-            <span class="kw">let </span>node = <span class="kw-2">&amp;</span><span class="self">self</span>.nodes[perspective.<span class="number">0</span>];
+            <span class="kw">let </span>node = <span class="kw-2">&amp;</span><span class="self">self</span>.nodes[<span class="kw-2">&amp;</span>perspective];
             <span class="kw">if let </span><span class="prelude-val">Some</span>(styles) = <span class="kw-2">&amp;</span>node.styles {
                 query.retain(|name| {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(component) = styles.get(name) {
@@ -646,7 +665,7 @@
     ) -&gt; Component::ComponentType {
         <span class="kw">let </span>name = query.name();
         <span class="kw">loop </span>{
-            <span class="kw">let </span>node = <span class="kw-2">&amp;</span><span class="self">self</span>.nodes[perspective.<span class="number">0</span>];
+            <span class="kw">let </span>node = <span class="kw-2">&amp;</span><span class="self">self</span>.nodes[<span class="kw-2">&amp;</span>perspective];
             <span class="kw">if let </span><span class="prelude-val">Some</span>(styles) = <span class="kw-2">&amp;</span>node.styles {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(component) = styles.get(<span class="kw-2">&amp;</span>name) {
                     <span class="kw">let </span><span class="prelude-val">Ok</span>(value) =
@@ -672,6 +691,13 @@
     <span class="kw">pub </span>styles: <span class="prelude-ty">Option</span>&lt;Styles&gt;,
 }
 
-<span class="attr">#[derive(Clone, Copy, Eq, PartialEq, Debug)]
-</span><span class="kw">pub struct </span>WidgetId(LotId);
+<span class="attr">#[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
+</span><span class="kw">pub struct </span>WidgetId(u64);
+
+<span class="kw">impl </span>WidgetId {
+    <span class="kw">pub fn </span>unique() -&gt; <span class="self">Self </span>{
+        <span class="kw">static </span>COUNTER: AtomicU64 = AtomicU64::new(<span class="number">0</span>);
+        <span class="self">Self</span>(COUNTER.fetch_add(<span class="number">1</span>, atomic::Ordering::Acquire))
+    }
+}
 </code></pre></div></section></main></body></html>
