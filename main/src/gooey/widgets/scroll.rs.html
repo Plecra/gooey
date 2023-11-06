@@ -316,15 +316,13 @@
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
 <a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::time::Duration;
 
+<span class="kw">use </span>intentional::Cast;
 <span class="kw">use </span>kludgine::app::winit::event::{DeviceId, MouseScrollDelta, TouchPhase};
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
-<span class="kw">use </span>kludgine::figures::utils::lossy_f64_to_f32;
 <span class="kw">use </span>kludgine::figures::{
     FloatConversion, IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size,
 };
@@ -577,9 +575,7 @@
         <span class="kw">let </span>amount = <span class="kw">match </span>delta {
             <span class="comment">/* TODO query line height */
             </span>MouseScrollDelta::LineDelta(x, y) =&gt; Point::new(x, y) * <span class="number">16.0</span>,
-            MouseScrollDelta::PixelDelta(px) =&gt; {
-                Point::new(lossy_f64_to_f32(px.x), lossy_f64_to_f32(px.y))
-            }
+            MouseScrollDelta::PixelDelta(px) =&gt; Point::new(px.x.cast(), px.y.cast()),
         };
 
         <span class="self">self</span>.scroll.map_mut(|scroll| <span class="kw-2">*</span>scroll += amount.cast());
