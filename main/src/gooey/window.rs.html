@@ -551,6 +551,24 @@
 <a href="#551" id="551">551</a>
 <a href="#552" id="552">552</a>
 <a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -578,6 +596,7 @@
     WidgetContext,
 };
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::VisualOrder;
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, Widget, WidgetInstance, HANDLED, IGNORED};
@@ -869,6 +888,23 @@
                         window.set_needs_redraw();
                     }
                 }
+                KeyCode::Tab
+                    <span class="kw">if </span>!window.modifiers().state().possible_shortcut()
+                        &amp;&amp; input.state.is_pressed() =&gt;
+                {
+                    <span class="kw">let </span>direction = <span class="kw">if </span>window.modifiers().state().shift_key() {
+                        VisualOrder::left_to_right().rev()
+                    } <span class="kw">else </span>{
+                        VisualOrder::left_to_right()
+                    };
+                    <span class="kw">let </span>target = <span class="self">self</span>.root.tree.focused_widget().unwrap_or(<span class="self">self</span>.root.id());
+                    <span class="kw">let </span>target = <span class="self">self</span>.root.tree.widget(target).expect(<span class="string">&quot;missing widget&quot;</span>);
+                    <span class="kw">let </span><span class="kw-2">mut </span>target = EventContext::new(
+                        WidgetContext::new(target, <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, <span class="kw-2">&amp;mut </span>window),
+                        kludgine,
+                    );
+                    target.advance_focus(direction);
+                }
                 <span class="kw">_ </span>=&gt; {}
             }
         }
@@ -954,7 +990,7 @@
             );
             <span class="self">self</span>.mouse_state.widget = <span class="prelude-val">None</span>;
             <span class="kw">for </span>widget <span class="kw">in </span><span class="self">self</span>.root.tree.widgets_at_point(location) {
-                <span class="kw">let </span><span class="kw-2">mut </span>widget_context = context.for_other(widget.clone());
+                <span class="kw">let </span><span class="kw-2">mut </span>widget_context = context.for_other(<span class="kw-2">&amp;</span>widget);
                 <span class="kw">let </span>relative = location
                     - widget_context
                         .last_layout()
@@ -1080,7 +1116,7 @@
     <span class="kw">match </span>each_widget(context) {
         HANDLED =&gt; <span class="prelude-val">Some</span>(context.widget().clone()),
         IGNORED =&gt; context.parent().and_then(|parent| {
-            recursively_handle_event(<span class="kw-2">&amp;mut </span>context.for_other(parent), each_widget)
+            recursively_handle_event(<span class="kw-2">&amp;mut </span>context.for_other(<span class="kw-2">&amp;</span>parent), each_widget)
         }),
     }
 }

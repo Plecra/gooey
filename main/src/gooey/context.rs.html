@@ -880,6 +880,87 @@
 <a href="#880" id="880">880</a>
 <a href="#881" id="881">881</a>
 <a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
+<a href="#887" id="887">887</a>
+<a href="#888" id="888">888</a>
+<a href="#889" id="889">889</a>
+<a href="#890" id="890">890</a>
+<a href="#891" id="891">891</a>
+<a href="#892" id="892">892</a>
+<a href="#893" id="893">893</a>
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
+<a href="#921" id="921">921</a>
+<a href="#922" id="922">922</a>
+<a href="#923" id="923">923</a>
+<a href="#924" id="924">924</a>
+<a href="#925" id="925">925</a>
+<a href="#926" id="926">926</a>
+<a href="#927" id="927">927</a>
+<a href="#928" id="928">928</a>
+<a href="#929" id="929">929</a>
+<a href="#930" id="930">930</a>
+<a href="#931" id="931">931</a>
+<a href="#932" id="932">932</a>
+<a href="#933" id="933">933</a>
+<a href="#934" id="934">934</a>
+<a href="#935" id="935">935</a>
+<a href="#936" id="936">936</a>
+<a href="#937" id="937">937</a>
+<a href="#938" id="938">938</a>
+<a href="#939" id="939">939</a>
+<a href="#940" id="940">940</a>
+<a href="#941" id="941">941</a>
+<a href="#942" id="942">942</a>
+<a href="#943" id="943">943</a>
+<a href="#944" id="944">944</a>
+<a href="#945" id="945">945</a>
+<a href="#946" id="946">946</a>
+<a href="#947" id="947">947</a>
+<a href="#948" id="948">948</a>
+<a href="#949" id="949">949</a>
+<a href="#950" id="950">950</a>
+<a href="#951" id="951">951</a>
+<a href="#952" id="952">952</a>
+<a href="#953" id="953">953</a>
+<a href="#954" id="954">954</a>
+<a href="#955" id="955">955</a>
+<a href="#956" id="956">956</a>
+<a href="#957" id="957">957</a>
+<a href="#958" id="958">958</a>
+<a href="#959" id="959">959</a>
+<a href="#960" id="960">960</a>
+<a href="#961" id="961">961</a>
+<a href="#962" id="962">962</a>
+<a href="#963" id="963">963</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
@@ -894,11 +975,12 @@
 <span class="kw">use </span>kludgine::Kludgine;
 
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::HighlightColor;
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, VisualOrder};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefaultvalue, ComponentDefinition, Styles};
 <span class="kw">use </span><span class="kw">crate</span>::value::Dynamic;
-<span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, WidgetId, WidgetInstance};
-<span class="kw">use </span><span class="kw">crate</span>::window::{sealed, RunningWindow};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, WidgetId, WidgetInstance, WidgetRef};
+<span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
+<span class="kw">use </span><span class="kw">crate</span>::window::RunningWindow;
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A context to an event function.
@@ -930,11 +1012,17 @@
     /// parent widget needs to invoke events on a child widget. This is done by
     /// creating an `EventContext` pointing to the child and calling the
     /// appropriate function to invoke the event.
-    </span><span class="kw">pub fn </span>for_other&lt;<span class="lifetime">&#39;child</span>&gt;(
+    </span><span class="kw">pub fn </span>for_other&lt;<span class="lifetime">&#39;child</span>, Widget&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;child </span><span class="kw-2">mut </span><span class="self">self</span>,
-        widget: ManagedWidget,
-    ) -&gt; EventContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>&gt; {
-        EventContext::new(<span class="self">self</span>.widget.for_other(widget), <span class="self">self</span>.kludgine)
+        widget: <span class="kw-2">&amp;</span>Widget,
+    ) -&gt; &lt;Widget::Managed <span class="kw">as </span>MapManagedWidget&lt;EventContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>&gt;&gt;&gt;::Result
+    <span class="kw">where
+        </span>Widget: ManageWidget,
+        Widget::Managed: MapManagedWidget&lt;EventContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>&gt;&gt;,
+    {
+        widget
+            .manage(<span class="self">self</span>)
+            .map(|managed| EventContext::new(<span class="self">self</span>.widget.for_other(<span class="kw-2">&amp;</span>managed), <span class="self">self</span>.kludgine))
     }
 
     <span class="doccomment">/// Invokes [`Widget::hit_test()`](crate::widget::Widget::hit_test) on this
@@ -1027,11 +1115,11 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>hover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;) {
         <span class="kw">let </span>changes = <span class="self">self</span>.current_node.tree.hover(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.current_node));
         <span class="kw">for </span>unhovered <span class="kw">in </span>changes.unhovered {
-            <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="self">self</span>.for_other(unhovered.clone());
+            <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>unhovered);
             unhovered.lock().as_widget().unhover(<span class="kw-2">&amp;mut </span>context);
         }
         <span class="kw">for </span>hover <span class="kw">in </span>changes.hovered {
-            <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="self">self</span>.for_other(hover.clone());
+            <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>hover);
             hover.lock().as_widget().hover(location, <span class="kw-2">&amp;mut </span>context);
         }
     }
@@ -1041,7 +1129,7 @@
         <span class="macro">assert!</span>(changes.hovered.is_empty());
 
         <span class="kw">for </span>old_hover <span class="kw">in </span>changes.unhovered {
-            <span class="kw">let </span><span class="kw-2">mut </span>old_hover_context = <span class="self">self</span>.for_other(old_hover.clone());
+            <span class="kw">let </span><span class="kw-2">mut </span>old_hover_context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>old_hover);
             old_hover.lock().as_widget().unhover(<span class="kw-2">&amp;mut </span>old_hover_context);
         }
     }
@@ -1052,7 +1140,7 @@
             <span class="kw">let </span>new = <span class="kw">match </span><span class="self">self</span>.current_node.tree.activate(active.as_ref()) {
                 <span class="prelude-val">Ok</span>(old) =&gt; {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(old) = old {
-                        <span class="kw">let </span><span class="kw-2">mut </span>old_context = <span class="self">self</span>.for_other(old.clone());
+                        <span class="kw">let </span><span class="kw-2">mut </span>old_context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>old);
                         old.lock().as_widget().deactivate(<span class="kw-2">&amp;mut </span>old_context);
                     }
                     <span class="bool-val">true
@@ -1064,7 +1152,7 @@
                     active
                         .lock()
                         .as_widget()
-                        .activate(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(active.clone()));
+                        .activate(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(active));
                 }
                 <span class="self">self</span>.pending_state.active = active;
             }
@@ -1076,19 +1164,19 @@
                 <span class="kw">if </span>focus
                     .lock()
                     .as_widget()
-                    .accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(focus.clone()))
+                    .accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>focus))
                 {
                     <span class="kw">break </span><span class="prelude-val">Some</span>(focus);
                 } <span class="kw">else if let </span><span class="prelude-val">Some</span>(next_focus) = focus.next_focus() {
                     focus = next_focus;
                 } <span class="kw">else </span>{
-                    <span class="kw">break </span><span class="self">self</span>.next_focus_after(focus);
+                    <span class="kw">break </span><span class="self">self</span>.next_focus_after(focus, VisualOrder::left_to_right());
                 }
             });
             <span class="kw">let </span>new = <span class="kw">match </span><span class="self">self</span>.current_node.tree.focus(focus.as_ref()) {
                 <span class="prelude-val">Ok</span>(old) =&gt; {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(old) = old {
-                        <span class="kw">let </span><span class="kw-2">mut </span>old_context = <span class="self">self</span>.for_other(old.clone());
+                        <span class="kw">let </span><span class="kw-2">mut </span>old_context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>old);
                         old.lock().as_widget().blur(<span class="kw-2">&amp;mut </span>old_context);
                     }
                     <span class="bool-val">true
@@ -1097,26 +1185,27 @@
             };
             <span class="kw">if </span>new {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="kw-2">&amp;</span>focus {
-                    focus
-                        .lock()
-                        .as_widget()
-                        .focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(focus.clone()));
+                    focus.lock().as_widget().focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(focus));
                 }
                 <span class="self">self</span>.pending_state.focus = focus;
             }
         }
     }
 
-    <span class="kw">fn </span>next_focus_after(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>focus: ManagedWidget) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+    <span class="kw">fn </span>next_focus_after(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">mut </span>focus: ManagedWidget,
+        order: VisualOrder,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
         <span class="comment">// First, look within the current focus for any focusable children.
         </span><span class="kw">let </span>stop_at = focus.id();
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>focus, <span class="prelude-val">None</span>, stop_at) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>focus, <span class="prelude-val">None</span>, stop_at, order) {
             <span class="kw">return </span><span class="prelude-val">Some</span>(focus);
         }
 
         <span class="comment">// Now, look for the next widget in each hierarchy
         </span><span class="kw">let </span>root = <span class="kw">loop </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_sibling(<span class="kw-2">&amp;</span>focus, stop_at) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_sibling(<span class="kw-2">&amp;</span>focus, stop_at, order) {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(focus);
             }
             <span class="kw">let </span><span class="prelude-val">Some</span>(parent) = focus.parent() <span class="kw">else </span>{
@@ -1127,15 +1216,16 @@
 
         <span class="comment">// We&#39;ve exhausted a forward scan, we can now start searching the final
         // parent, which is the root.
-        </span><span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>root, <span class="prelude-val">None</span>, stop_at)
+        </span><span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>root, <span class="prelude-val">None</span>, stop_at, order)
     }
 
     <span class="kw">fn </span>next_focus_sibling(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         focus: <span class="kw-2">&amp;</span>ManagedWidget,
         stop_at: WidgetId,
+        order: VisualOrder,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
-        <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>focus.parent()<span class="question-mark">?</span>, <span class="prelude-val">Some</span>(focus.id()), stop_at)
+        <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>focus.parent()<span class="question-mark">?</span>, <span class="prelude-val">Some</span>(focus.id()), stop_at, order)
     }
 
     <span class="doccomment">/// Searches for the next focus inside of `focus`, returning `None` if
@@ -1146,21 +1236,22 @@
         focus: <span class="kw-2">&amp;</span>ManagedWidget,
         start_at: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
         stop_at: WidgetId,
+        order: VisualOrder,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
-        <span class="kw">let </span>child_layouts = focus.child_layouts();
-        <span class="comment">// TODO visually sort the layouts
-
-        </span><span class="kw">let </span><span class="kw-2">mut </span>child_layouts = child_layouts.into_iter().peekable();
+        <span class="kw">let </span><span class="kw-2">mut </span>children = focus
+            .visually_ordered_children(order)
+            .into_iter()
+            .peekable();
         <span class="kw">if let </span><span class="prelude-val">Some</span>(start_at) = start_at {
             <span class="comment">// Skip all children up to `start_at`
-            </span><span class="kw">while </span>child_layouts.peek()<span class="question-mark">?</span>.<span class="number">0</span>.id() != start_at {
-                child_layouts.next();
+            </span><span class="kw">while </span>children.peek()<span class="question-mark">?</span>.id() != start_at {
+                children.next();
             }
             <span class="comment">// Skip `start_at`
-            </span>child_layouts.next();
+            </span>children.next();
         }
 
-        <span class="kw">for </span>(child, _layout) <span class="kw">in </span>child_layouts {
+        <span class="kw">for </span>child <span class="kw">in </span>children {
             <span class="comment">// Ensure we haven&#39;t cycled completely.
             </span><span class="kw">if </span>stop_at == child.id() {
                 <span class="kw">break</span>;
@@ -1169,16 +1260,20 @@
             <span class="kw">if </span>child
                 .lock()
                 .as_widget()
-                .accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(child.clone()))
+                .accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>child))
             {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(child);
-            } <span class="kw">else if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>child, <span class="prelude-val">None</span>, stop_at) {
+            } <span class="kw">else if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>child, <span class="prelude-val">None</span>, stop_at, order) {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(focus);
             }
         }
 
         <span class="prelude-val">None
     </span>}
+
+    <span class="kw">pub fn </span>advance_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, direction: VisualOrder) {
+        <span class="self">self</span>.pending_state.focus = <span class="self">self</span>.next_focus_after(<span class="self">self</span>.current_node.clone(), direction);
+    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; Deref <span class="kw">for </span>EventContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; {
@@ -1244,19 +1339,27 @@
 
     <span class="doccomment">/// Returns a new `GraphicsContext` that allows invoking graphics functions
     /// for `widget`.
-    </span><span class="kw">pub fn </span>for_other&lt;<span class="lifetime">&#39;child</span>&gt;(
+    </span><span class="kw">pub fn </span>for_other&lt;<span class="lifetime">&#39;child</span>, Widget&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;child </span><span class="kw-2">mut </span><span class="self">self</span>,
-        widget: ManagedWidget,
-    ) -&gt; GraphicsContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
-        <span class="kw">let </span>widget = <span class="self">self</span>.widget.for_other(widget);
-        <span class="kw">let </span>layout = widget.last_layout().map_or_else(
-            || Rect::from(<span class="self">self</span>.graphics.clip_rect().size).into_signed(),
-            |rect| rect - <span class="self">self</span>.graphics.region().origin,
-        );
-        GraphicsContext {
-            widget,
-            graphics: Exclusive::Owned(<span class="self">self</span>.graphics.clipped_to(layout)),
-        }
+        widget: <span class="kw-2">&amp;</span>Widget,
+    ) -&gt; &lt;Widget::Managed <span class="kw">as </span>MapManagedWidget&lt;
+        GraphicsContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;,
+    &gt;&gt;::Result
+    <span class="kw">where
+        </span>Widget: ManageWidget,
+        Widget::Managed: MapManagedWidget&lt;GraphicsContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;&gt;,
+    {
+        widget.manage(<span class="self">self</span>).map(|widget| {
+            <span class="kw">let </span>widget = <span class="self">self</span>.widget.for_other(<span class="kw-2">&amp;</span>widget);
+            <span class="kw">let </span>layout = widget.last_layout().map_or_else(
+                || Rect::from(<span class="self">self</span>.graphics.clip_rect().size).into_signed(),
+                |rect| rect - <span class="self">self</span>.graphics.region().origin,
+            );
+            GraphicsContext {
+                widget,
+                graphics: Exclusive::Owned(<span class="self">self</span>.graphics.clipped_to(layout)),
+            }
+        })
     }
 
     <span class="doccomment">/// Returns a new graphics context that renders to the `clip` rectangle.
@@ -1350,17 +1453,18 @@
 
     <span class="doccomment">/// Returns a new `LayoutContext` that allows invoking layout functions for
     /// `widget`.
-    </span><span class="kw">pub fn </span>for_other&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;widget</span>&gt;(
+    </span><span class="kw">pub fn </span>for_other&lt;<span class="lifetime">&#39;child</span>, Widget&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;child </span><span class="kw-2">mut </span><span class="self">self</span>,
-        widget: ManagedWidget,
-    ) -&gt; LayoutContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;
+        widget: <span class="kw-2">&amp;</span>Widget,
+    ) -&gt; &lt;Widget::Managed <span class="kw">as </span>MapManagedWidget&lt;LayoutContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;&gt;&gt;::Result
     <span class="kw">where
-        </span><span class="lifetime">&#39;widget</span>: <span class="lifetime">&#39;child</span>,
+        </span>Widget: ManageWidget,
+        Widget::Managed: MapManagedWidget&lt;LayoutContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;&gt;,
     {
-        LayoutContext {
-            graphics: <span class="self">self</span>.graphics.for_other(widget),
+        widget.manage(<span class="self">self</span>).map(|widget| LayoutContext {
+            graphics: <span class="self">self</span>.graphics.for_other(<span class="kw-2">&amp;</span>widget),
             persist_layout: <span class="self">self</span>.persist_layout,
-        }
+        })
     }
 
     <span class="doccomment">/// Invokes [`Widget::layout()`](crate::widget::Widget::layout) on this
@@ -1423,21 +1527,21 @@
         pushed_widget
             .lock()
             .as_widget()
-            .mounted(<span class="kw-2">&amp;mut </span>context.for_other(pushed_widget.clone()));
+            .mounted(<span class="kw-2">&amp;mut </span>context.for_other(<span class="kw-2">&amp;</span>pushed_widget));
         pushed_widget
     }
 
     <span class="doccomment">/// Removes a widget from the hierarchy.
     </span><span class="kw">fn </span>remove_child(<span class="kw-2">&amp;mut </span><span class="self">self</span>, child: <span class="kw-2">&amp;</span>ManagedWidget) {
         <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="self">self</span>.as_event_context();
+        child
+            .lock()
+            .as_widget()
+            .unmounted(<span class="kw-2">&amp;mut </span>context.for_other(child));
         context
             .current_node
             .tree
             .remove_child(child, <span class="kw-2">&amp;</span>context.current_node);
-        child
-            .lock()
-            .as_widget()
-            .unmounted(<span class="kw-2">&amp;mut </span>context.for_other(child.clone()));
     }
 }
 
@@ -1498,16 +1602,20 @@
     }
 
     <span class="doccomment">/// Returns a new context representing `widget`.
-    </span><span class="kw">pub fn </span>for_other&lt;<span class="lifetime">&#39;child</span>&gt;(
+    </span><span class="kw">pub fn </span>for_other&lt;<span class="lifetime">&#39;child</span>, Widget&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;child </span><span class="kw-2">mut </span><span class="self">self</span>,
-        widget: ManagedWidget,
-    ) -&gt; WidgetContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>&gt; {
-        WidgetContext {
-            current_node: widget,
+        widget: <span class="kw-2">&amp;</span>Widget,
+    ) -&gt; &lt;Widget::Managed <span class="kw">as </span>MapManagedWidget&lt;WidgetContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>&gt;&gt;&gt;::Result
+    <span class="kw">where
+        </span>Widget: ManageWidget,
+        Widget::Managed: MapManagedWidget&lt;WidgetContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>&gt;&gt;,
+    {
+        widget.manage(<span class="self">self</span>).map(|current_node| WidgetContext {
+            current_node,
             redraw_status: <span class="self">self</span>.redraw_status,
             window: <span class="kw-2">&amp;mut *</span><span class="self">self</span>.window,
             pending_state: <span class="self">self</span>.pending_state.borrowed(),
-        }
+        })
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
@@ -1674,14 +1782,14 @@
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>WindowHandle {
-    kludgine: kludgine::app::WindowHandle&lt;sealed::WindowCommand&gt;,
+    kludgine: kludgine::app::WindowHandle&lt;WindowCommand&gt;,
     redraw_status: RedrawStatus,
 }
 
 <span class="kw">impl </span>WindowHandle {
     <span class="kw">pub fn </span>redraw(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">if </span><span class="self">self</span>.redraw_status.should_send_refresh() {
-            <span class="kw">let </span>_result = <span class="self">self</span>.kludgine.send(sealed::WindowCommand::Redraw);
+            <span class="kw">let </span>_result = <span class="self">self</span>.kludgine.send(WindowCommand::Redraw);
         }
     }
 }
@@ -1760,6 +1868,60 @@
 
     <span class="kw">pub fn </span>refresh_received(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="self">self</span>.refresh_sent.store(<span class="bool-val">false</span>, Ordering::Release);
+    }
+}
+
+<span class="kw">pub trait </span>ManageWidget {
+    <span class="kw">type </span>Managed: MapManagedWidget&lt;ManagedWidget&gt;;
+    <span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed;
+}
+
+<span class="kw">impl </span>ManageWidget <span class="kw">for </span>WidgetInstance {
+    <span class="kw">type </span>Managed = <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;;
+
+    <span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed {
+        context.current_node.tree.widget(<span class="self">self</span>.id())
+    }
+}
+
+<span class="kw">impl </span>ManageWidget <span class="kw">for </span>WidgetRef {
+    <span class="kw">type </span>Managed = <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;;
+
+    <span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed {
+        <span class="kw">match </span><span class="self">self </span>{
+            WidgetRef::Unmounted(instance) =&gt; context.current_node.tree.widget(instance.id()),
+            WidgetRef::Mounted(instance) =&gt; <span class="prelude-val">Some</span>(instance.clone()),
+        }
+    }
+}
+
+<span class="kw">impl </span>ManageWidget <span class="kw">for </span>ManagedWidget {
+    <span class="kw">type </span>Managed = <span class="self">Self</span>;
+
+    <span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed {
+        <span class="self">self</span>.clone()
+    }
+}
+
+<span class="kw">pub trait </span>MapManagedWidget&lt;T&gt; {
+    <span class="kw">type </span><span class="prelude-ty">Result</span>;
+
+    <span class="kw">fn </span>map(<span class="self">self</span>, map: <span class="kw">impl </span>FnOnce(ManagedWidget) -&gt; T) -&gt; <span class="self">Self</span>::Result;
+}
+
+<span class="kw">impl</span>&lt;T&gt; MapManagedWidget&lt;T&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+    <span class="kw">type </span><span class="prelude-ty">Result </span>= <span class="prelude-ty">Option</span>&lt;T&gt;;
+
+    <span class="kw">fn </span>map(<span class="self">self</span>, map: <span class="kw">impl </span>FnOnce(ManagedWidget) -&gt; T) -&gt; <span class="self">Self</span>::Result {
+        <span class="self">self</span>.map(map)
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; MapManagedWidget&lt;T&gt; <span class="kw">for </span>ManagedWidget {
+    <span class="kw">type </span><span class="prelude-ty">Result </span>= T;
+
+    <span class="kw">fn </span>map(<span class="self">self</span>, map: <span class="kw">impl </span>FnOnce(ManagedWidget) -&gt; T) -&gt; <span class="self">Self</span>::Result {
+        map(<span class="self">self</span>)
     }
 }
 </code></pre></div></section></main></body></html>

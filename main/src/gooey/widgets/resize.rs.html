@@ -99,6 +99,7 @@
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::UPx;
 <span class="kw">use </span>kludgine::figures::{Fraction, IntoUnsigned, ScreenScale, Size};
 
@@ -161,7 +162,7 @@
 <span class="kw">impl </span>Widget <span class="kw">for </span>Resize {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        context.for_other(child).redraw();
+        context.for_other(<span class="kw-2">&amp;</span>child).redraw();
     }
 
     <span class="kw">fn </span>layout(
@@ -184,7 +185,8 @@
                 ),
             );
             <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-            context.for_other(child).layout(available_space)
+            <span class="comment">// TODO set_child_layout
+            </span>context.for_other(<span class="kw-2">&amp;</span>child).layout(available_space)
         }
     }
 }

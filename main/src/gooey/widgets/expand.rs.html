@@ -118,7 +118,7 @@
 <span class="kw">impl </span>Widget <span class="kw">for </span>Expand {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        context.for_other(child).redraw();
+        context.for_other(<span class="kw-2">&amp;</span>child).redraw();
     }
 
     <span class="kw">fn </span>layout(
@@ -131,7 +131,7 @@
             ConstraintLimit::Known(available_space.height.max()),
         );
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        <span class="kw">let </span>size = context.for_other(child.clone()).layout(available_space);
+        <span class="kw">let </span>size = context.for_other(<span class="kw-2">&amp;</span>child).layout(available_space);
         context.set_child_layout(<span class="kw-2">&amp;</span>child, Rect::from(size.into_signed()));
         size
     }

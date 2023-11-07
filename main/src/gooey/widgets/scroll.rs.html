@@ -330,7 +330,7 @@
 <span class="kw">use </span>kludgine::Color;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, AnimationTarget, IntoAnimate, Spawn, ZeroToOne};
-<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{EasingIn, EasingOut};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{
     ComponentDefinition, ComponentGroup, ComponentName, Dimension, NamedComponent,
@@ -444,7 +444,7 @@
         <span class="kw">let </span>visible_bottom_right = visible_rect.into_signed().extent();
 
         <span class="kw">let </span>managed = <span class="self">self</span>.contents.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        context.for_other(managed).redraw();
+        context.for_other(<span class="kw-2">&amp;</span>managed).redraw();
 
         <span class="kw">if </span><span class="self">self</span>.horizontal_bar.amount_hidden &gt; <span class="number">0 </span>{
             context.graphics.draw_shape(
@@ -485,8 +485,8 @@
 
     <span class="kw">fn </span>layout(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        available_space: Size&lt;<span class="kw">crate</span>::ConstraintLimit&gt;,
-        context: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::context::LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        available_space: Size&lt;ConstraintLimit&gt;,
+        context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>ScrollBarThickness]);
         <span class="self">self</span>.bar_width = styles
@@ -510,7 +510,7 @@
         );
         <span class="kw">let </span>managed = <span class="self">self</span>.contents.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         <span class="kw">let </span>new_content_size = context
-            .for_other(managed.clone())
+            .for_other(<span class="kw-2">&amp;</span>managed)
             .layout(max_extents)
             .into_signed();
 

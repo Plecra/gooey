@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Easing","EasingIn","EasingOut","HighlightColor","IntrinsicPadding","LineHeight","TextColor","TextSize"]};
+window.SIDEBAR_ITEMS = {"enum":["HorizontalOrder","VerticalOrder"],"struct":["Easing","EasingIn","EasingOut","HighlightColor","IntrinsicPadding","LineHeight","TextColor","TextSize","VisualOrder"]};

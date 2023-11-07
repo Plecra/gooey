@@ -684,6 +684,35 @@
 <a href="#684" id="684">684</a>
 <a href="#685" id="685">685</a>
 <a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -701,6 +730,7 @@
 <span class="kw">use </span>kludgine::figures::{Point, Rect, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::VisualOrder;
 <span class="kw">use </span><span class="kw">crate</span>::styles::Styles;
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
@@ -880,14 +910,14 @@
 /// [`WidgetId`].
 </span><span class="kw">pub trait </span>MakeWidgetWithId: Sized {
     <span class="doccomment">/// Returns a new [`WidgetInstance`] whose [`WidgetId`] is `id`.
-    </span><span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: PendingWidgetId) -&gt; WidgetInstance;
+    </span><span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: WidgetTag) -&gt; WidgetInstance;
 }
 
 <span class="kw">impl</span>&lt;T&gt; MakeWidgetWithId <span class="kw">for </span>T
 <span class="kw">where
     </span>T: Widget,
 {
-    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: PendingWidgetId) -&gt; WidgetInstance {
+    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: WidgetTag) -&gt; WidgetInstance {
         WidgetInstance::with_id(<span class="self">self</span>, id)
     }
 }
@@ -897,7 +927,7 @@
     </span>T: MakeWidgetWithId,
 {
     <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
-        <span class="self">self</span>.make_with_id(PendingWidgetId::unique())
+        <span class="self">self</span>.make_with_id(WidgetTag::unique())
     }
 }
 
@@ -953,7 +983,7 @@
 <span class="kw">impl </span>WidgetInstance {
     <span class="doccomment">/// Returns a new instance containing `widget` that is assigned the unique
     /// `id` provided.
-    </span><span class="kw">pub fn </span>with_id&lt;W&gt;(widget: W, id: PendingWidgetId) -&gt; <span class="self">Self
+    </span><span class="kw">pub fn </span>with_id&lt;W&gt;(widget: W, id: WidgetTag) -&gt; <span class="self">Self
     </span><span class="kw">where
         </span>W: Widget,
     {
@@ -969,7 +999,7 @@
     </span><span class="kw">where
         </span>W: Widget,
     {
-        <span class="self">Self</span>::with_id(widget, PendingWidgetId::unique())
+        <span class="self">Self</span>::with_id(widget, WidgetTag::unique())
     }
 
     <span class="doccomment">/// Returns the unique id of this widget instance.
@@ -1014,6 +1044,11 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>next_focus(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;WidgetId&gt; {
         <span class="self">self</span>.next_focus.get()
+    }
+}
+<span class="kw">impl </span>AsRef&lt;WidgetId&gt; <span class="kw">for </span>WidgetInstance {
+    <span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>WidgetId {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.id
     }
 }
 
@@ -1170,8 +1205,14 @@
         <span class="self">self</span>.tree.reset_child_layouts(<span class="self">self</span>.id());
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>child_layouts(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;(ManagedWidget, Rect&lt;Px&gt;)&gt; {
-        <span class="self">self</span>.tree.child_layouts(<span class="self">self</span>.id())
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>visually_ordered_children(<span class="kw-2">&amp;</span><span class="self">self</span>, order: VisualOrder) -&gt; Vec&lt;ManagedWidget&gt; {
+        <span class="self">self</span>.tree.visually_ordered_children(<span class="self">self</span>.id(), order)
+    }
+}
+
+<span class="kw">impl </span>AsRef&lt;WidgetId&gt; <span class="kw">for </span>ManagedWidget {
+    <span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>WidgetId {
+        <span class="self">self</span>.widget.as_ref()
     }
 }
 
@@ -1317,6 +1358,15 @@
     }
 }
 
+<span class="kw">impl </span>AsRef&lt;WidgetId&gt; <span class="kw">for </span>WidgetRef {
+    <span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>WidgetId {
+        <span class="kw">match </span><span class="self">self </span>{
+            WidgetRef::Unmounted(widget) =&gt; widget.as_ref(),
+            WidgetRef::Mounted(widget) =&gt; widget.as_ref(),
+        }
+    }
+}
+
 <span class="doccomment">/// The unique id of a [`WidgetInstance`].
 ///
 /// Each [`WidgetInstance`] is guaranteed to have a unique [`WidgetId`] across
@@ -1340,9 +1390,17 @@
 /// assigned a given [`WidgetId`]. The contained [`WidgetId`] can be accessed
 /// via [`id()`](Self::id), `Into&lt;WidgetId&gt;`, or `Deref`.
 </span><span class="attr">#[derive(Eq, PartialEq, Debug)]
-</span><span class="kw">pub struct </span>PendingWidgetId(WidgetId);
+</span><span class="kw">pub struct </span>WidgetTag(WidgetId);
 
-<span class="kw">impl </span>PendingWidgetId {
+<span class="kw">impl </span>WidgetTag {
+    <span class="doccomment">/// Returns a unique tag and its contained id.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>new() -&gt; (<span class="self">Self</span>, WidgetId) {
+        <span class="kw">let </span>tag = <span class="self">Self</span>::unique();
+        <span class="kw">let </span>id = <span class="kw-2">*</span>tag;
+        (tag, id)
+    }
+
     <span class="doccomment">/// Returns a newly allocated [`WidgetId`] that is guaranteed to be unique
     /// for the lifetime of the application.
     </span><span class="attr">#[must_use]
@@ -1357,13 +1415,13 @@
     </span>}
 }
 
-<span class="kw">impl </span>From&lt;PendingWidgetId&gt; <span class="kw">for </span>WidgetId {
-    <span class="kw">fn </span>from(value: PendingWidgetId) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;WidgetTag&gt; <span class="kw">for </span>WidgetId {
+    <span class="kw">fn </span>from(value: WidgetTag) -&gt; <span class="self">Self </span>{
         value.<span class="number">0
     </span>}
 }
 
-<span class="kw">impl </span>Deref <span class="kw">for </span>PendingWidgetId {
+<span class="kw">impl </span>Deref <span class="kw">for </span>WidgetTag {
     <span class="kw">type </span>Target = WidgetId;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
