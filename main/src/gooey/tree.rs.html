@@ -349,17 +349,24 @@
 <a href="#349" id="349">349</a>
 <a href="#350" id="350">350</a>
 <a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
-<span class="kw">use </span>std::sync::atomic::{<span class="self">self</span>, AtomicU64};
 <span class="kw">use </span>std::sync::{Arc, Mutex, PoisonError};
 
 <span class="kw">use </span>kludgine::figures::units::Px;
 <span class="kw">use </span>kludgine::figures::{Point, Rect};
 
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefaultvalue, ComponentDefinition, ComponentType, Styles};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{ManagedWidget, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{ManagedWidget, WidgetId, WidgetInstance};
 
 <span class="attr">#[derive(Clone, Default)]
 </span><span class="kw">pub struct </span>Tree {
@@ -387,6 +394,9 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(parent) = parent {
             <span class="kw">let </span>parent = data.nodes.get_mut(<span class="kw-2">&amp;</span>parent.id()).expect(<span class="string">&quot;missing parent&quot;</span>);
             parent.children.push(id);
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(next_focus) = widget.next_focus() {
+            data.previous_focuses.insert(next_focus, id);
         }
         ManagedWidget {
             widget,
@@ -434,6 +444,19 @@
         <span class="kw">for </span>child <span class="kw">in </span>children {
             data.nodes.get_mut(<span class="kw-2">&amp;</span>child).expect(<span class="string">&quot;missing widget&quot;</span>).layout = <span class="prelude-val">None</span>;
         }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>child_layouts(<span class="kw-2">&amp;</span><span class="self">self</span>, parent: WidgetId) -&gt; Vec&lt;(ManagedWidget, Rect&lt;Px&gt;)&gt; {
+        <span class="kw">let </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
+        data.nodes[<span class="kw-2">&amp;</span>parent]
+            .children
+            .iter()
+            .filter_map(|id| {
+                data.nodes[id]
+                    .layout
+                    .map(|layout| (data.widget(<span class="kw-2">*</span>id, <span class="self">self</span>).expect(<span class="string">&quot;child still owned&quot;</span>), layout))
+            })
+            .collect()
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>hover(<span class="kw-2">&amp;</span><span class="self">self</span>, new_hover: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ManagedWidget&gt;) -&gt; HoverResults {
@@ -571,6 +594,7 @@
     focus: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
     hover: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
     render_order: Vec&lt;WidgetId&gt;,
+    previous_focuses: HashMap&lt;WidgetId, WidgetId&gt;,
 }
 
 <span class="kw">impl </span>TreeData {
@@ -592,6 +616,10 @@
             .expect(<span class="string">&quot;child not found in parent&quot;</span>);
         parent.children.remove(index);
         <span class="kw">let </span><span class="kw-2">mut </span>detached_nodes = removed_node.children;
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(next_focus) = removed_node.widget.next_focus() {
+            <span class="self">self</span>.previous_focuses.remove(<span class="kw-2">&amp;</span>next_focus);
+        }
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>(node) = detached_nodes.pop() {
             <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.nodes.remove(<span class="kw-2">&amp;</span>node).expect(<span class="string">&quot;detached node missing&quot;</span>);
@@ -689,15 +717,5 @@
     <span class="kw">pub </span>parent: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
     <span class="kw">pub </span>layout: <span class="prelude-ty">Option</span>&lt;Rect&lt;Px&gt;&gt;,
     <span class="kw">pub </span>styles: <span class="prelude-ty">Option</span>&lt;Styles&gt;,
-}
-
-<span class="attr">#[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
-</span><span class="kw">pub struct </span>WidgetId(u64);
-
-<span class="kw">impl </span>WidgetId {
-    <span class="kw">pub fn </span>unique() -&gt; <span class="self">Self </span>{
-        <span class="kw">static </span>COUNTER: AtomicU64 = AtomicU64::new(<span class="number">0</span>);
-        <span class="self">Self</span>(COUNTER.fetch_add(<span class="number">1</span>, atomic::Ordering::Acquire))
-    }
 }
 </code></pre></div></section></main></body></html>
