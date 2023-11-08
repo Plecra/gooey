@@ -100,8 +100,9 @@
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::UPx;
-<span class="kw">use </span>kludgine::figures::{Fraction, IntoUnsigned, ScreenScale, Size};
+<span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, Rect, ScreenScale, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
@@ -170,7 +171,8 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">if let </span>(<span class="prelude-val">Some</span>(width), <span class="prelude-val">Some</span>(height)) = (<span class="self">self</span>.width, <span class="self">self</span>.height) {
+        <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
+        <span class="kw">let </span>size = <span class="kw">if let </span>(<span class="prelude-val">Some</span>(width), <span class="prelude-val">Some</span>(height)) = (<span class="self">self</span>.width, <span class="self">self</span>.height) {
             Size::new(
                 width.into_px(context.graphics.scale()).into_unsigned(),
                 height.into_px(context.graphics.scale()).into_unsigned(),
@@ -184,10 +186,10 @@
                     context.graphics.scale(),
                 ),
             );
-            <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-            <span class="comment">// TODO set_child_layout
-            </span>context.for_other(<span class="kw-2">&amp;</span>child).layout(available_space)
-        }
+            context.for_other(<span class="kw-2">&amp;</span>child).layout(available_space)
+        };
+        context.set_child_layout(<span class="kw-2">&amp;</span>child, Rect::from(size.into_signed()));
+        size
     }
 }
 

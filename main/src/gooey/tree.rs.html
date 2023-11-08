@@ -405,6 +405,10 @@
 <a href="#405" id="405">405</a>
 <a href="#406" id="406">406</a>
 <a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::sync::{Arc, Mutex, PoisonError};
@@ -460,7 +464,6 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_layout(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: WidgetId, rect: Rect&lt;Px&gt;) {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
 
-        data.render_order.push(widget);
         <span class="kw">let </span>node = data.nodes.get_mut(<span class="kw-2">&amp;</span>widget).expect(<span class="string">&quot;missing widget&quot;</span>);
         node.layout = <span class="prelude-val">Some</span>(rect);
         <span class="kw">let </span><span class="kw-2">mut </span>children_to_offset = node.children.clone();
@@ -484,6 +487,11 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset_render_order(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
         data.render_order.clear();
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>note_widget_rendered(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: WidgetId) {
+        <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
+        data.render_order.push(widget);
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset_child_layouts(<span class="kw-2">&amp;</span><span class="self">self</span>, parent: WidgetId) {

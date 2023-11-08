@@ -252,6 +252,20 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 </span><span class="kw">use </span>std::borrow::Cow;
 
@@ -416,14 +430,18 @@
     }
 }
 
-<span class="attr">#[derive(Copy, Clone, Eq, PartialEq)]
+<span class="doccomment">/// A 2d ordering configuration.
+</span><span class="attr">#[derive(Copy, Clone, Eq, PartialEq)]
 </span><span class="kw">pub struct </span>VisualOrder {
-    <span class="kw">pub </span>horizontal: HorizontalOrder,
-    <span class="kw">pub </span>vertical: VerticalOrder,
+    <span class="doccomment">/// The ordering to apply horizontally.
+    </span><span class="kw">pub </span>horizontal: HorizontalOrder,
+    <span class="doccomment">/// The ordering to apply vertically.
+    </span><span class="kw">pub </span>vertical: VerticalOrder,
 }
 
 <span class="kw">impl </span>VisualOrder {
-    <span class="attr">#[must_use]
+    <span class="doccomment">/// Returns a right-to-left ordering.
+    </span><span class="attr">#[must_use]
     </span><span class="kw">pub const fn </span>right_to_left() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             horizontal: HorizontalOrder::RightToLeft,
@@ -431,7 +449,8 @@
         }
     }
 
-    <span class="attr">#[must_use]
+    <span class="doccomment">/// Returns a left-to-right ordering.
+    </span><span class="attr">#[must_use]
     </span><span class="kw">pub const fn </span>left_to_right() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             horizontal: HorizontalOrder::LeftToRight,
@@ -439,7 +458,8 @@
         }
     }
 
-    <span class="attr">#[must_use]
+    <span class="doccomment">/// Returns the reverse ordering of `self`.
+    </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>rev(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             horizontal: <span class="self">self</span>.horizontal.rev(),
@@ -454,14 +474,18 @@
     }
 }
 
-<span class="attr">#[derive(Copy, Clone, Eq, PartialEq)]
+<span class="doccomment">/// A horizontal direction.
+</span><span class="attr">#[derive(Copy, Clone, Eq, PartialEq)]
 </span><span class="kw">pub enum </span>HorizontalOrder {
-    LeftToRight,
-    RightToLeft,
+    <span class="doccomment">/// Describes an order starting at the left and proceeding to the right.
+    </span>LeftToRight,
+    <span class="doccomment">/// Describes an order starting at the right and proceeding to the left.
+    </span>RightToLeft,
 }
 
 <span class="kw">impl </span>HorizontalOrder {
-    <span class="attr">#[must_use]
+    <span class="doccomment">/// Returns the reverse order of `self`.
+    </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>rev(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::LeftToRight =&gt; <span class="self">Self</span>::RightToLeft,
@@ -469,7 +493,7 @@
         }
     }
 
-    <span class="kw">pub fn </span>sort_key(<span class="self">self</span>, rect: <span class="kw-2">&amp;</span>Rect&lt;Px&gt;) -&gt; Px {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>sort_key(<span class="self">self</span>, rect: <span class="kw-2">&amp;</span>Rect&lt;Px&gt;) -&gt; Px {
         <span class="kw">match </span><span class="self">self </span>{
             HorizontalOrder::LeftToRight =&gt; rect.origin.x,
             HorizontalOrder::RightToLeft =&gt; -(rect.origin.x + rect.size.width),
@@ -477,14 +501,18 @@
     }
 }
 
-<span class="attr">#[derive(Copy, Clone, Eq, PartialEq)]
+<span class="doccomment">/// A vertical direction.
+</span><span class="attr">#[derive(Copy, Clone, Eq, PartialEq)]
 </span><span class="kw">pub enum </span>VerticalOrder {
-    TopToBottom,
-    BottomToTop,
+    <span class="doccomment">/// Describes an order starting at the top and proceeding to the bottom.
+    </span>TopToBottom,
+    <span class="doccomment">/// Describes an order starting at the bottom and proceeding to the top.
+    </span>BottomToTop,
 }
 
 <span class="kw">impl </span>VerticalOrder {
-    <span class="attr">#[must_use]
+    <span class="doccomment">/// Returns the reverse order of `self`.
+    </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>rev(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::TopToBottom =&gt; VerticalOrder::BottomToTop,
@@ -492,14 +520,14 @@
         }
     }
 
-    <span class="kw">pub fn </span>max_px(<span class="self">self</span>) -&gt; Px {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>max_px(<span class="self">self</span>) -&gt; Px {
         <span class="kw">match </span><span class="self">self </span>{
             VerticalOrder::TopToBottom =&gt; Px::MAX,
             VerticalOrder::BottomToTop =&gt; Px::MIN,
         }
     }
 
-    <span class="kw">pub fn </span>smallest_px(<span class="self">self</span>, a: Px, b: Px) -&gt; Px {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>smallest_px(<span class="self">self</span>, a: Px, b: Px) -&gt; Px {
         <span class="kw">match </span><span class="self">self </span>{
             VerticalOrder::TopToBottom =&gt; a.min(b),
             VerticalOrder::BottomToTop =&gt; b.max(a),
