@@ -975,6 +975,42 @@
 <a href="#975" id="975">975</a>
 <a href="#976" id="976">976</a>
 <a href="#977" id="977">977</a>
+<a href="#978" id="978">978</a>
+<a href="#979" id="979">979</a>
+<a href="#980" id="980">980</a>
+<a href="#981" id="981">981</a>
+<a href="#982" id="982">982</a>
+<a href="#983" id="983">983</a>
+<a href="#984" id="984">984</a>
+<a href="#985" id="985">985</a>
+<a href="#986" id="986">986</a>
+<a href="#987" id="987">987</a>
+<a href="#988" id="988">988</a>
+<a href="#989" id="989">989</a>
+<a href="#990" id="990">990</a>
+<a href="#991" id="991">991</a>
+<a href="#992" id="992">992</a>
+<a href="#993" id="993">993</a>
+<a href="#994" id="994">994</a>
+<a href="#995" id="995">995</a>
+<a href="#996" id="996">996</a>
+<a href="#997" id="997">997</a>
+<a href="#998" id="998">998</a>
+<a href="#999" id="999">999</a>
+<a href="#1000" id="1000">1000</a>
+<a href="#1001" id="1001">1001</a>
+<a href="#1002" id="1002">1002</a>
+<a href="#1003" id="1003">1003</a>
+<a href="#1004" id="1004">1004</a>
+<a href="#1005" id="1005">1005</a>
+<a href="#1006" id="1006">1006</a>
+<a href="#1007" id="1007">1007</a>
+<a href="#1008" id="1008">1008</a>
+<a href="#1009" id="1009">1009</a>
+<a href="#1010" id="1010">1010</a>
+<a href="#1011" id="1011">1011</a>
+<a href="#1012" id="1012">1012</a>
+<a href="#1013" id="1013">1013</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
@@ -1149,8 +1185,21 @@
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>apply_pending_state(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="kw">let </span>active = <span class="self">self</span>.pending_state.active.clone();
-        <span class="kw">if </span><span class="self">self</span>.current_node.tree.active_widget() != active.as_ref().map(ManagedWidget::id) {
+        <span class="kw">const </span>MAX_ITERS: u8 = <span class="number">100</span>;
+        <span class="comment">// These two blocks apply active/focus in a loop to pick up the event
+        // where during the process of calling deactivate/blur or activate/focus
+        // the active/focus widget is changed again. This can lead to infinite
+        // loops, which is a programmer error. However, rather than block
+        // forever, we log a message that this is happening and break.
+
+        </span><span class="kw">let </span><span class="kw-2">mut </span>activation_changes = <span class="number">0</span>;
+        <span class="kw">while </span>activation_changes &lt; MAX_ITERS {
+            <span class="kw">let </span>active = <span class="self">self</span>.pending_state.active.clone();
+            <span class="kw">if </span><span class="self">self</span>.current_node.tree.active_widget() == active.as_ref().map(ManagedWidget::id) {
+                <span class="kw">break</span>;
+            }
+            activation_changes += <span class="number">1</span>;
+
             <span class="kw">let </span>new = <span class="kw">match </span><span class="self">self</span>.current_node.tree.activate(active.as_ref()) {
                 <span class="prelude-val">Ok</span>(old) =&gt; {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(old) = old {
@@ -1162,19 +1211,33 @@
                 <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
             };
             <span class="kw">if </span>new {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(active) = <span class="kw-2">&amp;</span>active {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(active) = <span class="self">self</span>.pending_state.active.clone() {
                     active
                         .lock()
                         .as_widget()
-                        .activate(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(active));
+                        .activate(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>active));
                 }
                 <span class="self">self</span>.pending_state.active = active;
+            } <span class="kw">else </span>{
+                <span class="kw">break</span>;
             }
         }
 
-        <span class="kw">let </span>focus = <span class="self">self</span>.pending_state.focus.clone();
-        <span class="kw">if </span><span class="self">self</span>.current_node.tree.focused_widget() != focus.as_ref().map(ManagedWidget::id) {
-            <span class="kw">let </span>focus = focus.and_then(|<span class="kw-2">mut </span>focus| <span class="kw">loop </span>{
+        <span class="kw">if </span>activation_changes == MAX_ITERS {
+            <span class="macro">eprintln!</span>(
+                <span class="string">&quot;activation change force stopped after {activation_changes} sequential changes&quot;
+            </span>);
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>focus_changes = <span class="number">0</span>;
+        <span class="kw">while </span>focus_changes &lt; MAX_ITERS {
+            <span class="kw">let </span>focus = <span class="self">self</span>.pending_state.focus.clone();
+            <span class="kw">if </span><span class="self">self</span>.current_node.tree.focused_widget() == focus.as_ref().map(ManagedWidget::id) {
+                <span class="kw">break</span>;
+            }
+            focus_changes += <span class="number">1</span>;
+
+            <span class="self">self</span>.pending_state.focus = focus.and_then(|<span class="kw-2">mut </span>focus| <span class="kw">loop </span>{
                 <span class="kw">if </span>focus
                     .lock()
                     .as_widget()
@@ -1187,7 +1250,11 @@
                     <span class="kw">break </span><span class="self">self</span>.next_focus_after(focus, VisualOrder::left_to_right());
                 }
             });
-            <span class="kw">let </span>new = <span class="kw">match </span><span class="self">self</span>.current_node.tree.focus(focus.as_ref()) {
+            <span class="kw">let </span>new = <span class="kw">match </span><span class="self">self
+                </span>.current_node
+                .tree
+                .focus(<span class="self">self</span>.pending_state.focus.as_ref())
+            {
                 <span class="prelude-val">Ok</span>(old) =&gt; {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(old) = old {
                         <span class="kw">let </span><span class="kw-2">mut </span>old_context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>old);
@@ -1198,11 +1265,16 @@
                 <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
             };
             <span class="kw">if </span>new {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="kw-2">&amp;</span>focus {
-                    focus.lock().as_widget().focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(focus));
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.pending_state.focus.clone() {
+                    focus.lock().as_widget().focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>focus));
                 }
-                <span class="self">self</span>.pending_state.focus = focus;
+            } <span class="kw">else </span>{
+                <span class="kw">break</span>;
             }
+        }
+
+        <span class="kw">if </span>focus_changes == MAX_ITERS {
+            <span class="macro">eprintln!</span>(<span class="string">&quot;focus change force stopped after {focus_changes} sequential changes&quot;</span>);
         }
     }
 
