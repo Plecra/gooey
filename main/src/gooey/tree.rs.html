@@ -527,7 +527,7 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>layout(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: WidgetId) -&gt; <span class="prelude-ty">Option</span>&lt;Rect&lt;Px&gt;&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
-        data.nodes[<span class="kw-2">&amp;</span>widget].layout
+        data.nodes.get(<span class="kw-2">&amp;</span>widget).and_then(|widget| widget.layout)
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset_render_order(<span class="kw-2">&amp;</span><span class="self">self</span>) {
@@ -703,7 +703,7 @@
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().map_or_else(PoisonError::into_inner, |g| g);
         <span class="kw">let </span><span class="kw-2">mut </span>hits = Vec::new();
         <span class="kw">for </span>id <span class="kw">in </span>data.render_order.iter().rev() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(last_rendered) = data.nodes[id].layout {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(last_rendered) = data.nodes.get(id).and_then(|widget| widget.layout) {
                 <span class="kw">if </span>last_rendered.contains(point) {
                     hits.push(ManagedWidget {
                         widget: data.nodes[id].widget.clone(),
@@ -821,8 +821,8 @@
             new_widget,
         ) {
             (<span class="prelude-val">Some</span>(old_widget), <span class="prelude-val">Some</span>(new_widget)) <span class="kw">if </span>old_widget == new_widget.id() =&gt; <span class="prelude-val">Err</span>(()),
-            (<span class="prelude-val">Some</span>(old_widget), <span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(ManagedWidget {
-                widget: <span class="self">self</span>.nodes[<span class="kw-2">&amp;</span>old_widget].widget.clone(),
+            (<span class="prelude-val">Some</span>(old_widget), <span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.nodes.get(<span class="kw-2">&amp;</span>old_widget).map(|node| ManagedWidget {
+                widget: node.widget.clone(),
                 tree: tree.clone(),
             })),
             (<span class="prelude-val">None</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
