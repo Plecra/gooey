@@ -557,6 +557,11 @@
 <a href="#557" id="557">557</a>
 <a href="#558" id="558">558</a>
 <a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -839,7 +844,8 @@
                     (<span class="prelude-val">Err</span>(<span class="kw">_</span>), <span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; {}
                 }
             } <span class="kw">else if let </span><span class="prelude-val">Ok</span>((location, <span class="kw">_</span>)) = cursor_glyph(buffer, <span class="kw-2">&amp;</span>cursor) {
-                <span class="kw">if </span>cursor_state.visible {
+                <span class="kw">let </span>window_focused = context.window().focused().get();
+                <span class="kw">if </span>window_focused &amp;&amp; cursor_state.visible {
                     context.graphics.draw_shape(
                         <span class="kw-2">&amp;</span>Shape::filled_rect(
                             Rect::new(
@@ -853,7 +859,11 @@
                         <span class="prelude-val">None</span>,
                     );
                 }
-                context.redraw_in(cursor_state.remaining_until_blink);
+                <span class="kw">if </span>window_focused {
+                    context.redraw_in(cursor_state.remaining_until_blink);
+                } <span class="kw">else </span>{
+                    context.redraw_when_changed(context.window().focused());
+                }
             }
         }
 

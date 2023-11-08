@@ -642,12 +642,93 @@
 <a href="#642" id="642">642</a>
 <a href="#643" id="643">643</a>
 <a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::ffi::OsStr;
+<span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::panic::{AssertUnwindSafe, UnwindSafe};
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::string::ToString;
@@ -678,7 +759,53 @@
 <span class="kw">use crate</span>::{ConstraintLimit, Run};
 
 <span class="doccomment">/// A currently running Gooey window.
-</span><span class="kw">pub type </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; = kludgine::app::Window&lt;<span class="lifetime">&#39;window</span>, WindowCommand&gt;;
+</span><span class="kw">pub struct </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; {
+    window: kludgine::app::Window&lt;<span class="lifetime">&#39;window</span>, WindowCommand&gt;,
+    focused: Dynamic&lt;bool&gt;,
+    occluded: Dynamic&lt;bool&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;window</span>&gt; RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
+        window: kludgine::app::Window&lt;<span class="lifetime">&#39;window</span>, WindowCommand&gt;,
+        focused: <span class="kw-2">&amp;</span>Dynamic&lt;bool&gt;,
+        occluded: <span class="kw-2">&amp;</span>Dynamic&lt;bool&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            window,
+            focused: focused.clone(),
+            occluded: occluded.clone(),
+        }
+    }
+
+    <span class="doccomment">/// Returns a dynamic that is updated whenever this window&#39;s focus status
+    /// changes.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub const fn </span>focused(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Dynamic&lt;bool&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.focused
+    }
+
+    <span class="doccomment">/// Returns a dynamic that is updated whenever this window&#39;s occlusion
+    /// status changes.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>occluded(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Dynamic&lt;bool&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.occluded
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;window</span>&gt; Deref <span class="kw">for </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; {
+    <span class="kw">type </span>Target = kludgine::app::Window&lt;<span class="lifetime">&#39;window</span>, WindowCommand&gt;;
+
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.window
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;window</span>&gt; DerefMut <span class="kw">for </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; {
+    <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.window
+    }
+}
 
 <span class="doccomment">/// The attributes of a Gooey window.
 </span><span class="kw">pub type </span>WindowAttributes = kludgine::app::WindowAttributes&lt;WindowCommand&gt;;
@@ -838,8 +965,8 @@
     mouse_state: MouseState,
     redraw_status: RedrawStatus,
     initial_frame: bool,
-    occluded: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;bool&gt;&gt;,
-    focused: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;bool&gt;&gt;,
+    occluded: Dynamic&lt;bool&gt;,
+    focused: Dynamic&lt;bool&gt;,
 }
 
 <span class="kw">impl</span>&lt;T&gt; GooeyWindow&lt;T&gt;
@@ -860,14 +987,27 @@
     <span class="kw">type </span>Context = AssertUnwindSafe&lt;sealed::Context&lt;T::Context&gt;&gt;;
 
     <span class="kw">fn </span>initialize(
-        <span class="kw-2">mut </span>window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;,
+        window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         _graphics: <span class="kw-2">&amp;mut </span>kludgine::Graphics&lt;<span class="lifetime">&#39;_</span>&gt;,
         AssertUnwindSafe(context): <span class="self">Self</span>::Context,
     ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>behavior = T::initialize(<span class="kw-2">&amp;mut </span>window, context.user);
+        <span class="kw">let </span>occluded = context
+            .settings
+            .borrow_mut()
+            .occluded
+            .take()
+            .unwrap_or_default();
+        <span class="kw">let </span>focused = context
+            .settings
+            .borrow_mut()
+            .focused
+            .take()
+            .unwrap_or_default();
+        <span class="kw">let </span><span class="kw-2">mut </span>behavior = T::initialize(
+            <span class="kw-2">&amp;mut </span>RunningWindow::new(window, <span class="kw-2">&amp;</span>focused, <span class="kw-2">&amp;</span>occluded),
+            context.user,
+        );
         <span class="kw">let </span>root = Tree::default().push_boxed(behavior.make_root(), <span class="prelude-val">None</span>);
-        <span class="kw">let </span>occluded = context.settings.borrow_mut().occluded.take();
-        <span class="kw">let </span>focused = context.settings.borrow_mut().focused.take();
 
         <span class="self">Self </span>{
             behavior,
@@ -886,11 +1026,16 @@
         }
     }
 
-    <span class="kw">fn </span>prepare(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;, graphics: <span class="kw-2">&amp;mut </span>kludgine::Graphics&lt;<span class="lifetime">&#39;_</span>&gt;) {
+    <span class="kw">fn </span>prepare(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
+        graphics: <span class="kw-2">&amp;mut </span>kludgine::Graphics&lt;<span class="lifetime">&#39;_</span>&gt;,
+    ) {
         <span class="self">self</span>.redraw_status.refresh_received();
         graphics.reset_text_attributes();
         <span class="self">self</span>.root.tree.reset_render_order();
         <span class="kw">let </span>graphics = <span class="self">self</span>.contents.new_frame(graphics);
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span><span class="kw-2">mut </span>context = GraphicsContext {
             widget: WidgetContext::new(<span class="self">self</span>.root.clone(), <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, <span class="kw-2">&amp;mut </span>window),
             graphics: Exclusive::Owned(Graphics::new(graphics)),
@@ -924,9 +1069,7 @@
         window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         _kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
     ) {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(focused) = <span class="kw-2">&amp;</span><span class="self">self</span>.focused {
-            focused.update(window.focused());
-        }
+        <span class="self">self</span>.focused.update(window.focused());
     }
 
     <span class="kw">fn </span>occlusion_changed(
@@ -934,14 +1077,12 @@
         window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         _kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
     ) {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(occluded) = <span class="kw-2">&amp;</span><span class="self">self</span>.occluded {
-            occluded.update(window.ocluded());
-        }
+        <span class="self">self</span>.occluded.update(window.ocluded());
     }
 
     <span class="kw">fn </span>render&lt;<span class="lifetime">&#39;pass</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;pass </span><span class="kw-2">mut </span><span class="self">self</span>,
-        _window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;,
+        _window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         graphics: <span class="kw-2">&amp;mut </span>kludgine::RenderingGraphics&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;pass</span>&gt;,
     ) -&gt; bool {
         <span class="self">self</span>.contents.render(graphics);
@@ -960,8 +1101,16 @@
             .expect(<span class="string">&quot;called more than once&quot;</span>)
     }
 
-    <span class="kw">fn </span>close_requested(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;, _kludgine: <span class="kw-2">&amp;mut </span>Kludgine) -&gt; bool {
-        <span class="self">self</span>.request_close(<span class="kw-2">&amp;mut </span>window)
+    <span class="kw">fn </span>close_requested(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
+        _kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
+    ) -&gt; bool {
+        <span class="self">self</span>.request_close(<span class="kw-2">&amp;mut </span>RunningWindow::new(
+            window,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.focused,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.occluded,
+        ))
     }
 
     <span class="comment">// fn power_preference() -&gt; wgpu::PowerPreference {
@@ -996,7 +1145,7 @@
 
     </span><span class="kw">fn </span>keyboard_input(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        <span class="kw-2">mut </span>window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;,
+        window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
         device_id: DeviceId,
         input: KeyEvent,
@@ -1004,6 +1153,7 @@
     ) {
         <span class="kw">let </span>target = <span class="self">self</span>.root.tree.focused_widget().unwrap_or(<span class="self">self</span>.root.id());
         <span class="kw">let </span>target = <span class="self">self</span>.root.tree.widget(target).expect(<span class="string">&quot;missing widget&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span><span class="kw-2">mut </span>target = EventContext::new(
             WidgetContext::new(target, <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, <span class="kw-2">&amp;mut </span>window),
             kludgine,
@@ -1048,7 +1198,7 @@
 
     <span class="kw">fn </span>mouse_wheel(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        <span class="kw-2">mut </span>window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;,
+        window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
         device_id: DeviceId,
         delta: MouseScrollDelta,
@@ -1066,6 +1216,7 @@
                     .expect(<span class="string">&quot;missing widget&quot;</span>)
             });
 
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span><span class="kw-2">mut </span>widget = EventContext::new(
             WidgetContext::new(widget, <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, <span class="kw-2">&amp;mut </span>window),
             kludgine,
@@ -1077,7 +1228,12 @@
 
     <span class="comment">// fn modifiers_changed(&amp;mut self, window: kludgine::app::Window&lt;&#39;_, ()&gt;) {}
 
-    </span><span class="kw">fn </span>ime(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;, kludgine: <span class="kw-2">&amp;mut </span>Kludgine, ime: Ime) {
+    </span><span class="kw">fn </span>ime(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
+        kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
+        ime: Ime,
+    ) {
         <span class="kw">let </span>widget = <span class="self">self
             </span>.root
             .tree
@@ -1089,6 +1245,7 @@
                     .widget(<span class="self">self</span>.root.id())
                     .expect(<span class="string">&quot;missing widget&quot;</span>)
             });
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span><span class="kw-2">mut </span>target = EventContext::new(
             WidgetContext::new(widget, <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, <span class="kw-2">&amp;mut </span>window),
             kludgine,
@@ -1100,7 +1257,7 @@
 
     <span class="kw">fn </span>cursor_moved(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        <span class="kw-2">mut </span>window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;,
+        window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
         device_id: DeviceId,
         position: PhysicalPosition&lt;f64&gt;,
@@ -1108,6 +1265,7 @@
         <span class="kw">let </span>location = Point::&lt;Px&gt;::from(position);
         <span class="self">self</span>.mouse_state.location = <span class="prelude-val">Some</span>(location);
 
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(state) = <span class="self">self</span>.mouse_state.devices.get(<span class="kw-2">&amp;</span>device_id) {
             <span class="comment">// Mouse Drag
             </span><span class="kw">for </span>(button, handler) <span class="kw">in </span>state {
@@ -1149,11 +1307,12 @@
 
     <span class="kw">fn </span>cursor_left(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        <span class="kw-2">mut </span>window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;,
+        window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
         _device_id: DeviceId,
     ) {
         <span class="kw">if </span><span class="self">self</span>.mouse_state.widget.take().is_some() {
+            <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
             <span class="kw">let </span><span class="kw-2">mut </span>context = EventContext::new(
                 WidgetContext::new(<span class="self">self</span>.root.clone(), <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, <span class="kw-2">&amp;mut </span>window),
                 kludgine,
@@ -1164,12 +1323,13 @@
 
     <span class="kw">fn </span>mouse_input(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        <span class="kw-2">mut </span>window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;,
+        window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
         device_id: DeviceId,
         state: ElementState,
         button: MouseButton,
     ) {
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">match </span>state {
             ElementState::Pressed =&gt; {
                 EventContext::new(
@@ -1231,7 +1391,7 @@
 
     <span class="kw">fn </span>event(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        <span class="kw-2">mut </span>window: RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;,
+        <span class="kw-2">mut </span>window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         _kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
         event: WindowCommand,
     ) {

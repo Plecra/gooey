@@ -118,6 +118,24 @@
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
 <a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
 </pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../.crate-docs.md&quot;</span>)]
 #![warn(clippy::pedantic, missing_docs)]
 #![allow(clippy::module_name_repetitions, clippy::missing_errors_doc)]
@@ -141,6 +159,7 @@
 <span class="kw">pub use </span>kludgine;
 <span class="kw">use </span>kludgine::app::winit::error::EventLoopError;
 <span class="kw">use </span>kludgine::figures::units::UPx;
+<span class="kw">use </span>kludgine::figures::{Fraction, IntoUnsigned, ScreenUnit};
 <span class="kw">pub use </span>names::Name;
 <span class="kw">pub use </span>utils::WithClone;
 
@@ -162,6 +181,23 @@
     </span><span class="kw">pub fn </span>max(<span class="self">self</span>) -&gt; UPx {
         <span class="kw">match </span><span class="self">self </span>{
             ConstraintLimit::Known(v) | ConstraintLimit::ClippedAfter(v) =&gt; v,
+        }
+    }
+
+    <span class="doccomment">/// Converts `measured` to unsigned pixels, and adjusts it according to the
+    /// contraint&#39;s intentions.
+    ///
+    /// If this constraint is of a known size, it will return the maximum of the
+    /// measured size and the contraint. If it is of an unknown size, it will
+    /// return the measured size.
+    </span><span class="kw">pub fn </span>fit_measured&lt;Unit&gt;(<span class="self">self</span>, measured: Unit, scale: Fraction) -&gt; UPx
+    <span class="kw">where
+        </span>Unit: ScreenUnit,
+    {
+        <span class="kw">let </span>measured = measured.into_px(scale).into_unsigned();
+        <span class="kw">match </span><span class="self">self </span>{
+            ConstraintLimit::Known(size) =&gt; size.max(measured),
+            ConstraintLimit::ClippedAfter(<span class="kw">_</span>) =&gt; measured,
         }
     }
 }

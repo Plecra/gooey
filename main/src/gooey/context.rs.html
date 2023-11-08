@@ -1011,6 +1011,19 @@
 <a href="#1011" id="1011">1011</a>
 <a href="#1012" id="1012">1012</a>
 <a href="#1013" id="1013">1013</a>
+<a href="#1014" id="1014">1014</a>
+<a href="#1015" id="1015">1015</a>
+<a href="#1016" id="1016">1016</a>
+<a href="#1017" id="1017">1017</a>
+<a href="#1018" id="1018">1018</a>
+<a href="#1019" id="1019">1019</a>
+<a href="#1020" id="1020">1020</a>
+<a href="#1021" id="1021">1021</a>
+<a href="#1022" id="1022">1022</a>
+<a href="#1023" id="1023">1023</a>
+<a href="#1024" id="1024">1024</a>
+<a href="#1025" id="1025">1025</a>
+<a href="#1026" id="1026">1026</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
@@ -1871,6 +1884,18 @@
             redraw_status: <span class="self">self</span>.redraw_status.clone(),
         }
     }
+
+    <span class="doccomment">/// Returns the window containing this widget.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>window(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; {
+        <span class="self">self</span>.window
+    }
+
+    <span class="doccomment">/// Returns an exclusive reference to the window containing this widget.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>window_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; {
+        <span class="self">self</span>.window
+    }
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>WindowHandle {
@@ -1903,6 +1928,7 @@
         <span class="self">self</span>.window
     }
 }
+
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;window</span>&gt; DerefMut <span class="kw">for </span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;window</span>&gt; {
     <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
         <span class="self">self</span>.window
