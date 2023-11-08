@@ -76,6 +76,33 @@
 <a href="#76" id="76">76</a>
 <a href="#77" id="77">77</a>
 <a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::UPx;
 <span class="kw">use </span>kludgine::figures::{IntoSigned, Rect, Size};
 
@@ -92,7 +119,13 @@
     <span class="doccomment">/// The weight to use when splitting available space with multiple
     /// [`Expand`] widgets.
     </span><span class="kw">pub </span>weight: u8,
-    child: WidgetRef,
+    child: <span class="prelude-ty">Option</span>&lt;WidgetRef&gt;,
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>Expand {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::empty()
+    }
 }
 
 <span class="kw">impl </span>Expand {
@@ -100,7 +133,16 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>new(child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            child: WidgetRef::new(child),
+            child: <span class="prelude-val">Some</span>(WidgetRef::new(child)),
+            weight: <span class="number">1</span>,
+        }
+    }
+
+    <span class="doccomment">/// Returns a widget that expands to fill its parent, but has no contents.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>empty() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            child: <span class="prelude-val">None</span>,
             weight: <span class="number">1</span>,
         }
     }
@@ -112,21 +154,22 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>weighted(weight: u8, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            child: WidgetRef::new(child),
+            child: <span class="prelude-val">Some</span>(WidgetRef::new(child)),
             weight,
         }
     }
 
     <span class="doccomment">/// Returns a reference to the child widget.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>child(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>WidgetRef {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.child
+    </span><span class="kw">pub fn </span>child(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>WidgetRef&gt; {
+        <span class="self">self</span>.child.as_ref()
     }
 }
 
 <span class="kw">impl </span>Widget <span class="kw">for </span>Expand {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
+        <span class="kw">let </span><span class="prelude-val">Some</span>(child) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.child <span class="kw">else </span>{ <span class="kw">return </span>};
+        <span class="kw">let </span>child = child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         context.for_other(<span class="kw-2">&amp;</span>child).redraw();
     }
 
@@ -139,8 +182,15 @@
             ConstraintLimit::Known(available_space.width.max()),
             ConstraintLimit::Known(available_space.height.max()),
         );
-        <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        <span class="kw">let </span>size = context.for_other(<span class="kw-2">&amp;</span>child).layout(available_space);
+        <span class="kw">let </span>child = <span class="self">self
+            </span>.child
+            .as_mut()
+            .map(|child| child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context()));
+        <span class="kw">let </span>size = <span class="kw">if let </span><span class="prelude-val">Some</span>(child) = <span class="kw-2">&amp;</span>child {
+            context.for_other(child).layout(available_space)
+        } <span class="kw">else </span>{
+            Size::default()
+        };
 
         <span class="kw">let </span>expanded_size = Size::new(
             available_space
@@ -150,7 +200,11 @@
                 .height
                 .fit_measured(size.height, context.graphics.scale()),
         );
-        context.set_child_layout(<span class="kw-2">&amp;</span>child, Rect::from(expanded_size.into_signed()));
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(child) = child {
+            context.set_child_layout(<span class="kw-2">&amp;</span>child, Rect::from(expanded_size.into_signed()));
+        }
+
         expanded_size
     }
 }

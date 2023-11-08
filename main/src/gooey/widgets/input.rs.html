@@ -562,6 +562,20 @@
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
 <a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -661,6 +675,12 @@
 
     <span class="kw">fn </span>styles(context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Styles {
         context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor, <span class="kw-2">&amp;</span>TextSize, <span class="kw-2">&amp;</span>LineHeight])
+    }
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>Input {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(String::new())
     }
 }
 
@@ -957,8 +977,14 @@
                 );
                 (<span class="bool-val">false</span>, HANDLED)
             }
-            (<span class="kw">_</span>, <span class="prelude-val">Some</span>(text)) <span class="kw">if </span>!context.modifiers().state().primary() &amp;&amp; text != <span class="string">&quot;\t&quot; </span>=&gt; {
-                editor.insert_string(<span class="kw-2">&amp;</span>text, <span class="prelude-val">None</span>);
+            (<span class="kw">_</span>, <span class="prelude-val">Some</span>(text))
+                <span class="kw">if </span>!context.modifiers().primary()
+                    &amp;&amp; text != <span class="string">&quot;\t&quot; </span><span class="comment">// tab
+                    </span>&amp;&amp; text != <span class="string">&quot;\r&quot; </span><span class="comment">// enter/return
+                    </span>&amp;&amp; text != <span class="string">&quot;\u{1b}&quot; </span><span class="comment">// escape
+                    </span>=&gt;
+            {
+                editor.insert_string(<span class="macro">dbg!</span>(<span class="kw-2">&amp;</span>text), <span class="prelude-val">None</span>);
                 (<span class="bool-val">true</span>, HANDLED)
             }
             (<span class="kw">_</span>, <span class="kw">_</span>) =&gt; (<span class="bool-val">false</span>, IGNORED),
@@ -1002,10 +1028,12 @@
 
     <span class="kw">fn </span>focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         context.set_ime_allowed(<span class="bool-val">true</span>);
+        context.set_needs_redraw();
     }
 
     <span class="kw">fn </span>blur(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         context.set_ime_allowed(<span class="bool-val">false</span>);
+        context.set_needs_redraw();
     }
 }
 

@@ -722,6 +722,60 @@
 <a href="#722" id="722">722</a>
 <a href="#723" id="723">723</a>
 <a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -738,7 +792,7 @@
 <span class="kw">use </span>kludgine::app::winit::event::{
     DeviceId, ElementState, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
-<span class="kw">use </span>kludgine::app::winit::keyboard::KeyCode;
+<span class="kw">use </span>kludgine::app::winit::keyboard::Key;
 <span class="kw">use </span>kludgine::app::WindowBehavior <span class="kw">as _</span>;
 <span class="kw">use </span>kludgine::figures::units::Px;
 <span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Rect, Size};
@@ -754,7 +808,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoDynamic};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, Widget, WidgetInstance, HANDLED, IGNORED};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{
+    EventHandling, ManagedWidget, Widget, WidgetId, WidgetInstance, HANDLED, IGNORED,
+};
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
 <span class="kw">use crate</span>::{ConstraintLimit, Run};
 
@@ -967,6 +1023,7 @@
     initial_frame: bool,
     occluded: Dynamic&lt;bool&gt;,
     focused: Dynamic&lt;bool&gt;,
+    keyboard_activated: <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;,
 }
 
 <span class="kw">impl</span>&lt;T&gt; GooeyWindow&lt;T&gt;
@@ -977,6 +1034,38 @@
         <span class="self">self</span>.should_close |= <span class="self">self</span>.behavior.close_requested(window);
 
         <span class="self">self</span>.should_close
+    }
+
+    <span class="kw">fn </span>keyboard_activate_widget(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        is_pressed: bool,
+        widget: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
+        window: <span class="kw-2">&amp;mut </span>RunningWindow&lt;<span class="lifetime">&#39;_</span>&gt;,
+        kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
+    ) {
+        <span class="kw">if </span>is_pressed {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(default) = widget.and_then(|id| <span class="self">self</span>.root.tree.widget(id)) {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(previously_active) = <span class="self">self</span>.keyboard_activated.take() {
+                    EventContext::new(
+                        WidgetContext::new(previously_active, <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, window),
+                        kludgine,
+                    )
+                    .deactivate();
+                }
+                EventContext::new(
+                    WidgetContext::new(default.clone(), <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, window),
+                    kludgine,
+                )
+                .activate();
+                <span class="self">self</span>.keyboard_activated = <span class="prelude-val">Some</span>(default);
+            }
+        } <span class="kw">else if let </span><span class="prelude-val">Some</span>(keyboard_activated) = <span class="self">self</span>.keyboard_activated.take() {
+            EventContext::new(
+                WidgetContext::new(keyboard_activated, <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, window),
+                kludgine,
+            )
+            .deactivate();
+        }
     }
 }
 
@@ -1023,6 +1112,7 @@
             initial_frame: <span class="bool-val">true</span>,
             occluded,
             focused,
+            keyboard_activated: <span class="prelude-val">None</span>,
         }
     }
 
@@ -1166,32 +1256,50 @@
         drop(target);
 
         <span class="kw">if </span>!handled {
-            <span class="kw">match </span>input.physical_key {
-                KeyCode::KeyW
-                    <span class="kw">if </span>window.modifiers().state().primary() &amp;&amp; input.state.is_pressed() =&gt;
-                {
-                    <span class="kw">if </span><span class="self">self</span>.request_close(<span class="kw-2">&amp;mut </span>window) {
+            <span class="kw">match </span>input.logical_key {
+                Key::Character(ch) <span class="kw">if </span>ch == <span class="string">&quot;w&quot; </span>&amp;&amp; window.modifiers().primary() =&gt; {
+                    <span class="kw">if </span>input.state.is_pressed() &amp;&amp; <span class="self">self</span>.request_close(<span class="kw-2">&amp;mut </span>window) {
                         window.set_needs_redraw();
                     }
                 }
-                KeyCode::Tab
-                    <span class="kw">if </span>!window.modifiers().state().possible_shortcut()
-                        &amp;&amp; input.state.is_pressed() =&gt;
-                {
-                    <span class="kw">let </span>direction = <span class="kw">if </span>window.modifiers().state().shift_key() {
-                        VisualOrder::left_to_right().rev()
-                    } <span class="kw">else </span>{
-                        VisualOrder::left_to_right()
-                    };
-                    <span class="kw">let </span>target = <span class="self">self</span>.root.tree.focused_widget().unwrap_or(<span class="self">self</span>.root.id());
-                    <span class="kw">let </span>target = <span class="self">self</span>.root.tree.widget(target).expect(<span class="string">&quot;missing widget&quot;</span>);
-                    <span class="kw">let </span><span class="kw-2">mut </span>target = EventContext::new(
-                        WidgetContext::new(target, <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, <span class="kw-2">&amp;mut </span>window),
+                Key::Tab <span class="kw">if </span>!window.modifiers().possible_shortcut() =&gt; {
+                    <span class="kw">if </span>input.state.is_pressed() {
+                        <span class="kw">let </span>direction = <span class="kw">if </span>window.modifiers().state().shift_key() {
+                            VisualOrder::left_to_right().rev()
+                        } <span class="kw">else </span>{
+                            VisualOrder::left_to_right()
+                        };
+                        <span class="kw">let </span>target = <span class="self">self</span>.root.tree.focused_widget().unwrap_or(<span class="self">self</span>.root.id());
+                        <span class="kw">let </span>target = <span class="self">self</span>.root.tree.widget(target).expect(<span class="string">&quot;missing widget&quot;</span>);
+                        <span class="kw">let </span><span class="kw-2">mut </span>target = EventContext::new(
+                            WidgetContext::new(target, <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, <span class="kw-2">&amp;mut </span>window),
+                            kludgine,
+                        );
+                        target.advance_focus(direction);
+                    }
+                }
+                Key::Enter =&gt; {
+                    <span class="self">self</span>.keyboard_activate_widget(
+                        input.state.is_pressed(),
+                        <span class="self">self</span>.root.tree.default_widget(),
+                        <span class="kw-2">&amp;mut </span>window,
                         kludgine,
                     );
-                    target.advance_focus(direction);
                 }
-                <span class="kw">_ </span>=&gt; {}
+                Key::Escape =&gt; {
+                    <span class="self">self</span>.keyboard_activate_widget(
+                        input.state.is_pressed(),
+                        <span class="self">self</span>.root.tree.escape_widget(),
+                        <span class="kw-2">&amp;mut </span>window,
+                        kludgine,
+                    );
+                }
+                <span class="kw">_ </span>=&gt; {
+                    <span class="macro">println!</span>(
+                        <span class="string">&quot;Ignored Keyboard Input: {:?} ({:?}); {:?}&quot;</span>,
+                        input.logical_key, input.physical_key, input.state
+                    );
+                }
             }
         }
     }

@@ -339,13 +339,27 @@
 <a href="#339" id="339">339</a>
 <a href="#340" id="340">340</a>
 <a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>kludgine::app::winit::event::{DeviceId, ElementState, KeyEvent, MouseButton};
-<span class="kw">use </span>kludgine::app::winit::keyboard::KeyCode;
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoUnsigned, Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::shapes::Shape;
@@ -355,8 +369,11 @@
 <span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, AnimationTarget, Spawn};
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::names::Name;
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{Easing, HighlightColor, IntrinsicPadding, TextColor};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{
+    Easing, HighlightColor, IntrinsicPadding, PrimaryColor, TextColor,
+};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, ComponentGroup, ComponentName, NamedComponent};
+<span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{Callback, EventHandling, Widget, HANDLED, IGNORED};
 
@@ -407,12 +424,15 @@
             <span class="kw-2">&amp;</span>ButtonActiveBackground,
             <span class="kw-2">&amp;</span>ButtonBackground,
             <span class="kw-2">&amp;</span>ButtonHoverBackground,
+            <span class="kw-2">&amp;</span>PrimaryColor,
             <span class="kw-2">&amp;</span>Easing,
         ]);
         <span class="kw">let </span>background_color = <span class="kw">if </span>context.active() {
             styles.get_or_default(<span class="kw-2">&amp;</span>ButtonActiveBackground)
         } <span class="kw">else if </span>context.hovered() {
             styles.get_or_default(<span class="kw-2">&amp;</span>ButtonHoverBackground)
+        } <span class="kw">else if </span>context.is_default() {
+            styles.get_or_default(<span class="kw-2">&amp;</span>PrimaryColor)
         } <span class="kw">else </span>{
             styles.get_or_default(<span class="kw-2">&amp;</span>ButtonBackground)
         };
@@ -578,13 +598,18 @@
         _is_synthetic: bool,
         context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; EventHandling {
-        <span class="kw">if </span>input.physical_key == KeyCode::Space {
+        <span class="comment">// TODO should this be handled at the window level?
+        </span><span class="kw">if </span>input.text.as_deref() == <span class="prelude-val">Some</span>(<span class="string">&quot; &quot;</span>) &amp;&amp; !context.modifiers().possible_shortcut() {
             <span class="kw">let </span>changed = <span class="kw">match </span>input.state {
-                ElementState::Pressed =&gt; context.activate(),
-                ElementState::Released =&gt; {
-                    <span class="self">self</span>.invoke_on_click();
-                    context.deactivate()
+                ElementState::Pressed =&gt; {
+                    <span class="kw">let </span>changed = context.activate();
+                    <span class="kw">if </span>!changed {
+                        <span class="comment">// The widget was already active. This is now a repeated keypress
+                        </span><span class="self">self</span>.invoke_on_click();
+                    }
+                    changed
                 }
+                ElementState::Released =&gt; context.deactivate(),
             };
             <span class="kw">if </span>changed {
                 context.set_needs_redraw();
@@ -612,6 +637,11 @@
     }
 
     <span class="kw">fn </span>activate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
+        <span class="comment">// If we have no buttons pressed, the event should fire on activate not
+        // on deactivate.
+        </span><span class="kw">if </span><span class="self">self</span>.buttons_pressed == <span class="number">0 </span>{
+            <span class="self">self</span>.invoke_on_click();
+        }
         <span class="self">self</span>.update_background_color(context, <span class="bool-val">true</span>);
     }
 
