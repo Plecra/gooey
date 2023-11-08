@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Value"],"struct":["BlockUntilUpdatedFuture","Dynamic","DynamicReader","Generation"],"trait":["IntoDynamic","IntoValue"]};
+window.SIDEBAR_ITEMS = {"enum":["Value"],"struct":["BlockUntilUpdatedFuture","Dynamic","DynamicGuard","DynamicReader","Generation"],"trait":["ForEach","IntoDynamic","IntoValue","MapEach"]};

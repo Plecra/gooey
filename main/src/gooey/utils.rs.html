@@ -129,17 +129,17 @@
 <span class="kw">use </span>kludgine::app::winit::keyboard::ModifiersState;
 
 <span class="doccomment">/// Invokes the provided macro with a pattern that can be matched using this
-/// `macro_rules!` expression: `$($type:ident $field:tt),+`, where `$type` is an
+/// `macro_rules!` expression: `$($type:ident $field:tt $var:ident),+`, where `$type` is an
 /// identifier to use for the generic parameter and `$field` is the field index
 /// inside of the tuple.
 </span><span class="macro">macro_rules! </span>impl_all_tuples {
     (<span class="macro-nonterminal">$macro_name</span>:ident) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>);
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>, T1 <span class="number">1</span>);
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>, T1 <span class="number">1</span>, T2 <span class="number">2</span>);
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>, T1 <span class="number">1</span>, T2 <span class="number">2</span>, T3 <span class="number">3</span>);
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>, T1 <span class="number">1</span>, T2 <span class="number">2</span>, T3 <span class="number">3</span>, T4 <span class="number">4</span>);
-        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0</span>, T1 <span class="number">1</span>, T2 <span class="number">2</span>, T3 <span class="number">3</span>, T4 <span class="number">4</span>, T5 <span class="number">5</span>);
+        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0 </span>t0);
+        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0 </span>t0, T1 <span class="number">1 </span>t1);
+        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0 </span>t0, T1 <span class="number">1 </span>t1, T2 <span class="number">2 </span>t2);
+        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0 </span>t0, T1 <span class="number">1 </span>t1, T2 <span class="number">2 </span>t2, T3 <span class="number">3 </span>t3);
+        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0 </span>t0, T1 <span class="number">1 </span>t1, T2 <span class="number">2 </span>t2, T3 <span class="number">3 </span>t3, T4 <span class="number">4 </span>t4);
+        <span class="macro-nonterminal">$</span><span class="macro">macro_name!</span>(<span class="macro-nonterminal">T0 </span><span class="number">0 </span>t0, T1 <span class="number">1 </span>t1, T2 <span class="number">2 </span>t2, T3 <span class="number">3 </span>t3, T4 <span class="number">4 </span>t4, T5 <span class="number">5 </span>t5);
     }
 }
 
@@ -153,7 +153,7 @@
 }
 
 <span class="macro">macro_rules! </span>impl_with_clone {
-    ($(<span class="macro-nonterminal">$name</span>:ident <span class="macro-nonterminal">$field</span>:tt),+) =&gt; {
+    ($(<span class="macro-nonterminal">$name</span>:ident <span class="macro-nonterminal">$field</span>:tt <span class="macro-nonterminal">$var</span>:ident),+) =&gt; {
         <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, $(<span class="macro-nonterminal">$name</span>: Clone,)+&gt; WithClone <span class="kw">for </span>($(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="macro-nonterminal">$name</span>,)+)
         {
             <span class="kw">type </span>Cloned = ($(<span class="macro-nonterminal">$name</span>,)+);
