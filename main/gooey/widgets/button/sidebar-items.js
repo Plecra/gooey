@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Button","ButtonActiveBackground","ButtonBackground","ButtonHoverBackground"]};
+window.SIDEBAR_ITEMS = {"struct":["Button","ButtonActiveBackground","ButtonBackground","ButtonDisabledBackground","ButtonHoverBackground"]};

@@ -574,14 +574,12 @@
 <a href="#574" id="574">574</a>
 <a href="#575" id="575">575</a>
 <a href="#576" id="576">576</a>
-<a href="#577" id="577">577</a>
-<a href="#578" id="578">578</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span>kludgine::app::winit::event::{Ime, KeyEvent};
+<span class="kw">use </span>kludgine::app::winit::event::{ElementState, Ime, KeyEvent};
 <span class="kw">use </span>kludgine::app::winit::keyboard::Key;
 <span class="kw">use </span>kludgine::cosmic_text::{Action, Attrs, Buffer, Cursor, Edit, Editor, Metrics, Shaping};
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
@@ -928,10 +926,6 @@
             on_key.invoke(input.clone())<span class="question-mark">?</span>;
         }
 
-        <span class="kw">if </span>!input.state.is_pressed() {
-            <span class="kw">return </span>IGNORED;
-        }
-
         <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor]);
         <span class="kw">let </span>editor = <span class="self">self</span>.editor_mut(context.kludgine, <span class="kw-2">&amp;</span>styles);
 
@@ -939,8 +933,8 @@
         //     &quot;Keyboard input: {:?}. {:?}, {:?}&quot;,
         //     input.logical_key, input.text, input.physical_key
         // );
-        </span><span class="kw">let </span>(text_changed, handled) = <span class="kw">match </span>(input.logical_key, input.text) {
-            (key @ (Key::Backspace | Key::Delete), <span class="kw">_</span>) =&gt; {
+        </span><span class="kw">let </span>(text_changed, handled) = <span class="kw">match </span>(input.state, input.logical_key, input.text) {
+            (ElementState::Pressed,  key @ (Key::Backspace | Key::Delete), <span class="kw">_</span>) =&gt; {
                 editor.action(
                     context.kludgine.font_system(),
                     <span class="kw">match </span>key {
@@ -951,7 +945,7 @@
                 );
                 (<span class="bool-val">true</span>, HANDLED)
             }
-            (key @ (Key::ArrowLeft | Key::ArrowDown | Key::ArrowUp | Key::ArrowRight), <span class="kw">_</span>) =&gt; {
+            (ElementState::Pressed, key @ (Key::ArrowLeft | Key::ArrowDown | Key::ArrowUp | Key::ArrowRight), <span class="kw">_</span>) =&gt; {
                 <span class="kw">let </span>modifiers = context.modifiers();
                 <span class="kw">match </span>(editor.select_opt(), modifiers.state().shift_key()) {
                     (<span class="prelude-val">None</span>, <span class="bool-val">true</span>) =&gt; {
@@ -977,17 +971,19 @@
                 );
                 (<span class="bool-val">false</span>, HANDLED)
             }
-            (<span class="kw">_</span>, <span class="prelude-val">Some</span>(text))
+            (state, <span class="kw">_</span>, <span class="prelude-val">Some</span>(text))
                 <span class="kw">if </span>!context.modifiers().primary()
                     &amp;&amp; text != <span class="string">&quot;\t&quot; </span><span class="comment">// tab
                     </span>&amp;&amp; text != <span class="string">&quot;\r&quot; </span><span class="comment">// enter/return
                     </span>&amp;&amp; text != <span class="string">&quot;\u{1b}&quot; </span><span class="comment">// escape
                     </span>=&gt;
             {
-                editor.insert_string(<span class="macro">dbg!</span>(<span class="kw-2">&amp;</span>text), <span class="prelude-val">None</span>);
-                (<span class="bool-val">true</span>, HANDLED)
+                <span class="kw">if </span>state.is_pressed() {
+                    editor.insert_string(<span class="kw-2">&amp;</span>text, <span class="prelude-val">None</span>);
+                }
+                (state.is_pressed(), HANDLED)
             }
-            (<span class="kw">_</span>, <span class="kw">_</span>) =&gt; (<span class="bool-val">false</span>, IGNORED),
+            (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; (<span class="bool-val">false</span>, IGNORED),
         };
 
         <span class="kw">if </span>handled.is_break() {
