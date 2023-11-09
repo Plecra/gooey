@@ -1056,6 +1056,11 @@
 <a href="#1056" id="1056">1056</a>
 <a href="#1057" id="1057">1057</a>
 <a href="#1058" id="1058">1058</a>
+<a href="#1059" id="1059">1059</a>
+<a href="#1060" id="1060">1060</a>
+<a href="#1061" id="1061">1061</a>
+<a href="#1062" id="1062">1062</a>
+<a href="#1063" id="1063">1063</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
@@ -1509,6 +1514,11 @@
     /// To ensure the correct color is used, include [`HighlightColor`] in the
     /// styles request.
     </span><span class="kw">pub fn </span>draw_focus_ring_using(<span class="kw-2">&amp;mut </span><span class="self">self</span>, styles: <span class="kw-2">&amp;</span>Styles) {
+        <span class="comment">// If this is the root widget, don&#39;t draw a focus ring. It&#39;s redundant.
+        </span><span class="kw">if </span>!<span class="self">self</span>.current_node.has_parent() {
+            <span class="kw">return</span>;
+        }
+
         <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.graphics.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
         <span class="kw">let </span>focus_ring = Shape::stroked_rect(
             visible_rect,
