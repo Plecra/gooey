@@ -990,7 +990,7 @@
     /// equal to the currently stored value.
     </span><span class="kw">pub fn </span>update(<span class="kw-2">&amp;</span><span class="self">self</span>, new_value: T)
     <span class="kw">where
-        </span>T: Eq,
+        </span>T: PartialEq,
     {
         <span class="self">self</span>.<span class="number">0</span>.map_mut(|value, changed| {
             <span class="kw">if </span><span class="kw-2">*</span>value == new_value {

@@ -783,8 +783,6 @@
 <a href="#783" id="783">783</a>
 <a href="#784" id="784">784</a>
 <a href="#785" id="785">785</a>
-<a href="#786" id="786">786</a>
-<a href="#787" id="787">787</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -1523,9 +1521,7 @@
     ) {
         <span class="kw">match </span>event {
             WindowCommand::Redraw =&gt; {
-                <span class="comment">// TODO we should attempt to batch redraw events so that we&#39;re
-                // not constantly sending them from animations.
-                </span>window.set_needs_redraw();
+                window.set_needs_redraw();
             }
         }
     }

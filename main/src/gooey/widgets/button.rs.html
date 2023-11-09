@@ -510,7 +510,7 @@
                     .spawn();
             }
             (<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(dynamic)) =&gt; {
-                dynamic.set(background_color);
+                dynamic.update(background_color);
                 <span class="self">self</span>.background_color_animation.clear();
             }
             (<span class="kw">_</span>, <span class="prelude-val">None</span>) =&gt; {
