@@ -776,6 +776,11 @@
 <a href="#776" id="776">776</a>
 <a href="#777" id="777">777</a>
 <a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -798,6 +803,7 @@
 <span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Rect, Size};
 <span class="kw">use </span>kludgine::render::Drawing;
 <span class="kw">use </span>kludgine::Kludgine;
+<span class="kw">use </span>tracing::Level;
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{
     AsEventContext, EventContext, Exclusive, GraphicsContext, LayoutContext, RedrawStatus,
@@ -812,7 +818,7 @@
     EventHandling, ManagedWidget, Widget, WidgetId, WidgetInstance, HANDLED, IGNORED,
 };
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
-<span class="kw">use crate</span>::{ConstraintLimit, Run};
+<span class="kw">use crate</span>::{initialize_tracing, ConstraintLimit, Run};
 
 <span class="doccomment">/// A currently running Gooey window.
 </span><span class="kw">pub struct </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; {
@@ -969,6 +975,7 @@
     </span>Behavior: WindowBehavior,
 {
     <span class="kw">fn </span>run(<span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result {
+        initialize_tracing();
         GooeyWindow::&lt;Behavior&gt;::run_with(AssertUnwindSafe(sealed::Context {
             user: <span class="self">self</span>.context,
             settings: RefCell::new(sealed::WindowSettings {
@@ -1295,9 +1302,12 @@
                     );
                 }
                 <span class="kw">_ </span>=&gt; {
-                    <span class="macro">println!</span>(
-                        <span class="string">&quot;Ignored Keyboard Input: {:?} ({:?}); {:?}&quot;</span>,
-                        input.logical_key, input.physical_key, input.state
+                    <span class="macro">tracing::event!</span>(
+                        Level::DEBUG,
+                        logical = <span class="question-mark">?</span>input.logical_key,
+                        physical = <span class="question-mark">?</span>input.physical_key,
+                        state = <span class="question-mark">?</span>input.state,
+                        <span class="string">&quot;Ignored Keyboard Input&quot;</span>,
                     );
                 }
             }

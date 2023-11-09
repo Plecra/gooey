@@ -1259,7 +1259,7 @@
         }
 
         <span class="kw">if </span>activation_changes == MAX_ITERS {
-            <span class="macro">eprintln!</span>(
+            <span class="macro">tracing::error!</span>(
                 <span class="string">&quot;activation change force stopped after {activation_changes} sequential changes&quot;
             </span>);
         }
@@ -1309,7 +1309,7 @@
         }
 
         <span class="kw">if </span>focus_changes == MAX_ITERS {
-            <span class="macro">eprintln!</span>(<span class="string">&quot;focus change force stopped after {focus_changes} sequential changes&quot;</span>);
+            <span class="macro">tracing::error!</span>(<span class="string">&quot;focus change force stopped after {focus_changes} sequential changes&quot;</span>);
         }
     }
 

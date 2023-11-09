@@ -136,6 +136,22 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
 </pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../.crate-docs.md&quot;</span>)]
 #![warn(clippy::pedantic, missing_docs)]
 #![allow(clippy::module_name_repetitions, clippy::missing_errors_doc)]
@@ -273,5 +289,21 @@
     ($(<span class="macro-nonterminal">$component</span>:expr =&gt; <span class="macro-nonterminal">$value</span>:expr),* ,) =&gt; {{
         <span class="macro-nonterminal">$</span><span class="macro">crate::styles!</span>($(<span class="macro-nonterminal">$component </span>=&gt; <span class="macro-nonterminal">$value</span>),<span class="kw-2">*</span>)
     }};
+}
+
+<span class="kw">fn </span>initialize_tracing() {
+    <span class="attr">#[cfg(feature = <span class="string">&quot;tracing-output&quot;</span>)]
+    </span>{
+        <span class="kw">use </span>tracing::Level;
+
+        <span class="attr">#[cfg(debug_assertions)]
+        </span><span class="kw">const </span>MAX_LEVEL: Level = Level::DEBUG;
+        <span class="attr">#[cfg(not(debug_assertions))]
+        </span><span class="kw">const </span>MAX_LEVEL: Level = Level::ERROR;
+
+        <span class="kw">let </span>_result = tracing_subscriber::fmt::fmt()
+            .with_max_level(MAX_LEVEL)
+            .try_init();
+    }
 }
 </code></pre></div></section></main></body></html>
