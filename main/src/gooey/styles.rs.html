@@ -618,6 +618,11 @@
 <a href="#618" id="618">618</a>
 <a href="#619" id="619">619</a>
 <a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::borrow::Cow;
@@ -627,6 +632,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{EasingFunction, ZeroToOne};
 <span class="kw">use </span><span class="kw">crate</span>::names::Name;
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{FocusableWidgets, VisualOrder};
 <span class="kw">use </span><span class="kw">crate</span>::utils::Lazy;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 
@@ -771,6 +777,10 @@
     </span>Custom(CustomComponent),
     <span class="doccomment">/// An easing function for animations.
     </span>Easing(EasingFunction),
+    <span class="doccomment">/// A visual ordering to use for layout.
+    </span>VisualOrder(VisualOrder),
+    <span class="doccomment">/// A description of what widgets should be focusable.
+    </span>FocusableWidgets(FocusableWidgets),
 }
 
 <span class="kw">impl </span>From&lt;Color&gt; <span class="kw">for </span>Component {

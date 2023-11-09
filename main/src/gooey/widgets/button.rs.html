@@ -399,7 +399,6 @@
 <a href="#399" id="399">399</a>
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -416,7 +415,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::names::Name;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
-    Easing, HighlightColor, IntrinsicPadding, PrimaryColor, TextColor,
+    AutoFocusableControls, Easing, HighlightColor, IntrinsicPadding, PrimaryColor, TextColor,
 };
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, ComponentGroup, ComponentName, NamedComponent};
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
@@ -582,9 +581,8 @@
         <span class="bool-val">true
     </span>}
 
-    <span class="kw">fn </span>accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
-        <span class="comment">// TODO this should be driven by a &quot;focus_all_widgets&quot; setting that hopefully can be queried from the OS.
-        </span><span class="self">self</span>.enabled.get()
+    <span class="kw">fn </span>accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
+        <span class="self">self</span>.enabled.get() &amp;&amp; context.query_style(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
     }
 
     <span class="kw">fn </span>mouse_down(

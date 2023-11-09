@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["HorizontalOrder","VerticalOrder"],"struct":["Easing","EasingIn","EasingOut","HighlightColor","IntrinsicPadding","LineHeight","PrimaryColor","TextColor","TextSize","VisualOrder"]};
+window.SIDEBAR_ITEMS = {"enum":["FocusableWidgets","HorizontalOrder","VerticalOrder"],"struct":["AutoFocusableControls","Easing","EasingIn","EasingOut","HighlightColor","IntrinsicPadding","LayoutOrder","LineHeight","PrimaryColor","TextColor","TextSize","VisualOrder"]};
