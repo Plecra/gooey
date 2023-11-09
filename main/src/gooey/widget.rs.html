@@ -1193,6 +1193,26 @@
 <a href="#1193" id="1193">1193</a>
 <a href="#1194" id="1194">1194</a>
 <a href="#1195" id="1195">1195</a>
+<a href="#1196" id="1196">1196</a>
+<a href="#1197" id="1197">1197</a>
+<a href="#1198" id="1198">1198</a>
+<a href="#1199" id="1199">1199</a>
+<a href="#1200" id="1200">1200</a>
+<a href="#1201" id="1201">1201</a>
+<a href="#1202" id="1202">1202</a>
+<a href="#1203" id="1203">1203</a>
+<a href="#1204" id="1204">1204</a>
+<a href="#1205" id="1205">1205</a>
+<a href="#1206" id="1206">1206</a>
+<a href="#1207" id="1207">1207</a>
+<a href="#1208" id="1208">1208</a>
+<a href="#1209" id="1209">1209</a>
+<a href="#1210" id="1210">1210</a>
+<a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1351,6 +1371,13 @@
     ) -&gt; EventHandling {
         IGNORED
     }
+
+    <span class="doccomment">/// Returns a reference to a single child widget if this widget is a widget
+    /// that primarily wraps a single other widget to customize its behavior.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">fn </span>wraps(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>WidgetInstance&gt; {
+        <span class="prelude-val">None
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;T&gt; Run <span class="kw">for </span>T
@@ -1365,7 +1392,7 @@
 <span class="doccomment">/// A [`Widget`] that contains a single child.
 </span><span class="kw">pub trait </span>WrapperWidget: Debug + Send + UnwindSafe + <span class="lifetime">&#39;static </span>{
     <span class="doccomment">/// Returns the child widget.
-    </span><span class="kw">fn </span>child(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef;
+    </span><span class="kw">fn </span>child_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef;
 
     <span class="doccomment">/// Returns the rectangle that the child widget should occupy given
     /// `available_space`.
@@ -1375,7 +1402,7 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Rect&lt;Px&gt; {
-        <span class="kw">let </span>child = <span class="self">self</span>.child().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
+        <span class="kw">let </span>child = <span class="self">self</span>.child_mut().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
 
         context
             .for_other(<span class="kw-2">&amp;</span>child)
@@ -1507,8 +1534,12 @@
 <span class="kw">where
     </span>T: WrapperWidget,
 {
+    <span class="kw">fn </span>wraps(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>WidgetInstance&gt; {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.child_mut().widget())
+    }
+
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="kw">let </span>child = <span class="self">self</span>.child().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
+        <span class="kw">let </span>child = <span class="self">self</span>.child_mut().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         context.for_other(<span class="kw-2">&amp;</span>child).redraw();
     }
 
@@ -1517,7 +1548,7 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>child = <span class="self">self</span>.child().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
+        <span class="kw">let </span>child = <span class="self">self</span>.child_mut().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
 
         <span class="kw">let </span>layout = <span class="self">self</span>.layout_child(available_space, context);
         context.set_child_layout(<span class="kw-2">&amp;</span>child, layout);
@@ -2315,6 +2346,15 @@
             <span class="macro">unreachable!</span>(<span class="string">&quot;just initialized&quot;</span>)
         };
         widget.clone()
+    }
+
+    <span class="doccomment">/// Returns the a reference to the underlying widget instance.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>widget(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>WidgetInstance {
+        <span class="kw">match </span><span class="self">self </span>{
+            WidgetRef::Unmounted(widget) =&gt; widget,
+            WidgetRef::Mounted(managed) =&gt; <span class="kw-2">&amp;</span>managed.widget,
+        }
     }
 }
 

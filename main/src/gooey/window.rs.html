@@ -784,6 +784,72 @@
 <a href="#784" id="784">784</a>
 <a href="#785" id="785">785</a>
 <a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
+<a href="#819" id="819">819</a>
+<a href="#820" id="820">820</a>
+<a href="#821" id="821">821</a>
+<a href="#822" id="822">822</a>
+<a href="#823" id="823">823</a>
+<a href="#824" id="824">824</a>
+<a href="#825" id="825">825</a>
+<a href="#826" id="826">826</a>
+<a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -796,14 +862,14 @@
 <span class="kw">use </span>std::string::ToString;
 <span class="kw">use </span>std::sync::OnceLock;
 
-<span class="kw">use </span>kludgine::app::winit::dpi::PhysicalPosition;
+<span class="kw">use </span>kludgine::app::winit::dpi::{PhysicalPosition, PhysicalSize};
 <span class="kw">use </span>kludgine::app::winit::event::{
     DeviceId, ElementState, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
 <span class="kw">use </span>kludgine::app::winit::keyboard::Key;
 <span class="kw">use </span>kludgine::app::WindowBehavior <span class="kw">as _</span>;
-<span class="kw">use </span>kludgine::figures::units::Px;
-<span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Rect, Size};
+<span class="kw">use </span>kludgine::figures::units::{Px, UPx};
+<span class="kw">use </span>kludgine::figures::{IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::render::Drawing;
 <span class="kw">use </span>kludgine::Kludgine;
 <span class="kw">use </span>tracing::Level;
@@ -820,6 +886,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::widget::{
     EventHandling, ManagedWidget, Widget, WidgetId, WidgetInstance, HANDLED, IGNORED,
 };
+<span class="kw">use </span><span class="kw">crate</span>::widgets::Resize;
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
 <span class="kw">use crate</span>::{initialize_tracing, ConstraintLimit, Run};
 
@@ -1034,6 +1101,8 @@
     occluded: Dynamic&lt;bool&gt;,
     focused: Dynamic&lt;bool&gt;,
     keyboard_activated: <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;,
+    min_inner_size: <span class="prelude-ty">Option</span>&lt;Size&lt;UPx&gt;&gt;,
+    max_inner_size: <span class="prelude-ty">Option</span>&lt;Size&lt;UPx&gt;&gt;,
 }
 
 <span class="kw">impl</span>&lt;T&gt; GooeyWindow&lt;T&gt;
@@ -1123,6 +1192,8 @@
             occluded,
             focused,
             keyboard_activated: <span class="prelude-val">None</span>,
+            min_inner_size: <span class="prelude-val">None</span>,
+            max_inner_size: <span class="prelude-val">None</span>,
         }
     }
 
@@ -1134,6 +1205,55 @@
         <span class="self">self</span>.redraw_status.refresh_received();
         graphics.reset_text_attributes();
         <span class="self">self</span>.root.tree.reset_render_order();
+
+        <span class="kw">let </span>resizable = window.winit().is_resizable();
+        {
+            <span class="kw">let </span><span class="kw-2">mut </span>root_or_child = <span class="self">self</span>.root.widget.clone();
+            <span class="kw">loop </span>{
+                <span class="kw">let </span><span class="kw-2">mut </span>widget = root_or_child.lock();
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(resize) = widget.downcast_ref::&lt;Resize&gt;() {
+                    <span class="kw">let </span>min_width = resize
+                        .width
+                        .minimum()
+                        .map_or(Px(<span class="number">0</span>), |width| width.into_px(graphics.scale()));
+                    <span class="kw">let </span>max_width = resize
+                        .width
+                        .maximum()
+                        .map_or(Px::MAX, |width| width.into_px(graphics.scale()));
+                    <span class="kw">let </span>min_height = resize
+                        .height
+                        .minimum()
+                        .map_or(Px(<span class="number">0</span>), |height| height.into_px(graphics.scale()));
+                    <span class="kw">let </span>max_height = resize
+                        .height
+                        .maximum()
+                        .map_or(Px::MAX, |height| height.into_px(graphics.scale()));
+
+                    <span class="kw">let </span>new_min_size = (min_width &gt; <span class="number">0 </span>|| min_height &gt; <span class="number">0</span>)
+                        .then_some(Size::&lt;Px&gt;::new(min_width, min_height).into_unsigned());
+
+                    <span class="kw">if </span>new_min_size != <span class="self">self</span>.min_inner_size {
+                        window.set_min_inner_size(new_min_size);
+                        <span class="self">self</span>.min_inner_size = new_min_size;
+                    }
+                    <span class="kw">let </span>new_max_size = (max_width &gt; <span class="number">0 </span>|| max_height &gt; <span class="number">0</span>)
+                        .then_some(Size::&lt;Px&gt;::new(max_width, max_height).into_unsigned());
+
+                    <span class="kw">if </span>new_max_size != <span class="self">self</span>.max_inner_size &amp;&amp; resizable {
+                        window.set_max_inner_size(new_max_size);
+                    }
+                    <span class="self">self</span>.max_inner_size = new_max_size;
+                    <span class="kw">break</span>;
+                } <span class="kw">else if let </span><span class="prelude-val">Some</span>(wraps) = widget.as_widget().wraps().cloned() {
+                    drop(widget);
+
+                    root_or_child = wraps;
+                } <span class="kw">else </span>{
+                    <span class="kw">break</span>;
+                }
+            }
+        }
+
         <span class="kw">let </span>graphics = <span class="self">self</span>.contents.new_frame(graphics);
         <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span><span class="kw-2">mut </span>context = GraphicsContext {
@@ -1147,6 +1267,18 @@
             ConstraintLimit::ClippedAfter(window_size.height),
         ));
         <span class="kw">let </span>render_size = actual_size.min(window_size);
+        <span class="kw">if </span>render_size != window_size &amp;&amp; !resizable {
+            <span class="kw">let </span><span class="kw-2">mut </span>new_size = actual_size;
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(min_size) = <span class="self">self</span>.min_inner_size {
+                new_size = new_size.max(min_size);
+            }
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(max_size) = <span class="self">self</span>.max_inner_size {
+                new_size = new_size.min(max_size);
+            }
+            <span class="kw">let _ </span>= layout_context
+                .winit()
+                .request_inner_size(PhysicalSize::from(new_size));
+        }
         <span class="self">self</span>.root.set_layout(Rect::from(render_size.into_signed()));
 
         <span class="kw">if </span><span class="self">self</span>.initial_frame {

@@ -390,7 +390,7 @@
 }
 
 <span class="kw">impl </span>WrapperWidget <span class="kw">for </span>Align {
-    <span class="kw">fn </span>child(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
+    <span class="kw">fn </span>child_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.child
     }
 

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["StackDimension","StackOrientation"],"struct":["Stack","StackDirection"]};
+window.SIDEBAR_ITEMS = {"enum":["StackOrientation"],"struct":["Stack","StackDirection"]};

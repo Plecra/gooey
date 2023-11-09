@@ -94,20 +94,23 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, Rect, ScreenScale, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
-<span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
+<span class="kw">use </span><span class="kw">crate</span>::styles::DimensionRange;
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrapperWidget};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A widget that resizes its contained widget to an explicit size.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Resize {
-    <span class="doccomment">/// If present, the width to apply to the child widget.
-    </span><span class="kw">pub </span>width: <span class="prelude-ty">Option</span>&lt;Dimension&gt;,
-    <span class="doccomment">/// If present, the height to apply to the child widget.
-    </span><span class="kw">pub </span>height: <span class="prelude-ty">Option</span>&lt;Dimension&gt;,
+    <span class="doccomment">/// The range of allowed width for the child widget.
+    </span><span class="kw">pub </span>width: DimensionRange,
+    <span class="doccomment">/// The range of allowed height for the child widget.
+    </span><span class="kw">pub </span>height: DimensionRange,
     child: WidgetRef,
 }
 
@@ -122,38 +125,38 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>to&lt;T&gt;(size: Size&lt;T&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: Into&lt;Dimension&gt;,
+        </span>T: Into&lt;DimensionRange&gt;,
     {
         <span class="self">Self </span>{
             child: WidgetRef::new(child),
-            width: <span class="prelude-val">Some</span>(size.width.into()),
-            height: <span class="prelude-val">Some</span>(size.height.into()),
+            width: size.width.into(),
+            height: size.height.into(),
         }
     }
 
     <span class="doccomment">/// Resizes `child`&#39;s width to `width`.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>width(width: <span class="kw">impl </span>Into&lt;Dimension&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>width(width: <span class="kw">impl </span>Into&lt;DimensionRange&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             child: WidgetRef::new(child),
-            width: <span class="prelude-val">Some</span>(width.into()),
-            height: <span class="prelude-val">None</span>,
+            width: width.into(),
+            height: DimensionRange::from(..),
         }
     }
 
     <span class="doccomment">/// Resizes `child`&#39;s height to `height`.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>height(height: <span class="kw">impl </span>Into&lt;Dimension&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>height(height: <span class="kw">impl </span>Into&lt;DimensionRange&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             child: WidgetRef::new(child),
-            width: <span class="prelude-val">None</span>,
-            height: <span class="prelude-val">Some</span>(height.into()),
+            width: DimensionRange::from(..),
+            height: height.into(),
         }
     }
 }
 
 <span class="kw">impl </span>WrapperWidget <span class="kw">for </span>Resize {
-    <span class="kw">fn </span>child(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
+    <span class="kw">fn </span>child_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.child
     }
 
@@ -163,7 +166,9 @@
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Rect&lt;kludgine::figures::units::Px&gt; {
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        <span class="kw">let </span>size = <span class="kw">if let </span>(<span class="prelude-val">Some</span>(width), <span class="prelude-val">Some</span>(height)) = (<span class="self">self</span>.width, <span class="self">self</span>.height) {
+        <span class="kw">let </span>size = <span class="kw">if let </span>(<span class="prelude-val">Some</span>(width), <span class="prelude-val">Some</span>(height)) =
+            (<span class="self">self</span>.width.exact_dimension(), <span class="self">self</span>.height.exact_dimension())
+        {
             Size::new(
                 width.into_px(context.gfx.scale()).into_unsigned(),
                 height.into_px(context.gfx.scale()).into_unsigned(),
@@ -181,13 +186,14 @@
 
 <span class="kw">fn </span>override_constraint(
     constraint: ConstraintLimit,
-    explicit: <span class="prelude-ty">Option</span>&lt;Dimension&gt;,
+    range: DimensionRange,
     scale: Fraction,
 ) -&gt; ConstraintLimit {
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = explicit {
-        ConstraintLimit::Known(size.into_px(scale).into_unsigned())
-    } <span class="kw">else </span>{
-        constraint
+    <span class="kw">match </span>constraint {
+        ConstraintLimit::Known(size) =&gt; ConstraintLimit::Known(range.clamp(size, scale)),
+        ConstraintLimit::ClippedAfter(clipped_after) =&gt; {
+            ConstraintLimit::ClippedAfter(range.clamp(clipped_after, scale))
+        }
     }
 }
 </code></pre></div></section></main></body></html>
