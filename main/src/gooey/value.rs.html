@@ -830,6 +830,28 @@
 <a href="#830" id="830">830</a>
 <a href="#831" id="831">831</a>
 <a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::fmt::Debug;
@@ -1584,14 +1606,36 @@
         <span class="comment">//
         </span>[<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ident $field</span>:tt <span class="macro-nonterminal">$var</span>:ident, $(<span class="macro-nonterminal">$rtype</span>:ident <span class="macro-nonterminal">$rfield</span>:tt <span class="macro-nonterminal">$rvar</span>:ident),+]
     ) =&gt; {
-
         <span class="macro">impl_tuple_for_each!</span>(
             invoke
             <span class="macro-nonterminal">$self $for_each
             $</span><span class="kw">type </span><span class="macro-nonterminal">$field $var
             </span>[$(<span class="macro-nonterminal">$ltype $lfield $lvar</span>,)* <span class="macro-nonterminal">$</span><span class="kw">type </span><span class="macro-nonterminal">$field $var</span>, $(<span class="macro-nonterminal">$rtype $rfield $rvar</span>),+]
             [$(<span class="macro-nonterminal">$ltype $lfield $lvar</span>,)* $(<span class="macro-nonterminal">$rtype $rfield $rvar</span>),+]
-        )
+        );
+        <span class="macro">impl_tuple_for_each!</span>(
+            invoke
+            <span class="macro-nonterminal">$self $for_each
+            </span>[$(<span class="macro-nonterminal">$ltype $lfield $lvar</span>,)* <span class="macro-nonterminal">$</span><span class="kw">type </span><span class="macro-nonterminal">$field $var</span>]
+            [$(<span class="macro-nonterminal">$rtype $rfield $rvar</span>),+]
+        );
+    };
+    (
+        invoke
+        <span class="comment">// Identifiers used from the outer method
+        </span><span class="macro-nonterminal">$self</span>:ident <span class="macro-nonterminal">$for_each</span>:ident
+        <span class="comment">// List of all tuple fields that have already been positioned as the focused call
+        </span>[$(<span class="macro-nonterminal">$ltype</span>:ident <span class="macro-nonterminal">$lfield</span>:tt <span class="macro-nonterminal">$lvar</span>:ident),+]
+        <span class="comment">//
+        </span>[<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ident $field</span>:tt <span class="macro-nonterminal">$var</span>:ident]
+    ) =&gt; {
+        <span class="macro">impl_tuple_for_each!</span>(
+            invoke
+            <span class="macro-nonterminal">$self $for_each
+            $</span><span class="kw">type </span><span class="macro-nonterminal">$field $var
+            </span>[$(<span class="macro-nonterminal">$ltype $lfield $lvar</span>,)+ <span class="macro-nonterminal">$</span><span class="kw">type </span><span class="macro-nonterminal">$field $var</span>]
+            [$(<span class="macro-nonterminal">$ltype $lfield $lvar</span>),+]
+        );
     };
     (
         invoke

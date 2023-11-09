@@ -781,6 +781,10 @@
 <a href="#781" id="781">781</a>
 <a href="#782" id="782">782</a>
 <a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -1148,6 +1152,10 @@
 
         <span class="kw">if </span><span class="self">self</span>.initial_frame {
             <span class="self">self</span>.initial_frame = <span class="bool-val">false</span>;
+            <span class="self">self</span>.root
+                .lock()
+                .as_widget()
+                .mounted(<span class="kw-2">&amp;mut </span>layout_context.as_event_context());
             layout_context.focus();
             layout_context.as_event_context().apply_pending_state();
         }

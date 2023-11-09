@@ -152,6 +152,7 @@
 <a href="#152" id="152">152</a>
 <a href="#153" id="153">153</a>
 <a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
 </pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../.crate-docs.md&quot;</span>)]
 #![warn(clippy::pedantic, missing_docs)]
 #![allow(clippy::module_name_repetitions, clippy::missing_errors_doc)]
@@ -246,6 +247,7 @@
 <span class="doccomment">/// Creates a [`Children`](crate::widget::Children) instance with the given list
 /// of widgets.
 </span><span class="attr">#[macro_export]
+#[deprecated = <span class="string">&quot;use MakeWidget.and()/Children.and() to chain widgets without a macro&quot;</span>]
 </span><span class="macro">macro_rules! </span>children {
     () =&gt; {
         <span class="macro-nonterminal">$crate::widget::Children::new</span>()
