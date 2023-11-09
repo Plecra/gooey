@@ -316,6 +316,22 @@
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
 <a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::time::Duration;
@@ -331,12 +347,12 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, AnimationTarget, IntoAnimate, Spawn, ZeroToOne};
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, LayoutContext};
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{EasingIn, EasingOut};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{EasingIn, EasingOut, LineHeight};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{
     ComponentDefinition, ComponentGroup, ComponentName, Dimension, NamedComponent,
 };
 <span class="kw">use </span><span class="kw">crate</span>::value::Dynamic;
-<span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, MakeWidget, Widget, WidgetRef, HANDLED};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, MakeWidget, Widget, WidgetRef, HANDLED, IGNORED};
 <span class="kw">use crate</span>::{ConstraintLimit, Name};
 
 <span class="doccomment">/// A widget that supports scrolling its contents.
@@ -353,6 +369,7 @@
     horizontal_bar: ScrollbarInfo,
     vertical_bar: ScrollbarInfo,
     bar_width: Px,
+    line_height: Px,
 }
 
 <span class="kw">impl </span>Scroll {
@@ -370,6 +387,7 @@
             horizontal_bar: ScrollbarInfo::default(),
             vertical_bar: ScrollbarInfo::default(),
             bar_width: Px::default(),
+            line_height: Px::default(),
         }
     }
 
@@ -390,10 +408,14 @@
         <span class="self">Self</span>::construct(contents, Point::new(<span class="bool-val">false</span>, <span class="bool-val">true</span>))
     }
 
+    <span class="kw">fn </span>constrained_scroll(scroll: Point&lt;Px&gt;, max_scroll: Point&lt;Px&gt;) -&gt; Point&lt;Px&gt; {
+        scroll.max(max_scroll).min(Point::default())
+    }
+
     <span class="kw">fn </span>constrain_scroll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; (Point&lt;Px&gt;, Point&lt;Px&gt;) {
         <span class="kw">let </span>scroll = <span class="self">self</span>.scroll.get();
         <span class="kw">let </span>max_scroll = <span class="self">self</span>.max_scroll.get();
-        <span class="kw">let </span>clamped = scroll.max(max_scroll).min(Point::default());
+        <span class="kw">let </span>clamped = <span class="self">Self</span>::constrained_scroll(scroll, max_scroll);
         <span class="kw">if </span>clamped != scroll {
             <span class="self">self</span>.scroll.set(clamped);
         }
@@ -488,9 +510,12 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>ScrollBarThickness]);
+        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>ScrollBarThickness, <span class="kw-2">&amp;</span>LineHeight]);
         <span class="self">self</span>.bar_width = styles
             .get_or_default(<span class="kw-2">&amp;</span>ScrollBarThickness)
+            .into_px(context.graphics.scale());
+        <span class="self">self</span>.line_height = styles
+            .get_or_default(<span class="kw-2">&amp;</span>LineHeight)
             .into_px(context.graphics.scale());
 
         <span class="kw">let </span>(<span class="kw-2">mut </span>scroll, current_max_scroll) = <span class="self">self</span>.constrain_scroll();
@@ -573,17 +598,24 @@
         context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; EventHandling {
         <span class="kw">let </span>amount = <span class="kw">match </span>delta {
-            <span class="comment">/* TODO query line height */
-            </span>MouseScrollDelta::LineDelta(x, y) =&gt; Point::new(x, y) * <span class="number">16.0</span>,
+            MouseScrollDelta::LineDelta(x, y) =&gt; Point::new(x, y) * <span class="self">self</span>.line_height.into_float(),
             MouseScrollDelta::PixelDelta(px) =&gt; Point::new(px.x.cast(), px.y.cast()),
         };
 
-        <span class="self">self</span>.scroll.map_mut(|scroll| <span class="kw-2">*</span>scroll += amount.cast());
-        <span class="self">self</span>.show_scrollbars(context);
-        context.set_needs_redraw();
+        <span class="kw">let </span><span class="kw-2">mut </span>scroll = <span class="self">self</span>.scroll.lock();
+        <span class="kw">let </span>old_scroll = <span class="kw-2">*</span>scroll;
+        <span class="kw">let </span>new_scroll = <span class="self">Self</span>::constrained_scroll(<span class="kw-2">*</span>scroll + amount.cast(), <span class="self">self</span>.max_scroll.get());
+        <span class="kw">if </span>old_scroll == new_scroll {
+            IGNORED
+        } <span class="kw">else </span>{
+            <span class="kw-2">*</span>scroll = new_scroll;
+            drop(scroll);
 
-        <span class="comment">// TODO make this only returned handled if we actually scrolled.
-        </span>HANDLED
+            <span class="self">self</span>.show_scrollbars(context);
+            context.set_needs_redraw();
+
+            HANDLED
+        }
     }
 }
 
