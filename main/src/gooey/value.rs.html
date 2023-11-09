@@ -852,6 +852,32 @@
 <a href="#852" id="852">852</a>
 <a href="#853" id="853">853</a>
 <a href="#854" id="854">854</a>
+<a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::fmt::Debug;
@@ -969,6 +995,32 @@
         </span>T: Clone,
     {
         <span class="self">self</span>.<span class="number">0</span>.get().value
+    }
+
+    <span class="doccomment">/// Returns the currently stored value, replacing the current contents with
+    /// `T::default()`.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>take(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; T
+    <span class="kw">where
+        </span>T: Default,
+    {
+        std::mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.lock())
+    }
+
+    <span class="doccomment">/// Checks if the currently stored value is different than `T::default()`,
+    /// and if so, returns `Some(self.take())`.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>take_if_not_default(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt;
+    <span class="kw">where
+        </span>T: Default + PartialEq,
+    {
+        <span class="kw">let </span>default = T::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>guard = <span class="self">self</span>.lock();
+        <span class="kw">if </span><span class="kw-2">*</span>guard == default {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(std::mem::replace(<span class="kw-2">&amp;mut </span>guard, default))
+        }
     }
 
     <span class="doccomment">/// Replaces the contents with `new_value`, returning the previous contents.
