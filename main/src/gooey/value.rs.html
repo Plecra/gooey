@@ -821,6 +821,15 @@
 <a href="#821" id="821">821</a>
 <a href="#822" id="822">822</a>
 <a href="#823" id="823">823</a>
+<a href="#824" id="824">824</a>
+<a href="#825" id="825">825</a>
+<a href="#826" id="826">826</a>
+<a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::fmt::Debug;
@@ -1087,17 +1096,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>changed = <span class="bool-val">true</span>;
             <span class="kw">let </span>result = map(<span class="kw-2">&amp;mut </span>state.wrapped.value, <span class="kw-2">&amp;mut </span>changed);
             <span class="kw">if </span>changed {
-                state.wrapped.generation = state.wrapped.generation.next();
-
-                <span class="kw">for </span>callback <span class="kw">in </span><span class="kw-2">&amp;mut </span>state.callbacks {
-                    callback.update(<span class="kw-2">&amp;</span>state.wrapped);
-                }
-                <span class="kw">for </span>window <span class="kw">in </span>state.windows.drain(..) {
-                    window.redraw();
-                }
-                <span class="kw">for </span>waker <span class="kw">in </span>state.wakers.drain(..) {
-                    waker.wake();
-                }
+                state.note_changed();
             }
 
             result
@@ -1144,6 +1143,22 @@
     readers: usize,
 }
 
+<span class="kw">impl</span>&lt;T&gt; State&lt;T&gt; {
+    <span class="kw">fn </span>note_changed(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.wrapped.generation = <span class="self">self</span>.wrapped.generation.next();
+
+        <span class="kw">for </span>callback <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.callbacks {
+            callback.update(<span class="kw-2">&amp;</span><span class="self">self</span>.wrapped);
+        }
+        <span class="kw">for </span>window <span class="kw">in </span><span class="self">self</span>.windows.drain(..) {
+            window.redraw();
+        }
+        <span class="kw">for </span>waker <span class="kw">in </span><span class="self">self</span>.wakers.drain(..) {
+            waker.wake();
+        }
+    }
+}
+
 <span class="kw">impl</span>&lt;T&gt; Debug <span class="kw">for </span>State&lt;T&gt;
 <span class="kw">where
     </span>T: Debug,
@@ -1176,6 +1191,9 @@
 }
 
 <span class="doccomment">/// An exclusive reference to the contents of a [`Dynamic`].
+///
+/// If the contents are accessed through [`DerefMut`], all obververs will be
+/// notified of a change when this guard is dropped.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>DynamicGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
     guard: MutexGuard&lt;<span class="lifetime">&#39;a</span>, State&lt;T&gt;&gt;,
@@ -1200,7 +1218,7 @@
 <span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>DynamicGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span><span class="self">self</span>.accessed_mut {
-            <span class="macro">todo!</span>(<span class="string">&quot;trigger callbacks&quot;</span>)
+            <span class="self">self</span>.guard.note_changed();
         }
     }
 }

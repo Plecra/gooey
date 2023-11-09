@@ -178,21 +178,15 @@
 <a href="#178" id="178">178</a>
 <a href="#179" id="179">179</a>
 <a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span>kludgine::figures::units::UPx;
 <span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size};
 
-<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, GraphicsContext, LayoutContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Dimension, Edges, FlexibleDimension};
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, Widget, WidgetRef};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrapperWidget};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A widget aligns its contents to its container&#39;s boundaries.
@@ -331,31 +325,31 @@
     }
 }
 
-<span class="kw">impl </span>Widget <span class="kw">for </span>Align {
-    <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        context.for_other(<span class="kw-2">&amp;</span>child).redraw();
+<span class="kw">impl </span>WrapperWidget <span class="kw">for </span>Align {
+    <span class="kw">fn </span>child(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.child
     }
 
-    <span class="kw">fn </span>layout(
+    <span class="kw">fn </span>layout_child(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
-    ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
+    ) -&gt; Rect&lt;kludgine::figures::units::Px&gt; {
         <span class="kw">let </span>layout = <span class="self">self</span>.measure(available_space, context);
-        context.set_child_layout(
-            <span class="kw-2">&amp;</span>child,
-            Rect::new(
-                Point::new(
-                    layout.margin.left.into_signed(),
-                    layout.margin.top.into_signed(),
-                ),
-                layout.content.into_signed(),
-            ),
-        );
 
-        layout.size().into_unsigned()
+        Rect::new(
+            Point::new(
+                layout.margin.left.into_signed(),
+                layout.margin.top.into_signed(),
+            ),
+            layout.content.into_signed(),
+        )
+    }
+}
+
+<span class="kw">impl </span>AsMut&lt;WidgetRef&gt; <span class="kw">for </span>Align {
+    <span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.child
     }
 }
 
@@ -363,11 +357,5 @@
 </span><span class="kw">struct </span>Layout {
     margin: Edges&lt;UPx&gt;,
     content: Size&lt;UPx&gt;,
-}
-
-<span class="kw">impl </span>Layout {
-    <span class="kw">pub fn </span>size(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Size&lt;UPx&gt; {
-        <span class="self">self</span>.margin.size() + <span class="self">self</span>.content
-    }
 }
 </code></pre></div></section></main></body></html>

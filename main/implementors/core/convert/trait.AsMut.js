@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"gooey":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.73.0/core/convert/trait.AsMut.html\" title=\"trait core::convert::AsMut\">AsMut</a>&lt;<a class=\"enum\" href=\"gooey/widget/enum.WidgetRef.html\" title=\"enum gooey::widget::WidgetRef\">WidgetRef</a>&gt; for <a class=\"struct\" href=\"gooey/widgets/struct.Align.html\" title=\"struct gooey::widgets::Align\">Align</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
