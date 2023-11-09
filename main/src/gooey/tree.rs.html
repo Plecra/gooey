@@ -442,6 +442,9 @@
 <a href="#442" id="442">442</a>
 <a href="#443" id="443">443</a>
 <a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::sync::{Arc, Mutex, PoisonError};
@@ -449,6 +452,7 @@
 <span class="kw">use </span>kludgine::figures::units::Px;
 <span class="kw">use </span>kludgine::figures::{Point, Rect};
 
+<span class="kw">use </span><span class="kw">crate</span>::context::WidgetContext;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::VisualOrder;
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefaultvalue, ComponentDefinition, ComponentType, Styles};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{ManagedWidget, WidgetId, WidgetInstance};
@@ -740,11 +744,12 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         perspective: <span class="kw-2">&amp;</span>ManagedWidget,
         component: <span class="kw-2">&amp;</span>Component,
+        context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Component::ComponentType {
         <span class="self">self</span>.data
             .lock()
             .map_or_else(PoisonError::into_inner, |g| g)
-            .query_style(perspective.id(), component)
+            .query_style(perspective.id(), component, context)
     }
 }
 
@@ -840,8 +845,8 @@
             <span class="kw">let </span>node = <span class="kw-2">&amp;</span><span class="self">self</span>.nodes[<span class="kw-2">&amp;</span>perspective];
             <span class="kw">if let </span><span class="prelude-val">Some</span>(styles) = <span class="kw-2">&amp;</span>node.styles {
                 query.retain(|name| {
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(component) = styles.get(<span class="macro">dbg!</span>(name)) {
-                        resolved.insert(name, <span class="macro">dbg!</span>(component.clone()));
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(component) = styles.get_named(name) {
+                        resolved.insert(name, component.clone());
                         <span class="bool-val">false
                     </span>} <span class="kw">else </span>{
                         <span class="bool-val">true
@@ -858,17 +863,18 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="kw-2">mut </span>perspective: WidgetId,
         query: <span class="kw-2">&amp;</span>Component,
+        context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Component::ComponentType {
         <span class="kw">let </span>name = query.name();
         <span class="kw">loop </span>{
             <span class="kw">let </span>node = <span class="kw-2">&amp;</span><span class="self">self</span>.nodes[<span class="kw-2">&amp;</span>perspective];
             <span class="kw">if let </span><span class="prelude-val">Some</span>(styles) = <span class="kw-2">&amp;</span>node.styles {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(component) = styles.get(<span class="kw-2">&amp;</span>name) {
-                    <span class="kw">let </span><span class="prelude-val">Ok</span>(value) =
-                        &lt;Component::ComponentType&gt;::try_from_component(component.clone())
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(component) = styles.get_named(<span class="kw-2">&amp;</span>name) {
+                    <span class="kw">let </span><span class="prelude-val">Ok</span>(value) = &lt;Component::ComponentType&gt;::try_from_component(component.get())
                     <span class="kw">else </span>{
                         <span class="kw">break</span>;
                     };
+                    component.redraw_when_changed(context);
                     <span class="kw">return </span>value;
                 }
             }

@@ -73,6 +73,7 @@
 <a href="#73" id="73">73</a>
 <a href="#74" id="74">74</a>
 <a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoUnsigned, Point, ScreenScale, Size};
 <span class="kw">use </span>kludgine::text::{MeasuredText, Text, TextOrigin};
@@ -105,18 +106,19 @@
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="self">self</span>.text.redraw_when_changed(context);
 
-        <span class="kw">let </span>size = context.graphics.region().size;
+        <span class="kw">let </span>size = context.gfx.region().size;
         <span class="kw">let </span>center = Point::from(size) / <span class="number">2</span>;
         <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor]);
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(measured) = <span class="kw-2">&amp;</span><span class="self">self</span>.prepared_text {
             context
-                .graphics
+                .gfx
                 .draw_measured_text(measured, TextOrigin::Center, center, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
         } <span class="kw">else </span>{
+            <span class="kw">let </span>text_color = styles.get(<span class="kw-2">&amp;</span>TextColor, context);
             <span class="self">self</span>.text.map(|contents| {
-                context.graphics.draw_text(
-                    Text::new(contents, styles.get_or_default(<span class="kw-2">&amp;</span>TextColor))
+                context.gfx.draw_text(
+                    Text::new(contents, text_color)
                         .wrap_at(size.width)
                         .origin(TextOrigin::Center),
                     center,
@@ -134,12 +136,12 @@
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>padding = context
             .query_style(<span class="kw-2">&amp;</span>IntrinsicPadding)
-            .into_px(context.graphics.scale())
+            .into_px(context.gfx.scale())
             .into_unsigned();
         <span class="kw">let </span>width = available_space.width.max().try_into().unwrap_or(Px::MAX);
         <span class="self">self</span>.text.map(|contents| {
             <span class="kw">let </span>measured = context
-                .graphics
+                .gfx
                 .measure_text(Text::from(contents).wrap_at(width));
             <span class="kw">let </span><span class="kw-2">mut </span>size = measured.size.try_cast().unwrap_or_default();
             size += padding * <span class="number">2</span>;

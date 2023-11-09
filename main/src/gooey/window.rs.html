@@ -1138,10 +1138,10 @@
         <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span><span class="kw-2">mut </span>context = GraphicsContext {
             widget: WidgetContext::new(<span class="self">self</span>.root.clone(), <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status, <span class="kw-2">&amp;mut </span>window),
-            graphics: Exclusive::Owned(Graphics::new(graphics)),
+            gfx: Exclusive::Owned(Graphics::new(graphics)),
         };
         <span class="kw">let </span><span class="kw-2">mut </span>layout_context = LayoutContext::new(<span class="kw-2">&amp;mut </span>context);
-        <span class="kw">let </span>window_size = layout_context.graphics.size();
+        <span class="kw">let </span>window_size = layout_context.gfx.size();
         <span class="kw">let </span>actual_size = layout_context.layout(Size::new(
             ConstraintLimit::ClippedAfter(window_size.width),
             ConstraintLimit::ClippedAfter(window_size.height),

@@ -1061,6 +1061,8 @@
 <a href="#1061" id="1061">1061</a>
 <a href="#1062" id="1062">1062</a>
 <a href="#1063" id="1063">1063</a>
+<a href="#1064" id="1064">1064</a>
+<a href="#1065" id="1065">1065</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
@@ -1464,7 +1466,7 @@
     <span class="doccomment">/// The graphics context clipped and offset to the area of the widget being
     /// rendered. Drawing at 0,0 will draw at the top-left pixel of the laid-out
     /// widget region.
-    </span><span class="kw">pub </span>graphics: Exclusive&lt;<span class="lifetime">&#39;context</span>, Graphics&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;&gt;,
+    </span><span class="kw">pub </span>gfx: Exclusive&lt;<span class="lifetime">&#39;context</span>, Graphics&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; GraphicsContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
@@ -1472,7 +1474,7 @@
     </span><span class="kw">pub fn </span>borrowed(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
         GraphicsContext {
             widget: <span class="self">self</span>.widget.borrowed(),
-            graphics: Exclusive::Borrowed(<span class="kw-2">&amp;mut </span><span class="self">self</span>.graphics),
+            gfx: Exclusive::Borrowed(<span class="kw-2">&amp;mut </span><span class="self">self</span>.gfx),
         }
     }
 
@@ -1491,12 +1493,12 @@
         widget.manage(<span class="self">self</span>).map(|widget| {
             <span class="kw">let </span>widget = <span class="self">self</span>.widget.for_other(<span class="kw-2">&amp;</span>widget);
             <span class="kw">let </span>layout = widget.last_layout().map_or_else(
-                || Rect::from(<span class="self">self</span>.graphics.clip_rect().size).into_signed(),
-                |rect| rect - <span class="self">self</span>.graphics.region().origin,
+                || Rect::from(<span class="self">self</span>.gfx.clip_rect().size).into_signed(),
+                |rect| rect - <span class="self">self</span>.gfx.region().origin,
             );
             GraphicsContext {
                 widget,
-                graphics: Exclusive::Owned(<span class="self">self</span>.graphics.clipped_to(layout)),
+                gfx: Exclusive::Owned(<span class="self">self</span>.gfx.clipped_to(layout)),
             }
         })
     }
@@ -1505,7 +1507,7 @@
     </span><span class="kw">pub fn </span>clipped_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, clip: Rect&lt;Px&gt;) -&gt; GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
         GraphicsContext {
             widget: <span class="self">self</span>.widget.borrowed(),
-            graphics: Exclusive::Owned(<span class="self">self</span>.graphics.clipped_to(clip)),
+            gfx: Exclusive::Owned(<span class="self">self</span>.gfx.clipped_to(clip)),
         }
     }
 
@@ -1519,13 +1521,13 @@
             <span class="kw">return</span>;
         }
 
-        <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.graphics.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
+        <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
         <span class="kw">let </span>focus_ring = Shape::stroked_rect(
             visible_rect,
-            styles.get_or_default(<span class="kw-2">&amp;</span>HighlightColor),
+            styles.get(<span class="kw-2">&amp;</span>HighlightColor, <span class="self">self</span>),
             StrokeOptions::default(),
         );
-        <span class="self">self</span>.graphics
+        <span class="self">self</span>.gfx
             .draw_shape(<span class="kw-2">&amp;</span>focus_ring, Point::default(), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
     }
 
@@ -1582,7 +1584,9 @@
 
 <span class="doccomment">/// A context to a function that is rendering a widget.
 </span><span class="kw">pub struct </span>LayoutContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
-    graphics: GraphicsContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;,
+    <span class="doccomment">/// The graphics context that this layout operation is being performed
+    /// within.
+    </span><span class="kw">pub </span>graphics: GraphicsContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;,
     persist_layout: bool,
 }
 
@@ -1710,7 +1714,7 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;window</span>&gt; AsEventContext&lt;<span class="lifetime">&#39;window</span>&gt; <span class="kw">for </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
     <span class="kw">fn </span>as_event_context(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;window</span>&gt; {
-        EventContext::new(<span class="self">self</span>.widget.borrowed(), <span class="kw-2">&amp;mut </span><span class="self">self</span>.graphics)
+        EventContext::new(<span class="self">self</span>.widget.borrowed(), <span class="kw-2">&amp;mut </span><span class="self">self</span>.gfx)
     }
 }
 
@@ -1949,7 +1953,7 @@
     ) -&gt; Component::ComponentType {
         <span class="self">self</span>.current_node
             .tree
-            .query_style(<span class="kw-2">&amp;</span><span class="self">self</span>.current_node, query)
+            .query_style(<span class="kw-2">&amp;</span><span class="self">self</span>.current_node, query, <span class="self">self</span>)
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>handle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; WindowHandle {

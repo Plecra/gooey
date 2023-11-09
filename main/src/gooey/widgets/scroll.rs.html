@@ -430,13 +430,13 @@
             </span>.scrollbar_opacity
             .transition_to(ZeroToOne::ONE)
             .over(Duration::from_millis(<span class="number">300</span>))
-            .with_easing(styles.get_or_default(<span class="kw-2">&amp;</span>EasingIn))
+            .with_easing(styles.get(<span class="kw-2">&amp;</span>EasingIn, context))
             .and_then(Duration::from_secs(<span class="number">1</span>))
             .and_then(
                 <span class="self">self</span>.scrollbar_opacity
                     .transition_to(ZeroToOne::ZERO)
                     .over(Duration::from_millis(<span class="number">300</span>))
-                    .with_easing(styles.get_or_default(<span class="kw-2">&amp;</span>EasingOut)),
+                    .with_easing(styles.get(<span class="kw-2">&amp;</span>EasingOut, context)),
             )
             .spawn();
     }
@@ -462,7 +462,7 @@
 
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::context::GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         context.redraw_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>.scrollbar_opacity);
-        <span class="kw">let </span><span class="prelude-val">Some</span>(visible_rect) = context.graphics.visible_rect() <span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>(visible_rect) = context.gfx.visible_rect() <span class="kw">else </span>{
             <span class="kw">return</span>;
         };
         <span class="kw">let </span>visible_bottom_right = visible_rect.into_signed().extent();
@@ -471,7 +471,7 @@
         context.for_other(<span class="kw-2">&amp;</span>managed).redraw();
 
         <span class="kw">if </span><span class="self">self</span>.horizontal_bar.amount_hidden &gt; <span class="number">0 </span>{
-            context.graphics.draw_shape(
+            context.gfx.draw_shape(
                 <span class="kw-2">&amp;</span>Shape::filled_rect(
                     Rect::new(
                         Point::new(
@@ -489,7 +489,7 @@
         }
 
         <span class="kw">if </span><span class="self">self</span>.vertical_bar.amount_hidden &gt; <span class="number">0 </span>{
-            context.graphics.draw_shape(
+            context.gfx.draw_shape(
                 <span class="kw-2">&amp;</span>Shape::filled_rect(
                     Rect::new(
                         Point::new(
@@ -514,11 +514,11 @@
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>ScrollBarThickness, <span class="kw-2">&amp;</span>LineHeight]);
         <span class="self">self</span>.bar_width = styles
-            .get_or_default(<span class="kw-2">&amp;</span>ScrollBarThickness)
-            .into_px(context.graphics.scale());
+            .get(<span class="kw-2">&amp;</span>ScrollBarThickness, context)
+            .into_px(context.gfx.scale());
         <span class="self">self</span>.line_height = styles
-            .get_or_default(<span class="kw-2">&amp;</span>LineHeight)
-            .into_px(context.graphics.scale());
+            .get(<span class="kw-2">&amp;</span>LineHeight, context)
+            .into_px(context.gfx.scale());
 
         <span class="kw">let </span>(<span class="kw-2">mut </span>scroll, current_max_scroll) = <span class="self">self</span>.constrain_scroll();
 

@@ -200,7 +200,7 @@
         <span class="kw">let </span>focus = <span class="self">self</span>.focus.get();
         <span class="comment">// TODO this needs to be updated to support being placed in side of a scroll view.
         </span><span class="self">self</span>.layers.map(|layers| {
-            tilemap::draw(layers, focus, <span class="self">self</span>.zoom, context.graphics.inner_graphics());
+            tilemap::draw(layers, focus, <span class="self">self</span>.zoom, context.gfx.inner_graphics());
         });
         context.draw_focus_ring();
 

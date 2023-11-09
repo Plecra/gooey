@@ -817,7 +817,7 @@
 
         <span class="kw">let </span>content_size = <span class="self">self</span>.layout.update(
             available_space,
-            context.graphics.scale(),
+            context.gfx.scale(),
             |child_index, constraints, persist| {
                 <span class="kw">let </span><span class="kw-2">mut </span>context = context.for_other(<span class="kw-2">&amp;</span><span class="self">self</span>.synced_children[child_index]);
                 <span class="kw">if </span>!persist {

@@ -399,6 +399,7 @@
 <a href="#399" id="399">399</a>
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -489,15 +490,15 @@
             <span class="kw-2">&amp;</span>Easing,
         ]);
         <span class="kw">let </span>background_color = <span class="kw">if </span>!<span class="self">self</span>.enabled.get() {
-            styles.get_or_default(<span class="kw-2">&amp;</span>ButtonDisabledBackground)
+            styles.get(<span class="kw-2">&amp;</span>ButtonDisabledBackground, context)
         } <span class="kw">else if </span>context.active() {
-            styles.get_or_default(<span class="kw-2">&amp;</span>ButtonActiveBackground)
+            styles.get(<span class="kw-2">&amp;</span>ButtonActiveBackground, context)
         } <span class="kw">else if </span>context.hovered() {
-            styles.get_or_default(<span class="kw-2">&amp;</span>ButtonHoverBackground)
+            styles.get(<span class="kw-2">&amp;</span>ButtonHoverBackground, context)
         } <span class="kw">else if </span>context.is_default() {
-            styles.get_or_default(<span class="kw-2">&amp;</span>PrimaryColor)
+            styles.get(<span class="kw-2">&amp;</span>PrimaryColor, context)
         } <span class="kw">else </span>{
-            styles.get_or_default(<span class="kw-2">&amp;</span>ButtonBackground)
+            styles.get(<span class="kw-2">&amp;</span>ButtonBackground, context)
         };
 
         <span class="kw">match </span>(immediate, <span class="kw-2">&amp;</span><span class="self">self</span>.background_color) {
@@ -505,7 +506,7 @@
                 <span class="self">self</span>.background_color_animation = dynamic
                     .transition_to(background_color)
                     .over(Duration::from_millis(<span class="number">150</span>))
-                    .with_easing(styles.get_or_default(<span class="kw-2">&amp;</span>Easing))
+                    .with_easing(styles.get(<span class="kw-2">&amp;</span>Easing, context))
                     .spawn();
             }
             (<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(dynamic)) =&gt; {
@@ -540,7 +541,7 @@
             <span class="self">self</span>.currently_enabled = enabled;
         }
 
-        <span class="kw">let </span>size = context.graphics.region().size;
+        <span class="kw">let </span>size = context.gfx.region().size;
         <span class="kw">let </span>center = Point::from(size) / <span class="number">2</span>;
         <span class="self">self</span>.label.redraw_when_changed(context);
         <span class="self">self</span>.enabled.redraw_when_changed(context);
@@ -558,7 +559,7 @@
         <span class="kw">let </span>background = <span class="self">self</span>.current_background_color(context);
         <span class="kw">let </span>background = Shape::filled_rect(visible_rect, background);
         context
-            .graphics
+            .gfx
             .draw_shape(<span class="kw-2">&amp;</span>background, Point::default(), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
 
         <span class="kw">if </span>context.focused() {
@@ -566,8 +567,9 @@
         }
 
         <span class="self">self</span>.label.map(|label| {
-            context.graphics.draw_text(
-                Text::new(label, styles.get_or_default(<span class="kw-2">&amp;</span>TextColor))
+            <span class="kw">let </span>text_color = styles.get(<span class="kw-2">&amp;</span>TextColor, context);
+            context.gfx.draw_text(
+                Text::new(label, text_color)
                     .origin(kludgine::text::TextOrigin::Center)
                     .wrap_at(size.width),
                 center,
@@ -647,12 +649,12 @@
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>padding = context
             .query_style(<span class="kw-2">&amp;</span>IntrinsicPadding)
-            .into_px(context.graphics.scale())
+            .into_px(context.gfx.scale())
             .into_unsigned();
         <span class="kw">let </span>width = available_space.width.max().try_into().unwrap_or(Px::MAX);
         <span class="self">self</span>.label.map(|label| {
             <span class="kw">let </span>measured = context
-                .graphics
+                .gfx
                 .measure_text::&lt;Px&gt;(Text::from(label).wrap_at(width));
 
             <span class="kw">let </span><span class="kw-2">mut </span>size = measured.size.into_unsigned();

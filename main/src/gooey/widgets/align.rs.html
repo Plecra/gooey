@@ -302,8 +302,8 @@
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Layout {
         <span class="kw">let </span>margin = <span class="self">self</span>.edges.get();
-        <span class="kw">let </span>vertical = FrameInfo::new(context.graphics.scale(), margin.top, margin.bottom);
-        <span class="kw">let </span>horizontal = FrameInfo::new(context.graphics.scale(), margin.left, margin.right);
+        <span class="kw">let </span>vertical = FrameInfo::new(context.gfx.scale(), margin.top, margin.bottom);
+        <span class="kw">let </span>horizontal = FrameInfo::new(context.gfx.scale(), margin.left, margin.right);
 
         <span class="kw">let </span>content_available = Size::new(
             horizontal.child_constraint(available_space.width),

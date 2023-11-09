@@ -94,10 +94,6 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, Rect, ScreenScale, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
@@ -169,17 +165,13 @@
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         <span class="kw">let </span>size = <span class="kw">if let </span>(<span class="prelude-val">Some</span>(width), <span class="prelude-val">Some</span>(height)) = (<span class="self">self</span>.width, <span class="self">self</span>.height) {
             Size::new(
-                width.into_px(context.graphics.scale()).into_unsigned(),
-                height.into_px(context.graphics.scale()).into_unsigned(),
+                width.into_px(context.gfx.scale()).into_unsigned(),
+                height.into_px(context.gfx.scale()).into_unsigned(),
             )
         } <span class="kw">else </span>{
             <span class="kw">let </span>available_space = Size::new(
-                override_constraint(available_space.width, <span class="self">self</span>.width, context.graphics.scale()),
-                override_constraint(
-                    available_space.height,
-                    <span class="self">self</span>.height,
-                    context.graphics.scale(),
-                ),
+                override_constraint(available_space.width, <span class="self">self</span>.width, context.gfx.scale()),
+                override_constraint(available_space.height, <span class="self">self</span>.height, context.gfx.scale()),
             );
             context.for_other(<span class="kw-2">&amp;</span>child).layout(available_space)
         };
