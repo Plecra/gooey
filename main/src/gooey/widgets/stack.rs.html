@@ -686,8 +686,6 @@
 <a href="#686" id="686">686</a>
 <a href="#687" id="687">687</a>
 <a href="#688" id="688">688</a>
-<a href="#689" id="689">689</a>
-<a href="#690" id="690">690</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines a collection of [`Children`] widgets into one.
 </span><span class="comment">// TODO on scale change, all `Lp` children need to resize
 
@@ -1093,18 +1091,14 @@
         <span class="comment">// Measure the children that fit their content
         </span><span class="kw">for </span><span class="kw-2">&amp;</span>id <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.measured {
             <span class="kw">let </span>index = <span class="self">self</span>.children.index_of_id(id).expect(<span class="string">&quot;child not found&quot;</span>);
-            <span class="kw">if </span>remaining &gt; <span class="number">0 </span>{
-                <span class="kw">let </span>(measured, <span class="kw">_</span>) = <span class="self">self</span>.orientation.split_size(measure(
-                    index,
-                    <span class="self">self</span>.orientation
-                        .make_size(ConstraintLimit::ClippedAfter(remaining), other_constraint),
-                    <span class="bool-val">false</span>,
-                ));
-                <span class="self">self</span>.layouts[index].size = measured;
-                remaining = remaining.saturating_sub(measured);
-            } <span class="kw">else </span>{
-                <span class="self">self</span>.layouts[index].size = UPx(<span class="number">0</span>);
-            }
+            <span class="kw">let </span>(measured, <span class="kw">_</span>) = <span class="self">self</span>.orientation.split_size(measure(
+                index,
+                <span class="self">self</span>.orientation
+                    .make_size(ConstraintLimit::ClippedAfter(remaining), other_constraint),
+                <span class="bool-val">false</span>,
+            ));
+            <span class="self">self</span>.layouts[index].size = measured;
+            remaining = remaining.saturating_sub(measured);
         }
 
         <span class="comment">// Measure the weighted children within the remaining space
@@ -1139,14 +1133,16 @@
             offset += <span class="self">self</span>.layouts[index].size;
             <span class="kw">let </span>(<span class="kw">_</span>, measured) = <span class="self">self</span>.orientation.split_size(measure(
                 index,
-                <span class="self">self</span>.orientation.make_size(
+                <span class="macro">dbg!</span>(<span class="self">self</span>.orientation.make_size(
                     ConstraintLimit::Known(<span class="self">self</span>.layouts[index].size.into_px(scale).into_unsigned()),
                     other_constraint,
-                ),
+                )),
                 <span class="bool-val">true</span>,
             ));
             <span class="self">self</span>.other = <span class="self">self</span>.other.max(measured);
         }
+
+        <span class="macro">println!</span>(<span class="string">&quot;Total height: {offset}&quot;</span>);
 
         <span class="self">self</span>.other = <span class="kw">match </span>other_constraint {
             ConstraintLimit::Known(max) =&gt; <span class="self">self</span>.other.max(max),
