@@ -995,7 +995,6 @@
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::render::Drawing;
-<span class="kw">use </span>kludgine::shapes::Shape;
 <span class="kw">use </span>kludgine::Kludgine;
 <span class="kw">use </span>tracing::Level;
 
@@ -1005,14 +1004,14 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::LayoutOrder;
-<span class="kw">use </span><span class="kw">crate</span>::styles::{ColorSource, ThemePair};
+<span class="kw">use </span><span class="kw">crate</span>::styles::ThemePair;
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, DynamicReader, IntoDynamic, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{
     EventHandling, ManagedWidget, Widget, WidgetId, WidgetInstance, HANDLED, IGNORED,
 };
-<span class="kw">use </span><span class="kw">crate</span>::widgets::Resize;
+<span class="kw">use </span><span class="kw">crate</span>::widgets::{Expand, Resize};
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
 <span class="kw">use crate</span>::{initialize_tracing, ConstraintLimit, Run};
 
@@ -1162,14 +1161,7 @@
                 ..WindowAttributes::default()
             },
             context,
-            theme: Value::Constant(ThemePair::from_sources(
-                ColorSource::new(-<span class="number">120.</span>, <span class="number">0.8</span>),
-                ColorSource::new(<span class="number">0.</span>, <span class="number">0.3</span>),
-                ColorSource::new(-<span class="number">30.</span>, <span class="number">0.3</span>),
-                ColorSource::new(<span class="number">30.</span>, <span class="number">0.8</span>),
-                ColorSource::new(<span class="number">0.</span>, <span class="number">0.001</span>),
-                ColorSource::new(<span class="number">30.</span>, <span class="number">0.</span>),
-            )),
+            theme: Value::default(),
             occluded: <span class="prelude-val">None</span>,
             focused: <span class="prelude-val">None</span>,
         }
@@ -1306,8 +1298,9 @@
         resizable: bool,
         window: <span class="kw-2">&amp;</span>kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         graphics: <span class="kw-2">&amp;mut </span>kludgine::Graphics&lt;<span class="lifetime">&#39;_</span>&gt;,
-    ) {
+    ) -&gt; bool {
         <span class="kw">let </span><span class="kw-2">mut </span>root_or_child = <span class="self">self</span>.root.widget.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>is_expanded = <span class="bool-val">false</span>;
         <span class="kw">loop </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>widget = root_or_child.lock();
             <span class="kw">if let </span><span class="prelude-val">Some</span>(resize) = widget.downcast_ref::&lt;Resize&gt;() {
@@ -1342,8 +1335,11 @@
                     window.set_max_inner_size(new_max_size);
                 }
                 <span class="self">self</span>.max_inner_size = new_max_size;
-                <span class="kw">break</span>;
-            } <span class="kw">else if let </span><span class="prelude-val">Some</span>(wraps) = widget.as_widget().wraps().cloned() {
+            } <span class="kw">else if </span>widget.downcast_ref::&lt;Expand&gt;().is_some() {
+                is_expanded = <span class="bool-val">true</span>;
+            }
+
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(wraps) = widget.as_widget().wraps().cloned() {
                 drop(widget);
 
                 root_or_child = wraps;
@@ -1351,6 +1347,8 @@
                 <span class="kw">break</span>;
             }
         }
+
+        is_expanded
     }
 }
 
@@ -1435,7 +1433,7 @@
         <span class="self">self</span>.root.tree.reset_render_order();
 
         <span class="kw">let </span>resizable = window.winit().is_resizable();
-        <span class="self">self</span>.constrain_window_resizing(resizable, <span class="kw-2">&amp;</span>window, graphics);
+        <span class="kw">let </span>is_expanded = <span class="self">self</span>.constrain_window_resizing(resizable, <span class="kw-2">&amp;</span>window, graphics);
 
         <span class="kw">let </span>graphics = <span class="self">self</span>.contents.new_frame(graphics);
         <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
@@ -1452,16 +1450,18 @@
         <span class="kw">let </span>window_size = layout_context.gfx.size();
 
         <span class="kw">let </span>background_color = layout_context.theme().surface.color;
-        layout_context.graphics.gfx.draw_shape(
-            <span class="kw-2">&amp;</span>Shape::filled_rect(window_size.into(), background_color),
-            Point::default(),
-            <span class="prelude-val">None</span>,
-            <span class="prelude-val">None</span>,
-        );
-        <span class="kw">let </span>actual_size = layout_context.layout(Size::new(
-            ConstraintLimit::ClippedAfter(window_size.width),
-            ConstraintLimit::ClippedAfter(window_size.height),
-        ));
+        layout_context.graphics.gfx.fill(background_color);
+        <span class="kw">let </span>actual_size = layout_context.layout(<span class="kw">if </span>is_expanded {
+            Size::new(
+                ConstraintLimit::Known(window_size.width),
+                ConstraintLimit::Known(window_size.height),
+            )
+        } <span class="kw">else </span>{
+            Size::new(
+                ConstraintLimit::ClippedAfter(window_size.width),
+                ConstraintLimit::ClippedAfter(window_size.height),
+            )
+        });
         <span class="kw">let </span>render_size = actual_size.min(window_size);
         <span class="kw">if </span>render_size != window_size &amp;&amp; !resizable {
             <span class="kw">let </span><span class="kw-2">mut </span>new_size = actual_size;

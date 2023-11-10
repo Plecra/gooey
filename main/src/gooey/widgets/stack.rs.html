@@ -687,6 +687,7 @@
 <a href="#687" id="687">687</a>
 <a href="#688" id="688">688</a>
 <a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines a collection of [`Children`] widgets into one.
 </span><span class="comment">// TODO on scale change, all `Lp` children need to resize
 
@@ -776,11 +777,10 @@
                             </span><span class="kw">let </span>guard = widget.lock();
                             <span class="kw">let </span>(<span class="kw-2">mut </span>widget, dimension) =
                                 <span class="kw">if let </span><span class="prelude-val">Some</span>(expand) = guard.downcast_ref::&lt;Expand&gt;() {
+                                    <span class="kw">let </span>weight = expand.weight;
                                     (
-                                        expand.child().clone(),
-                                        StackDimension::Fractional {
-                                            weight: expand.weight,
-                                        },
+                                        WidgetRef::Unmounted(widget.clone()),
+                                        StackDimension::Fractional { weight },
                                     )
                                 } <span class="kw">else if let </span><span class="prelude-val">Some</span>((child, size)) =
                                     guard.downcast_ref::&lt;Resize&gt;().and_then(|r| {
@@ -828,8 +828,10 @@
 
 <span class="kw">impl </span>Widget <span class="kw">for </span>Stack {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="kw">for </span>child <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.synced_children {
-            context.for_other(child).redraw();
+        <span class="kw">for </span>(layout, child) <span class="kw">in </span><span class="self">self</span>.layout.iter().zip(<span class="kw-2">&amp;</span><span class="self">self</span>.synced_children) {
+            <span class="kw">if </span>layout.size &gt; <span class="number">0 </span>{
+                context.for_other(child).redraw();
+            }
         }
     }
 

@@ -1251,6 +1251,23 @@
 <a href="#1251" id="1251">1251</a>
 <a href="#1252" id="1252">1252</a>
 <a href="#1253" id="1253">1253</a>
+<a href="#1254" id="1254">1254</a>
+<a href="#1255" id="1255">1255</a>
+<a href="#1256" id="1256">1256</a>
+<a href="#1257" id="1257">1257</a>
+<a href="#1258" id="1258">1258</a>
+<a href="#1259" id="1259">1259</a>
+<a href="#1260" id="1260">1260</a>
+<a href="#1261" id="1261">1261</a>
+<a href="#1262" id="1262">1262</a>
+<a href="#1263" id="1263">1263</a>
+<a href="#1264" id="1264">1264</a>
+<a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -2139,6 +2156,23 @@
             scrim: neutral.color(<span class="number">1</span>),
             shadow: neutral.color(<span class="number">1</span>),
         }
+    }
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>ThemePair {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="kw">const </span>PRIMARY_HUE: f32 = -<span class="number">120.</span>;
+        <span class="kw">const </span>SECONDARY_HUE: f32 = <span class="number">0.</span>;
+        <span class="kw">const </span>TERTIARY_HUE: f32 = -<span class="number">30.</span>;
+        <span class="kw">const </span>ERROR_HUE: f32 = <span class="number">30.</span>;
+        <span class="self">Self</span>::from_sources(
+            ColorSource::new(PRIMARY_HUE, <span class="number">0.8</span>),
+            ColorSource::new(SECONDARY_HUE, <span class="number">0.3</span>),
+            ColorSource::new(TERTIARY_HUE, <span class="number">0.3</span>),
+            ColorSource::new(ERROR_HUE, <span class="number">0.8</span>),
+            ColorSource::new(<span class="number">0.</span>, <span class="number">0.001</span>),
+            ColorSource::new(<span class="number">30.</span>, <span class="number">0.</span>),
+        )
     }
 }
 

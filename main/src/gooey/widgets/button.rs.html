@@ -417,12 +417,6 @@
 <a href="#417" id="417">417</a>
 <a href="#418" id="418">418</a>
 <a href="#419" id="419">419</a>
-<a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
-<a href="#422" id="422">422</a>
-<a href="#423" id="423">423</a>
-<a href="#424" id="424">424</a>
-<a href="#425" id="425">425</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -431,7 +425,6 @@
 <span class="kw">use </span>kludgine::app::winit::event::{DeviceId, ElementState, KeyEvent, MouseButton};
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoUnsigned, Point, Rect, ScreenScale, Size};
-<span class="kw">use </span>kludgine::shapes::Shape;
 <span class="kw">use </span>kludgine::text::Text;
 <span class="kw">use </span>kludgine::Color;
 
@@ -601,13 +594,8 @@
         <span class="self">self</span>.label.redraw_when_changed(context);
         <span class="self">self</span>.enabled.redraw_when_changed(context);
 
-        <span class="kw">let </span>visible_rect = Rect::from(size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
-
         <span class="kw">let </span>(background_color, text_color) = <span class="self">self</span>.current_colors(context);
-        <span class="kw">let </span>background = Shape::filled_rect(visible_rect, background_color);
-        context
-            .gfx
-            .draw_shape(<span class="kw-2">&amp;</span>background, Point::default(), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
+        context.gfx.fill(background_color);
 
         <span class="kw">if </span>context.focused() {
             context.draw_focus_ring();
