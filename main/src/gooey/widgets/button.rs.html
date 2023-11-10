@@ -400,6 +400,29 @@
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
 <a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -416,9 +439,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::names::Name;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
-    AutoFocusableControls, Easing, HighlightColor, IntrinsicPadding, PrimaryColor, TextColor,
+    AutoFocusableControls, Easing, IntrinsicPadding, SurfaceColor, TextColor,
 };
-<span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, ComponentGroup, ComponentName, NamedComponent};
+<span class="kw">use </span><span class="kw">crate</span>::styles::{ColorExt, ComponentDefinition, ComponentGroup, ComponentName, NamedComponent};
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{Callback, EventHandling, Widget, HANDLED, IGNORED};
@@ -435,7 +458,8 @@
     currently_enabled: bool,
     buttons_pressed: usize,
     background_color: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;Color&gt;&gt;,
-    background_color_animation: AnimationHandle,
+    text_color: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;Color&gt;&gt;,
+    color_animation: AnimationHandle,
 }
 
 <span class="kw">impl </span>Button {
@@ -448,7 +472,8 @@
             currently_enabled: <span class="bool-val">true</span>,
             buttons_pressed: <span class="number">0</span>,
             background_color: <span class="prelude-val">None</span>,
-            background_color_animation: AnimationHandle::default(),
+            text_color: <span class="prelude-val">None</span>,
+            color_animation: AnimationHandle::default(),
         }
     }
 
@@ -480,54 +505,84 @@
         }
     }
 
-    <span class="kw">fn </span>update_background_color(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;, immediate: bool) {
+    <span class="kw">fn </span>update_colors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;, immediate: bool) {
         <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[
             <span class="kw-2">&amp;</span>ButtonActiveBackground,
             <span class="kw-2">&amp;</span>ButtonBackground,
             <span class="kw-2">&amp;</span>ButtonHoverBackground,
             <span class="kw-2">&amp;</span>ButtonDisabledBackground,
-            <span class="kw-2">&amp;</span>PrimaryColor,
             <span class="kw-2">&amp;</span>Easing,
+            <span class="kw-2">&amp;</span>TextColor,
+            <span class="kw-2">&amp;</span>SurfaceColor,
         ]);
-        <span class="kw">let </span>background_color = <span class="kw">if </span>!<span class="self">self</span>.enabled.get() {
-            styles.get(<span class="kw-2">&amp;</span>ButtonDisabledBackground, context)
-        } <span class="kw">else if </span>context.active() {
-            styles.get(<span class="kw-2">&amp;</span>ButtonActiveBackground, context)
-        } <span class="kw">else if </span>context.hovered() {
-            styles.get(<span class="kw-2">&amp;</span>ButtonHoverBackground, context)
+        <span class="kw">let </span>text_color = styles.get(<span class="kw-2">&amp;</span>TextColor, context);
+        <span class="kw">let </span>surface_color = styles.get(<span class="kw-2">&amp;</span>SurfaceColor, context);
+        <span class="kw">let </span>(background_color, text_color, surface_color) = <span class="kw">if </span>!<span class="self">self</span>.enabled.get() {
+            (
+                styles.get(<span class="kw-2">&amp;</span>ButtonDisabledBackground, context),
+                text_color,
+                surface_color,
+            )
         } <span class="kw">else if </span>context.is_default() {
-            styles.get(<span class="kw-2">&amp;</span>PrimaryColor, context)
+            <span class="comment">// TODO this probably should be de-prioritized if ButtonBackground is explicitly set.
+            </span>(
+                context.theme().primary.color,
+                context.theme().primary.on_color,
+                context.theme().primary.color,
+            )
+        } <span class="kw">else if </span>context.active() {
+            (
+                styles.get(<span class="kw-2">&amp;</span>ButtonActiveBackground, context),
+                text_color,
+                surface_color,
+            )
+        } <span class="kw">else if </span>context.hovered() {
+            (
+                styles.get(<span class="kw-2">&amp;</span>ButtonHoverBackground, context),
+                text_color,
+                surface_color,
+            )
         } <span class="kw">else </span>{
-            styles.get(<span class="kw-2">&amp;</span>ButtonBackground, context)
+            (
+                styles.get(<span class="kw-2">&amp;</span>ButtonBackground, context),
+                text_color,
+                surface_color,
+            )
         };
 
-        <span class="kw">match </span>(immediate, <span class="kw-2">&amp;</span><span class="self">self</span>.background_color) {
-            (<span class="bool-val">false</span>, <span class="prelude-val">Some</span>(dynamic)) =&gt; {
-                <span class="self">self</span>.background_color_animation = dynamic
-                    .transition_to(background_color)
+        <span class="kw">let </span>text_color = background_color.most_contrasting(<span class="kw-2">&amp;</span>[text_color, surface_color]);
+
+        <span class="kw">match </span>(immediate, <span class="kw-2">&amp;</span><span class="self">self</span>.background_color, <span class="kw-2">&amp;</span><span class="self">self</span>.text_color) {
+            (<span class="bool-val">false</span>, <span class="prelude-val">Some</span>(bg), <span class="prelude-val">Some</span>(text)) =&gt; {
+                <span class="self">self</span>.color_animation = (
+                    bg.transition_to(background_color),
+                    text.transition_to(text_color),
+                )
                     .over(Duration::from_millis(<span class="number">150</span>))
                     .with_easing(styles.get(<span class="kw-2">&amp;</span>Easing, context))
                     .spawn();
             }
-            (<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(dynamic)) =&gt; {
-                dynamic.update(background_color);
-                <span class="self">self</span>.background_color_animation.clear();
+            (<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(bg), <span class="prelude-val">Some</span>(text)) =&gt; {
+                bg.update(background_color);
+                text.update(text_color);
+                <span class="self">self</span>.color_animation.clear();
             }
-            (<span class="kw">_</span>, <span class="prelude-val">None</span>) =&gt; {
-                <span class="kw">let </span>dynamic = Dynamic::new(background_color);
-                <span class="self">self</span>.background_color = <span class="prelude-val">Some</span>(dynamic);
+            <span class="kw">_ </span>=&gt; {
+                <span class="self">self</span>.background_color = <span class="prelude-val">Some</span>(Dynamic::new(background_color));
+                <span class="self">self</span>.text_color = <span class="prelude-val">Some</span>(Dynamic::new(text_color));
             }
         }
     }
 
-    <span class="kw">fn </span>current_background_color(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
+    <span class="kw">fn </span>current_colors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; (Color, Color) {
         <span class="kw">if </span><span class="self">self</span>.background_color.is_none() {
-            <span class="self">self</span>.update_background_color(context, <span class="bool-val">false</span>);
+            <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
         }
 
         <span class="kw">let </span>background_color = <span class="self">self</span>.background_color.as_ref().expect(<span class="string">&quot;always initialized&quot;</span>);
-        context.redraw_when_changed(background_color);
-        background_color.get()
+        <span class="kw">let </span>text_color = <span class="self">self</span>.text_color.as_ref().expect(<span class="string">&quot;always initialized&quot;</span>); <span class="comment">// TODO combine these into a single option
+        </span>context.redraw_when_changed(background_color);
+        (background_color.get(), text_color.get())
     }
 }
 
@@ -537,7 +592,7 @@
         <span class="comment">// TODO This seems ugly. It needs context, so it can&#39;t be moved into the
         // dynamic system.
         </span><span class="kw">if </span><span class="self">self</span>.currently_enabled != enabled {
-            <span class="self">self</span>.update_background_color(context, <span class="bool-val">false</span>);
+            <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
             <span class="self">self</span>.currently_enabled = enabled;
         }
 
@@ -546,28 +601,19 @@
         <span class="self">self</span>.label.redraw_when_changed(context);
         <span class="self">self</span>.enabled.redraw_when_changed(context);
 
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[
-            <span class="kw-2">&amp;</span>TextColor,
-            <span class="kw-2">&amp;</span>HighlightColor,
-            <span class="kw-2">&amp;</span>ButtonActiveBackground,
-            <span class="kw-2">&amp;</span>ButtonBackground,
-            <span class="kw-2">&amp;</span>ButtonHoverBackground,
-        ]);
-
         <span class="kw">let </span>visible_rect = Rect::from(size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
 
-        <span class="kw">let </span>background = <span class="self">self</span>.current_background_color(context);
-        <span class="kw">let </span>background = Shape::filled_rect(visible_rect, background);
+        <span class="kw">let </span>(background_color, text_color) = <span class="self">self</span>.current_colors(context);
+        <span class="kw">let </span>background = Shape::filled_rect(visible_rect, background_color);
         context
             .gfx
             .draw_shape(<span class="kw-2">&amp;</span>background, Point::default(), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
 
         <span class="kw">if </span>context.focused() {
-            context.draw_focus_ring_using(<span class="kw-2">&amp;</span>styles);
+            context.draw_focus_ring();
         }
 
         <span class="self">self</span>.label.map(|label| {
-            <span class="kw">let </span>text_color = styles.get(<span class="kw-2">&amp;</span>TextColor, context);
             context.gfx.draw_text(
                 Text::new(label, text_color)
                     .origin(kludgine::text::TextOrigin::Center)
@@ -694,11 +740,11 @@
     }
 
     <span class="kw">fn </span>unhover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="self">self</span>.update_background_color(context, <span class="bool-val">false</span>);
+        <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
     }
 
     <span class="kw">fn </span>hover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="self">self</span>.update_background_color(context, <span class="bool-val">false</span>);
+        <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
     }
 
     <span class="kw">fn </span>focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
@@ -715,11 +761,11 @@
         </span><span class="kw">if </span><span class="self">self</span>.buttons_pressed == <span class="number">0 </span>{
             <span class="self">self</span>.invoke_on_click();
         }
-        <span class="self">self</span>.update_background_color(context, <span class="bool-val">true</span>);
+        <span class="self">self</span>.update_colors(context, <span class="bool-val">true</span>);
     }
 
     <span class="kw">fn </span>deactivate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="self">self</span>.update_background_color(context, <span class="bool-val">false</span>);
+        <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
     }
 }
 
@@ -742,8 +788,8 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>ButtonBackground {
     <span class="kw">type </span>ComponentType = Color;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Color {
-        Color::new(<span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>, <span class="number">255</span>)
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
+        context.theme().surface.color
     }
 }
 
@@ -760,8 +806,8 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>ButtonActiveBackground {
     <span class="kw">type </span>ComponentType = Color;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Color {
-        Color::new(<span class="number">30</span>, <span class="number">30</span>, <span class="number">30</span>, <span class="number">255</span>)
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
+        context.theme().surface.dim_color
     }
 }
 
@@ -779,8 +825,8 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>ButtonHoverBackground {
     <span class="kw">type </span>ComponentType = Color;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Color {
-        Color::new(<span class="number">40</span>, <span class="number">40</span>, <span class="number">40</span>, <span class="number">255</span>)
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
+        context.theme().surface.bright_color
     }
 }
 
@@ -798,8 +844,8 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>ButtonDisabledBackground {
     <span class="kw">type </span>ComponentType = Color;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Color {
-        Color::new(<span class="number">50</span>, <span class="number">30</span>, <span class="number">30</span>, <span class="number">255</span>)
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
+        context.theme().surface.dim_color
     }
 }
 </code></pre></div></section></main></body></html>

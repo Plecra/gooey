@@ -74,6 +74,8 @@
 <a href="#74" id="74">74</a>
 <a href="#75" id="75">75</a>
 <a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoUnsigned, Point, ScreenScale, Size};
 <span class="kw">use </span>kludgine::text::{MeasuredText, Text, TextOrigin};
@@ -134,15 +136,17 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>padding = context
-            .query_style(<span class="kw-2">&amp;</span>IntrinsicPadding)
+        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor, <span class="kw-2">&amp;</span>IntrinsicPadding]);
+        <span class="kw">let </span>padding = styles
+            .get(<span class="kw-2">&amp;</span>IntrinsicPadding, context)
             .into_px(context.gfx.scale())
             .into_unsigned();
+        <span class="kw">let </span>color = styles.get(<span class="kw-2">&amp;</span>TextColor, context);
         <span class="kw">let </span>width = available_space.width.max().try_into().unwrap_or(Px::MAX);
         <span class="self">self</span>.text.map(|contents| {
             <span class="kw">let </span>measured = context
                 .gfx
-                .measure_text(Text::from(contents).wrap_at(width));
+                .measure_text(Text::new(contents, color).wrap_at(width));
             <span class="kw">let </span><span class="kw-2">mut </span>size = measured.size.try_cast().unwrap_or_default();
             size += padding * <span class="number">2</span>;
             <span class="self">self</span>.prepared_text = <span class="prelude-val">Some</span>(measured);

@@ -900,6 +900,13 @@
 <a href="#900" id="900">900</a>
 <a href="#901" id="901">901</a>
 <a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::fmt::Debug;
@@ -1356,6 +1363,13 @@
         <span class="kw">let </span>state = <span class="self">self</span>.source.state();
         <span class="self">self</span>.read_generation = state.wrapped.generation;
         map(<span class="kw-2">&amp;</span>state.wrapped.value)
+    }
+
+    <span class="doccomment">/// Returns true if the dynamic has been modified since the last time the
+    /// value was accessed through this reader.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>has_updated(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.source.state().wrapped.generation != <span class="self">self</span>.read_generation
     }
 
     <span class="doccomment">/// Returns a clone of the currently contained value.

@@ -375,6 +375,7 @@
 <a href="#375" id="375">375</a>
 <a href="#376" id="376">376</a>
 <a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 </span><span class="kw">use </span>std::borrow::Cow;
 
@@ -384,6 +385,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::easings::{EaseInQuadradic, EaseOutQuadradic};
 <span class="kw">use </span><span class="kw">crate</span>::animation::EasingFunction;
+<span class="kw">use </span><span class="kw">crate</span>::context::WidgetContext;
 <span class="kw">use </span><span class="kw">crate</span>::styles::{
     Component, ComponentDefinition, ComponentName, Dimension, Global, NamedComponent,
 };
@@ -401,7 +403,7 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>TextSize {
     <span class="kw">type </span>ComponentType = Dimension;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Dimension {
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Dimension {
         Dimension::Lp(Lp::points(<span class="number">12</span>))
     }
 }
@@ -419,8 +421,26 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>LineHeight {
     <span class="kw">type </span>ComponentType = Dimension;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Dimension {
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Dimension {
         Dimension::Lp(Lp::points(<span class="number">14</span>))
+    }
+}
+
+<span class="doccomment">/// The [`Color`] to use when rendering text.
+</span><span class="attr">#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+</span><span class="kw">pub struct </span>SurfaceColor;
+
+<span class="kw">impl </span>NamedComponent <span class="kw">for </span>SurfaceColor {
+    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cow&lt;<span class="lifetime">&#39;_</span>, ComponentName&gt; {
+        Cow::Owned(ComponentName::named::&lt;Global&gt;(<span class="string">&quot;surface_color&quot;</span>))
+    }
+}
+
+<span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>SurfaceColor {
+    <span class="kw">type </span>ComponentType = Color;
+
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
+        context.theme().surface.color
     }
 }
 
@@ -437,26 +457,8 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>TextColor {
     <span class="kw">type </span>ComponentType = Color;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Color {
-        Color::WHITE
-    }
-}
-
-<span class="doccomment">/// A [`Color`] to be used as a highlight color.
-</span><span class="attr">#[derive(Clone, Copy, Eq, PartialEq, Debug)]
-</span><span class="kw">pub struct </span>PrimaryColor;
-
-<span class="kw">impl </span>NamedComponent <span class="kw">for </span>PrimaryColor {
-    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cow&lt;<span class="lifetime">&#39;_</span>, ComponentName&gt; {
-        Cow::Owned(ComponentName::named::&lt;Global&gt;(<span class="string">&quot;primary_color&quot;</span>))
-    }
-}
-
-<span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>PrimaryColor {
-    <span class="kw">type </span>ComponentType = Color;
-
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Color {
-        Color::BLUE
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
+        context.theme().surface.on_color
     }
 }
 
@@ -473,8 +475,8 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>HighlightColor {
     <span class="kw">type </span>ComponentType = Color;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Color {
-        Color::AQUA
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
+        context.theme().primary.color
     }
 }
 
@@ -493,7 +495,7 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>IntrinsicPadding {
     <span class="kw">type </span>ComponentType = Dimension;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Dimension {
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Dimension {
         Dimension::Lp(Lp::points(<span class="number">5</span>))
     }
 }
@@ -512,7 +514,7 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>Easing {
     <span class="kw">type </span>ComponentType = EasingFunction;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::ComponentType {
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::ComponentType {
         EasingFunction::from(EaseInQuadradic)
     }
 }
@@ -533,7 +535,7 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>EasingIn {
     <span class="kw">type </span>ComponentType = EasingFunction;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::ComponentType {
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::ComponentType {
         EasingFunction::from(EaseInQuadradic)
     }
 }
@@ -554,7 +556,7 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>EasingOut {
     <span class="kw">type </span>ComponentType = EasingFunction;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::ComponentType {
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::ComponentType {
         EasingFunction::from(EaseOutQuadradic)
     }
 }
@@ -610,7 +612,7 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>LayoutOrder {
     <span class="kw">type </span>ComponentType = VisualOrder;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::ComponentType {
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::ComponentType {
         VisualOrder::left_to_right()
     }
 }
@@ -706,7 +708,7 @@
 <span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>AutoFocusableControls {
     <span class="kw">type </span>ComponentType = FocusableWidgets;
 
-    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::ComponentType {
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::ComponentType {
         FocusableWidgets::default()
     }
 }
