@@ -974,6 +974,29 @@
 <a href="#974" id="974">974</a>
 <a href="#975" id="975">975</a>
 <a href="#976" id="976">976</a>
+<a href="#977" id="977">977</a>
+<a href="#978" id="978">978</a>
+<a href="#979" id="979">979</a>
+<a href="#980" id="980">980</a>
+<a href="#981" id="981">981</a>
+<a href="#982" id="982">982</a>
+<a href="#983" id="983">983</a>
+<a href="#984" id="984">984</a>
+<a href="#985" id="985">985</a>
+<a href="#986" id="986">986</a>
+<a href="#987" id="987">987</a>
+<a href="#988" id="988">988</a>
+<a href="#989" id="989">989</a>
+<a href="#990" id="990">990</a>
+<a href="#991" id="991">991</a>
+<a href="#992" id="992">992</a>
+<a href="#993" id="993">993</a>
+<a href="#994" id="994">994</a>
+<a href="#995" id="995">995</a>
+<a href="#996" id="996">996</a>
+<a href="#997" id="997">997</a>
+<a href="#998" id="998">998</a>
+<a href="#999" id="999">999</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -995,6 +1018,7 @@
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::render::Drawing;
+<span class="kw">use </span>kludgine::wgpu::CompositeAlphaMode;
 <span class="kw">use </span>kludgine::Kludgine;
 <span class="kw">use </span>tracing::Level;
 
@@ -1177,6 +1201,7 @@
         GooeyWindow::&lt;Behavior&gt;::run_with(AssertUnwindSafe(sealed::Context {
             user: <span class="self">self</span>.context,
             settings: RefCell::new(sealed::WindowSettings {
+                transparent: <span class="self">self</span>.attributes.transparent,
                 attributes: <span class="prelude-val">Some</span>(<span class="self">self</span>.attributes),
                 occluded: <span class="self">self</span>.occluded,
                 focused: <span class="self">self</span>.focused,
@@ -1234,6 +1259,7 @@
     max_inner_size: <span class="prelude-ty">Option</span>&lt;Size&lt;UPx&gt;&gt;,
     theme: <span class="prelude-ty">Option</span>&lt;DynamicReader&lt;ThemePair&gt;&gt;,
     current_theme: ThemePair,
+    transparent: bool,
 }
 
 <span class="kw">impl</span>&lt;T&gt; GooeyWindow&lt;T&gt;
@@ -1381,6 +1407,7 @@
             .theme
             .take()
             .expect(<span class="string">&quot;theme always present&quot;</span>);
+        <span class="kw">let </span>transparent = context.settings.borrow().transparent;
         <span class="kw">let </span><span class="kw-2">mut </span>behavior = T::initialize(
             <span class="kw-2">&amp;mut </span>RunningWindow::new(window, <span class="kw-2">&amp;</span>focused, <span class="kw-2">&amp;</span>occluded),
             context.user,
@@ -1411,6 +1438,7 @@
             max_inner_size: <span class="prelude-val">None</span>,
             current_theme,
             theme,
+            transparent,
         }
     }
 
@@ -1449,8 +1477,11 @@
         <span class="kw">let </span><span class="kw-2">mut </span>layout_context = LayoutContext::new(<span class="kw-2">&amp;mut </span>context);
         <span class="kw">let </span>window_size = layout_context.gfx.size();
 
-        <span class="kw">let </span>background_color = layout_context.theme().surface.color;
-        layout_context.graphics.gfx.fill(background_color);
+        <span class="kw">if </span>!<span class="self">self</span>.transparent {
+            <span class="kw">let </span>background_color = layout_context.theme().surface.color;
+            layout_context.graphics.gfx.fill(background_color);
+        }
+
         <span class="kw">let </span>actual_size = layout_context.layout(<span class="kw">if </span>is_expanded {
             Size::new(
                 ConstraintLimit::Known(window_size.width),
@@ -1553,11 +1584,25 @@
     //     wgpu::Limits::downlevel_webgl2_defaults().using_resolution(adapter_limits)
     // }
 
-    // fn clear_color() -&gt; Option&lt;kludgine::Color&gt; {
-    //     Some(kludgine::Color::BLACK)
-    // }
+    </span><span class="kw">fn </span>clear_color(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;kludgine::Color&gt; {
+        <span class="prelude-val">Some</span>(<span class="kw">if </span><span class="self">self</span>.transparent {
+            kludgine::Color::CLEAR_BLACK
+        } <span class="kw">else </span>{
+            kludgine::Color::BLACK
+        })
+    }
 
-    // fn focus_changed(&amp;mut self, window: kludgine::app::Window&lt;&#39;_, ()&gt;) {}
+    <span class="kw">fn </span>composite_alpha_mode(<span class="kw-2">&amp;</span><span class="self">self</span>, supported_modes: <span class="kw-2">&amp;</span>[CompositeAlphaMode]) -&gt; CompositeAlphaMode {
+        <span class="kw">if </span><span class="macro">dbg!</span>(<span class="self">self</span>.transparent)
+            &amp;&amp; <span class="macro">dbg!</span>(supported_modes).contains(<span class="kw-2">&amp;</span>CompositeAlphaMode::PreMultiplied)
+        {
+            CompositeAlphaMode::PreMultiplied
+        } <span class="kw">else </span>{
+            CompositeAlphaMode::Auto
+        }
+    }
+
+    <span class="comment">// fn focus_changed(&amp;mut self, window: kludgine::app::Window&lt;&#39;_, ()&gt;) {}
 
     // fn occlusion_changed(&amp;mut self, window: kludgine::app::Window&lt;&#39;_, ()&gt;) {}
 
@@ -1943,6 +1988,7 @@
         <span class="kw">pub </span>occluded: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;bool&gt;&gt;,
         <span class="kw">pub </span>focused: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;bool&gt;&gt;,
         <span class="kw">pub </span>theme: <span class="prelude-ty">Option</span>&lt;Value&lt;ThemePair&gt;&gt;,
+        <span class="kw">pub </span>transparent: bool,
     }
 
     <span class="kw">pub enum </span>WindowCommand {
