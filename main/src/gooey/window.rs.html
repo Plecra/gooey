@@ -995,8 +995,6 @@
 <a href="#995" id="995">995</a>
 <a href="#996" id="996">996</a>
 <a href="#997" id="997">997</a>
-<a href="#998" id="998">998</a>
-<a href="#999" id="999">999</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -1593,9 +1591,7 @@
     }
 
     <span class="kw">fn </span>composite_alpha_mode(<span class="kw-2">&amp;</span><span class="self">self</span>, supported_modes: <span class="kw-2">&amp;</span>[CompositeAlphaMode]) -&gt; CompositeAlphaMode {
-        <span class="kw">if </span><span class="macro">dbg!</span>(<span class="self">self</span>.transparent)
-            &amp;&amp; <span class="macro">dbg!</span>(supported_modes).contains(<span class="kw-2">&amp;</span>CompositeAlphaMode::PreMultiplied)
-        {
+        <span class="kw">if </span><span class="self">self</span>.transparent &amp;&amp; supported_modes.contains(<span class="kw-2">&amp;</span>CompositeAlphaMode::PreMultiplied) {
             CompositeAlphaMode::PreMultiplied
         } <span class="kw">else </span>{
             CompositeAlphaMode::Auto
