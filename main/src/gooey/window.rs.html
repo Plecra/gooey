@@ -1463,7 +1463,7 @@
             )
         });
         <span class="kw">let </span>render_size = actual_size.min(window_size);
-        <span class="kw">if </span>render_size != window_size &amp;&amp; !resizable {
+        <span class="kw">if </span>actual_size != window_size &amp;&amp; !resizable {
             <span class="kw">let </span><span class="kw-2">mut </span>new_size = actual_size;
             <span class="kw">if let </span><span class="prelude-val">Some</span>(min_size) = <span class="self">self</span>.min_inner_size {
                 new_size = new_size.max(min_size);
