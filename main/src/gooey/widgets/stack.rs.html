@@ -1133,10 +1133,10 @@
             offset += <span class="self">self</span>.layouts[index].size;
             <span class="kw">let </span>(<span class="kw">_</span>, measured) = <span class="self">self</span>.orientation.split_size(measure(
                 index,
-                <span class="macro">dbg!</span>(<span class="self">self</span>.orientation.make_size(
+                <span class="self">self</span>.orientation.make_size(
                     ConstraintLimit::Known(<span class="self">self</span>.layouts[index].size.into_px(scale).into_unsigned()),
                     other_constraint,
-                )),
+                ),
                 <span class="bool-val">true</span>,
             ));
             <span class="self">self</span>.other = <span class="self">self</span>.other.max(measured);

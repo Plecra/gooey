@@ -1728,7 +1728,7 @@
     <span class="kw">fn </span>from(value: RangeInclusive&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             start: Bound::Included(value.start().clone().into()),
-            end: Bound::Excluded(value.end().clone().into()),
+            end: Bound::Included(value.end().clone().into()),
         }
     }
 }
