@@ -1096,6 +1096,9 @@
 <a href="#1096" id="1096">1096</a>
 <a href="#1097" id="1097">1097</a>
 <a href="#1098" id="1098">1098</a>
+<a href="#1099" id="1099">1099</a>
+<a href="#1100" id="1100">1100</a>
+<a href="#1101" id="1101">1101</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
@@ -1111,7 +1114,7 @@
 <span class="kw">use </span>kludgine::Kludgine;
 
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, VisualOrder};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, VisualOrder, WidgetBackground};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefaultvalue, ComponentDefinition, Styles, Theme, ThemePair};
 <span class="kw">use </span><span class="kw">crate</span>::value::Dynamic;
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, WidgetId, WidgetInstance, WidgetRef};
@@ -1585,6 +1588,9 @@
             <span class="self">self</span>.last_layout().is_some(),
             <span class="string">&quot;redraw called without set_widget_layout&quot;
         </span>);
+
+        <span class="kw">let </span>background = <span class="self">self</span>.query_style(<span class="kw-2">&amp;</span>WidgetBackground);
+        <span class="self">self</span>.gfx.fill(background);
 
         <span class="self">self</span>.current_node
             .tree
