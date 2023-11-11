@@ -1099,6 +1099,12 @@
 <a href="#1099" id="1099">1099</a>
 <a href="#1100" id="1100">1100</a>
 <a href="#1101" id="1101">1101</a>
+<a href="#1102" id="1102">1102</a>
+<a href="#1103" id="1103">1103</a>
+<a href="#1104" id="1104">1104</a>
+<a href="#1105" id="1105">1105</a>
+<a href="#1106" id="1106">1106</a>
+<a href="#1107" id="1107">1107</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
@@ -1108,10 +1114,10 @@
     DeviceId, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
 <span class="kw">use </span>kludgine::app::winit::window;
-<span class="kw">use </span>kludgine::figures::units::{Px, UPx};
-<span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Rect, Size};
+<span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
+<span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
-<span class="kw">use </span>kludgine::Kludgine;
+<span class="kw">use </span>kludgine::{Color, Kludgine};
 
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, VisualOrder, WidgetBackground};
@@ -1551,6 +1557,18 @@
         }
     }
 
+    <span class="doccomment">/// Strokes an outline around this widget&#39;s contents.
+    </span><span class="kw">pub fn </span>stroke_outline&lt;Unit&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color, options: StrokeOptions&lt;Unit&gt;)
+    <span class="kw">where
+        </span>Unit: ScreenScale&lt;Px = Px, Lp = Lp&gt;,
+    {
+        <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
+        <span class="kw">let </span>focus_ring =
+            Shape::stroked_rect(visible_rect, color, options.into_px(<span class="self">self</span>.gfx.scale()));
+        <span class="self">self</span>.gfx
+            .draw_shape(<span class="kw-2">&amp;</span>focus_ring, Point::default(), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
+    }
+
     <span class="doccomment">/// Renders the default focus ring for this widget.
     ///
     /// To ensure the correct color is used, include [`HighlightColor`] in the
@@ -1561,14 +1579,8 @@
             <span class="kw">return</span>;
         }
 
-        <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
-        <span class="kw">let </span>focus_ring = Shape::stroked_rect(
-            visible_rect,
-            styles.get(<span class="kw-2">&amp;</span>HighlightColor, <span class="self">self</span>),
-            StrokeOptions::default(),
-        );
-        <span class="self">self</span>.gfx
-            .draw_shape(<span class="kw-2">&amp;</span>focus_ring, Point::default(), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
+        <span class="kw">let </span>color = styles.get(<span class="kw-2">&amp;</span>HighlightColor, <span class="self">self</span>);
+        <span class="self">self</span>.stroke_outline::&lt;Lp&gt;(color, StrokeOptions::default());
     }
 
     <span class="doccomment">/// Renders the default focus ring for this widget.

@@ -417,22 +417,53 @@
 <a href="#417" id="417">417</a>
 <a href="#418" id="418">418</a>
 <a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>kludgine::app::winit::event::{DeviceId, ElementState, KeyEvent, MouseButton};
-<span class="kw">use </span>kludgine::figures::units::{Px, UPx};
+<span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoUnsigned, Point, Rect, ScreenScale, Size};
+<span class="kw">use </span>kludgine::shapes::StrokeOptions;
 <span class="kw">use </span>kludgine::text::Text;
 <span class="kw">use </span>kludgine::Color;
 
-<span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, AnimationTarget, Spawn};
+<span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, AnimationTarget, LinearInterpolate, Spawn};
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::names::Name;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
-    AutoFocusableControls, Easing, IntrinsicPadding, SurfaceColor, TextColor,
+    AutoFocusableControls, DisabledOutlineColor, Easing, IntrinsicPadding, OutlineColor,
+    SurfaceColor, TextColor,
 };
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ColorExt, ComponentDefinition, ComponentGroup, ComponentName, NamedComponent};
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
@@ -450,8 +481,8 @@
     </span><span class="kw">pub </span>enabled: Value&lt;bool&gt;,
     currently_enabled: bool,
     buttons_pressed: usize,
-    background_color: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;Color&gt;&gt;,
-    text_color: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;Color&gt;&gt;,
+    colors: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;Colors&gt;&gt;,
+
     color_animation: AnimationHandle,
 }
 
@@ -464,8 +495,7 @@
             enabled: Value::Constant(<span class="bool-val">true</span>),
             currently_enabled: <span class="bool-val">true</span>,
             buttons_pressed: <span class="number">0</span>,
-            background_color: <span class="prelude-val">None</span>,
-            text_color: <span class="prelude-val">None</span>,
+            colors: <span class="prelude-val">None</span>,
             color_animation: AnimationHandle::default(),
         }
     }
@@ -507,12 +537,16 @@
             <span class="kw-2">&amp;</span>Easing,
             <span class="kw-2">&amp;</span>TextColor,
             <span class="kw-2">&amp;</span>SurfaceColor,
+            <span class="kw-2">&amp;</span>OutlineColor,
+            <span class="kw-2">&amp;</span>DisabledOutlineColor,
         ]);
         <span class="kw">let </span>text_color = styles.get(<span class="kw-2">&amp;</span>TextColor, context);
         <span class="kw">let </span>surface_color = styles.get(<span class="kw-2">&amp;</span>SurfaceColor, context);
-        <span class="kw">let </span>(background_color, text_color, surface_color) = <span class="kw">if </span>!<span class="self">self</span>.enabled.get() {
+        <span class="kw">let </span>outline_color = styles.get(<span class="kw-2">&amp;</span>OutlineColor, context);
+        <span class="kw">let </span>(background, outline, text_color, surface_color) = <span class="kw">if </span>!<span class="self">self</span>.enabled.get() {
             (
                 styles.get(<span class="kw-2">&amp;</span>ButtonDisabledBackground, context),
+                styles.get(<span class="kw-2">&amp;</span>DisabledOutlineColor, context),
                 text_color,
                 surface_color,
             )
@@ -520,62 +554,84 @@
             <span class="comment">// TODO this probably should be de-prioritized if ButtonBackground is explicitly set.
             </span>(
                 context.theme().primary.color,
+                context.theme().primary.color,
                 context.theme().primary.on_color,
                 context.theme().primary.color,
             )
         } <span class="kw">else if </span>context.active() {
             (
                 styles.get(<span class="kw-2">&amp;</span>ButtonActiveBackground, context),
+                outline_color,
                 text_color,
                 surface_color,
             )
         } <span class="kw">else if </span>context.hovered() {
             (
                 styles.get(<span class="kw-2">&amp;</span>ButtonHoverBackground, context),
+                outline_color,
                 text_color,
                 surface_color,
             )
         } <span class="kw">else </span>{
             (
                 styles.get(<span class="kw-2">&amp;</span>ButtonBackground, context),
+                outline_color,
                 text_color,
                 surface_color,
             )
         };
 
-        <span class="kw">let </span>text_color = background_color.most_contrasting(<span class="kw-2">&amp;</span>[text_color, surface_color]);
+        <span class="kw">let </span>text = background.most_contrasting(<span class="kw-2">&amp;</span>[text_color, surface_color]);
 
-        <span class="kw">match </span>(immediate, <span class="kw-2">&amp;</span><span class="self">self</span>.background_color, <span class="kw-2">&amp;</span><span class="self">self</span>.text_color) {
-            (<span class="bool-val">false</span>, <span class="prelude-val">Some</span>(bg), <span class="prelude-val">Some</span>(text)) =&gt; {
-                <span class="self">self</span>.color_animation = (
-                    bg.transition_to(background_color),
-                    text.transition_to(text_color),
-                )
+        <span class="kw">let </span>new_colors = Colors {
+            background,
+            text,
+            outline,
+        };
+
+        <span class="kw">match </span>(immediate, <span class="kw-2">&amp;</span><span class="self">self</span>.colors) {
+            (<span class="bool-val">false</span>, <span class="prelude-val">Some</span>(colors)) =&gt; {
+                <span class="self">self</span>.color_animation = colors
+                    .transition_to(new_colors)
                     .over(Duration::from_millis(<span class="number">150</span>))
                     .with_easing(styles.get(<span class="kw-2">&amp;</span>Easing, context))
                     .spawn();
             }
-            (<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(bg), <span class="prelude-val">Some</span>(text)) =&gt; {
-                bg.update(background_color);
-                text.update(text_color);
+            (<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(colors)) =&gt; {
+                colors.update(new_colors);
                 <span class="self">self</span>.color_animation.clear();
             }
             <span class="kw">_ </span>=&gt; {
-                <span class="self">self</span>.background_color = <span class="prelude-val">Some</span>(Dynamic::new(background_color));
-                <span class="self">self</span>.text_color = <span class="prelude-val">Some</span>(Dynamic::new(text_color));
+                <span class="self">self</span>.colors = <span class="prelude-val">Some</span>(Dynamic::new(new_colors));
             }
         }
     }
 
-    <span class="kw">fn </span>current_colors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; (Color, Color) {
-        <span class="kw">if </span><span class="self">self</span>.background_color.is_none() {
+    <span class="kw">fn </span>current_colors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Colors {
+        <span class="kw">if </span><span class="self">self</span>.colors.is_none() {
             <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
         }
 
-        <span class="kw">let </span>background_color = <span class="self">self</span>.background_color.as_ref().expect(<span class="string">&quot;always initialized&quot;</span>);
-        <span class="kw">let </span>text_color = <span class="self">self</span>.text_color.as_ref().expect(<span class="string">&quot;always initialized&quot;</span>); <span class="comment">// TODO combine these into a single option
-        </span>context.redraw_when_changed(background_color);
-        (background_color.get(), text_color.get())
+        <span class="kw">let </span>colors = <span class="self">self</span>.colors.as_ref().expect(<span class="string">&quot;always initialized&quot;</span>);
+        context.redraw_when_changed(colors);
+        colors.get()
+    }
+}
+
+<span class="attr">#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+</span><span class="kw">struct </span>Colors {
+    background: Color,
+    text: Color,
+    outline: Color,
+}
+
+<span class="kw">impl </span>LinearInterpolate <span class="kw">for </span>Colors {
+    <span class="kw">fn </span>lerp(<span class="kw-2">&amp;</span><span class="self">self</span>, target: <span class="kw-2">&amp;</span><span class="self">Self</span>, percent: f32) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            background: <span class="self">self</span>.background.lerp(<span class="kw-2">&amp;</span>target.background, percent),
+            text: <span class="self">self</span>.text.lerp(<span class="kw-2">&amp;</span>target.text, percent),
+            outline: <span class="self">self</span>.outline.lerp(<span class="kw-2">&amp;</span>target.outline, percent),
+        }
     }
 }
 
@@ -594,16 +650,18 @@
         <span class="self">self</span>.label.redraw_when_changed(context);
         <span class="self">self</span>.enabled.redraw_when_changed(context);
 
-        <span class="kw">let </span>(background_color, text_color) = <span class="self">self</span>.current_colors(context);
-        context.gfx.fill(background_color);
+        <span class="kw">let </span>colors = <span class="self">self</span>.current_colors(context);
+        context.gfx.fill(colors.background);
 
         <span class="kw">if </span>context.focused() {
             context.draw_focus_ring();
+        } <span class="kw">else </span>{
+            context.stroke_outline::&lt;Lp&gt;(colors.outline, StrokeOptions::default());
         }
 
         <span class="self">self</span>.label.map(|label| {
             context.gfx.draw_text(
-                Text::new(label, text_color)
+                Text::new(label, colors.text)
                     .origin(kludgine::text::TextOrigin::Center)
                     .wrap_at(size.width),
                 center,

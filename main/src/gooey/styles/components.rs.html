@@ -394,6 +394,42 @@
 <a href="#394" id="394">394</a>
 <a href="#395" id="395">395</a>
 <a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 </span><span class="kw">use </span>std::borrow::Cow;
 
@@ -788,6 +824,42 @@
 
     <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
         Color::CLEAR_WHITE
+    }
+}
+
+<span class="doccomment">/// A [`Color`] to be used as an outline color.
+</span><span class="attr">#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+</span><span class="kw">pub struct </span>OutlineColor;
+
+<span class="kw">impl </span>NamedComponent <span class="kw">for </span>OutlineColor {
+    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cow&lt;<span class="lifetime">&#39;_</span>, ComponentName&gt; {
+        Cow::Owned(ComponentName::named::&lt;Global&gt;(<span class="string">&quot;outline_color&quot;</span>))
+    }
+}
+
+<span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>OutlineColor {
+    <span class="kw">type </span>ComponentType = Color;
+
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
+        context.theme().surface.outline
+    }
+}
+
+<span class="doccomment">/// A [`Color`] to be used as an outline color.
+</span><span class="attr">#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+</span><span class="kw">pub struct </span>DisabledOutlineColor;
+
+<span class="kw">impl </span>NamedComponent <span class="kw">for </span>DisabledOutlineColor {
+    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cow&lt;<span class="lifetime">&#39;_</span>, ComponentName&gt; {
+        Cow::Owned(ComponentName::named::&lt;Global&gt;(<span class="string">&quot;disabled_outline_color&quot;</span>))
+    }
+}
+
+<span class="kw">impl </span>ComponentDefinition <span class="kw">for </span>DisabledOutlineColor {
+    <span class="kw">type </span>ComponentType = Color;
+
+    <span class="kw">fn </span>default_value(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
+        context.theme().surface.outline_variant
     }
 }
 </code></pre></div></section></main></body></html>
