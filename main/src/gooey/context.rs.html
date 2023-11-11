@@ -1105,15 +1105,47 @@
 <a href="#1105" id="1105">1105</a>
 <a href="#1106" id="1106">1106</a>
 <a href="#1107" id="1107">1107</a>
+<a href="#1108" id="1108">1108</a>
+<a href="#1109" id="1109">1109</a>
+<a href="#1110" id="1110">1110</a>
+<a href="#1111" id="1111">1111</a>
+<a href="#1112" id="1112">1112</a>
+<a href="#1113" id="1113">1113</a>
+<a href="#1114" id="1114">1114</a>
+<a href="#1115" id="1115">1115</a>
+<a href="#1116" id="1116">1116</a>
+<a href="#1117" id="1117">1117</a>
+<a href="#1118" id="1118">1118</a>
+<a href="#1119" id="1119">1119</a>
+<a href="#1120" id="1120">1120</a>
+<a href="#1121" id="1121">1121</a>
+<a href="#1122" id="1122">1122</a>
+<a href="#1123" id="1123">1123</a>
+<a href="#1124" id="1124">1124</a>
+<a href="#1125" id="1125">1125</a>
+<a href="#1126" id="1126">1126</a>
+<a href="#1127" id="1127">1127</a>
+<a href="#1128" id="1128">1128</a>
+<a href="#1129" id="1129">1129</a>
+<a href="#1130" id="1130">1130</a>
+<a href="#1131" id="1131">1131</a>
+<a href="#1132" id="1132">1132</a>
+<a href="#1133" id="1133">1133</a>
+<a href="#1134" id="1134">1134</a>
+<a href="#1135" id="1135">1135</a>
+<a href="#1136" id="1136">1136</a>
+<a href="#1137" id="1137">1137</a>
+<a href="#1138" id="1138">1138</a>
+<a href="#1139" id="1139">1139</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
-</span><span class="kw">use </span>std::ops::{Deref, DerefMut};
+</span><span class="kw">use </span>std::borrow::Cow;
+<span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>kludgine::app::winit::event::{
     DeviceId, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
-<span class="kw">use </span>kludgine::app::winit::window;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
@@ -1122,10 +1154,10 @@
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, VisualOrder, WidgetBackground};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefaultvalue, ComponentDefinition, Styles, Theme, ThemePair};
-<span class="kw">use </span><span class="kw">crate</span>::value::Dynamic;
+<span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, WidgetId, WidgetInstance, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
-<span class="kw">use </span><span class="kw">crate</span>::window::RunningWindow;
+<span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, ThemeMode};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A context to an event function.
@@ -1781,8 +1813,9 @@
     current_node: ManagedWidget,
     redraw_status: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>RedrawStatus,
     window: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt;,
-    theme: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>ThemePair,
+    theme: Cow&lt;<span class="lifetime">&#39;context</span>, ThemePair&gt;,
     pending_state: PendingState&lt;<span class="lifetime">&#39;context</span>&gt;,
+    theme_mode: ThemeMode,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; WidgetContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; {
@@ -1791,6 +1824,7 @@
         redraw_status: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>RedrawStatus,
         theme: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>ThemePair,
         window: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt;,
+        theme_mode: ThemeMode,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             pending_state: PendingState::Owned(PendingWidgetState {
@@ -1805,7 +1839,8 @@
             }),
             current_node,
             redraw_status,
-            theme,
+            theme: Cow::Borrowed(theme),
+            theme_mode,
             window,
         }
     }
@@ -1816,8 +1851,9 @@
             current_node: <span class="self">self</span>.current_node.clone(),
             redraw_status: <span class="self">self</span>.redraw_status,
             window: <span class="kw-2">&amp;mut *</span><span class="self">self</span>.window,
-            theme: <span class="self">self</span>.theme,
+            theme: Cow::Borrowed(<span class="self">self</span>.theme.as_ref()),
             pending_state: <span class="self">self</span>.pending_state.borrowed(),
+            theme_mode: <span class="self">self</span>.theme_mode,
         }
     }
 
@@ -1830,12 +1866,26 @@
         </span>Widget: ManageWidget,
         Widget::Managed: MapManagedWidget&lt;WidgetContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>&gt;&gt;,
     {
-        widget.manage(<span class="self">self</span>).map(|current_node| WidgetContext {
-            current_node,
-            redraw_status: <span class="self">self</span>.redraw_status,
-            window: <span class="kw-2">&amp;mut *</span><span class="self">self</span>.window,
-            theme: <span class="self">self</span>.theme,
-            pending_state: <span class="self">self</span>.pending_state.borrowed(),
+        widget.manage(<span class="self">self</span>).map(|current_node| {
+            <span class="kw">let </span>(theme, theme_mode) = current_node.overidden_theme();
+            <span class="kw">let </span>theme = <span class="kw">if let </span><span class="prelude-val">Some</span>(theme) = theme {
+                Cow::Owned(theme.get_tracked(<span class="self">self</span>))
+            } <span class="kw">else </span>{
+                Cow::Borrowed(<span class="self">self</span>.theme.as_ref())
+            };
+            <span class="kw">let </span>theme_mode = <span class="kw">if let </span><span class="prelude-val">Some</span>(mode) = theme_mode {
+                mode.get_tracked(<span class="self">self</span>)
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.theme_mode
+            };
+            WidgetContext {
+                current_node,
+                redraw_status: <span class="self">self</span>.redraw_status,
+                window: <span class="kw-2">&amp;mut *</span><span class="self">self</span>.window,
+                theme,
+                pending_state: <span class="self">self</span>.pending_state.borrowed(),
+                theme_mode,
+            }
         })
     }
 
@@ -1979,8 +2029,22 @@
     ///
     /// Style queries for children will return any values matching this
     /// collection.
-    </span><span class="kw">pub fn </span>attach_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, styles: Styles) {
+    </span><span class="kw">pub fn </span>attach_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, styles: Value&lt;Styles&gt;) {
         <span class="self">self</span>.current_node.attach_styles(styles);
+    }
+
+    <span class="doccomment">/// Attaches `theme` to the widget hierarchy for this widget.
+    ///
+    /// All children nodes will access this theme in their contexts.
+    </span><span class="kw">pub fn </span>attach_theme(<span class="kw-2">&amp;</span><span class="self">self</span>, theme: Value&lt;ThemePair&gt;) {
+        <span class="self">self</span>.current_node.attach_theme(theme);
+    }
+
+    <span class="doccomment">/// Attaches `theme_mode` to the widget hierarchy for this widget.
+    ///
+    /// All children nodes will use this theme mode.
+    </span><span class="kw">pub fn </span>attach_theme_mode(<span class="kw-2">&amp;</span><span class="self">self</span>, theme_mode: Value&lt;ThemeMode&gt;) {
+        <span class="self">self</span>.current_node.attach_theme_mode(theme_mode);
     }
 
     <span class="doccomment">/// Queries the widget hierarchy for matching style components.
@@ -1997,7 +2061,7 @@
     </span><span class="kw">pub fn </span>query_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, query: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="kw">dyn </span>ComponentDefaultvalue]) -&gt; Styles {
         <span class="self">self</span>.current_node
             .tree
-            .query_styles(<span class="kw-2">&amp;</span><span class="self">self</span>.current_node, query)
+            .query_styles(<span class="kw-2">&amp;</span><span class="self">self</span>.current_node, query, <span class="self">self</span>)
     }
 
     <span class="doccomment">/// Queries the widget hierarchy for a single style component.
@@ -2038,24 +2102,24 @@
     <span class="doccomment">/// Returns the theme pair for the window.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>theme_pair(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ThemePair {
-        <span class="self">self</span>.theme
+        <span class="self">self</span>.theme.as_ref()
     }
 
     <span class="doccomment">/// Returns the current theme in either light or dark mode.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>theme(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Theme {
-        <span class="kw">match </span><span class="self">self</span>.window.theme() {
-            window::Theme::Light =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.light,
-            window::Theme::Dark =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.dark,
+        <span class="kw">match </span><span class="self">self</span>.theme_mode {
+            ThemeMode::Light =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.light,
+            ThemeMode::Dark =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.dark,
         }
     }
 
     <span class="doccomment">/// Returns the opposite theme of [`Self::theme()`].
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>inverse_theme(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Theme {
-        <span class="kw">match </span><span class="self">self</span>.window.theme() {
-            window::Theme::Light =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.dark,
-            window::Theme::Dark =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.light,
+        <span class="kw">match </span><span class="self">self</span>.theme_mode {
+            ThemeMode::Light =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.dark,
+            ThemeMode::Dark =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.light,
         }
     }
 }

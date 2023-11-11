@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["RunningWindow","Window"],"trait":["WindowBehavior"],"type":["WindowAttributes"]};
+window.SIDEBAR_ITEMS = {"enum":["ThemeMode"],"struct":["RunningWindow","Window"],"trait":["WindowBehavior"],"type":["WindowAttributes"]};

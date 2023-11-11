@@ -919,6 +919,26 @@
 <a href="#919" id="919">919</a>
 <a href="#920" id="920">920</a>
 <a href="#921" id="921">921</a>
+<a href="#922" id="922">922</a>
+<a href="#923" id="923">923</a>
+<a href="#924" id="924">924</a>
+<a href="#925" id="925">925</a>
+<a href="#926" id="926">926</a>
+<a href="#927" id="927">927</a>
+<a href="#928" id="928">928</a>
+<a href="#929" id="929">929</a>
+<a href="#930" id="930">930</a>
+<a href="#931" id="931">931</a>
+<a href="#932" id="932">932</a>
+<a href="#933" id="933">933</a>
+<a href="#934" id="934">934</a>
+<a href="#935" id="935">935</a>
+<a href="#936" id="936">936</a>
+<a href="#937" id="937">937</a>
+<a href="#938" id="938">938</a>
+<a href="#939" id="939">939</a>
+<a href="#940" id="940">940</a>
+<a href="#941" id="941">941</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating animations.
 //!
 //! Animations in Gooey are performed by transitioning a [`Dynamic`]&#39;s contained
@@ -1592,6 +1612,26 @@
     <span class="kw">fn </span>lerp(<span class="kw-2">&amp;</span><span class="self">self</span>, target: <span class="kw-2">&amp;</span><span class="self">Self</span>, percent: f32) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>delta = <span class="kw-2">*</span>target - <span class="kw-2">*</span><span class="self">self</span>;
         <span class="kw-2">*</span><span class="self">self </span>+ delta * f64::from(percent)
+    }
+}
+
+<span class="kw">impl </span>LinearInterpolate <span class="kw">for </span>bool {
+    <span class="kw">fn </span>lerp(<span class="kw-2">&amp;</span><span class="self">self</span>, target: <span class="kw-2">&amp;</span><span class="self">Self</span>, percent: f32) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>percent &gt;= <span class="number">0.5 </span>{
+            <span class="kw-2">*</span>target
+        } <span class="kw">else </span>{
+            <span class="kw-2">*</span><span class="self">self
+        </span>}
+    }
+}
+
+<span class="kw">impl </span>PercentBetween <span class="kw">for </span>bool {
+    <span class="kw">fn </span>percent_between(<span class="kw-2">&amp;</span><span class="self">self</span>, min: <span class="kw-2">&amp;</span><span class="self">Self</span>, max: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ZeroToOne {
+        <span class="kw">if </span><span class="kw-2">*</span>min == <span class="kw-2">*</span>max || <span class="kw-2">*</span><span class="self">self </span>== <span class="kw-2">*</span>min {
+            ZeroToOne::ZERO
+        } <span class="kw">else </span>{
+            ZeroToOne::ONE
+        }
     }
 }
 

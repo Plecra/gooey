@@ -1213,6 +1213,18 @@
 <a href="#1213" id="1213">1213</a>
 <a href="#1214" id="1214">1214</a>
 <a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
+<a href="#1219" id="1219">1219</a>
+<a href="#1220" id="1220">1220</a>
+<a href="#1221" id="1221">1221</a>
+<a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
+<a href="#1225" id="1225">1225</a>
+<a href="#1226" id="1226">1226</a>
+<a href="#1227" id="1227">1227</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1231,11 +1243,11 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::VisualOrder;
-<span class="kw">use </span><span class="kw">crate</span>::styles::{IntoComponentValue, NamedComponent, Styles};
+<span class="kw">use </span><span class="kw">crate</span>::styles::{IntoComponentValue, NamedComponent, Styles, ThemePair};
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Align, Expand, Scroll, Style};
-<span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, Window, WindowBehavior};
+<span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, ThemeMode, Window, WindowBehavior};
 <span class="kw">use crate</span>::{ConstraintLimit, Run};
 
 <span class="doccomment">/// A type that makes up a graphical user interface.
@@ -1663,7 +1675,7 @@
     <span class="doccomment">/// Associates `styles` with this widget.
     ///
     /// This is equivalent to `Style::new(styles, self)`.
-    </span><span class="kw">fn </span>with_styles(<span class="self">self</span>, styles: <span class="kw">impl </span>Into&lt;Styles&gt;) -&gt; Style
+    </span><span class="kw">fn </span>with_styles(<span class="self">self</span>, styles: <span class="kw">impl </span>IntoValue&lt;Styles&gt;) -&gt; Style
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
     {
@@ -2166,8 +2178,20 @@
         <span class="self">self</span>.tree.parent(<span class="self">self</span>.id()).is_some()
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>attach_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, styles: Styles) {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>attach_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, styles: Value&lt;Styles&gt;) {
         <span class="self">self</span>.tree.attach_styles(<span class="self">self</span>.id(), styles);
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>attach_theme(<span class="kw-2">&amp;</span><span class="self">self</span>, theme: Value&lt;ThemePair&gt;) {
+        <span class="self">self</span>.tree.attach_theme(<span class="self">self</span>.id(), theme);
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>attach_theme_mode(<span class="kw-2">&amp;</span><span class="self">self</span>, theme: Value&lt;ThemeMode&gt;) {
+        <span class="self">self</span>.tree.attach_theme_mode(<span class="self">self</span>.id(), theme);
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>overidden_theme(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="prelude-ty">Option</span>&lt;Value&lt;ThemePair&gt;&gt;, <span class="prelude-ty">Option</span>&lt;Value&lt;ThemeMode&gt;&gt;) {
+        <span class="self">self</span>.tree.overriden_theme(<span class="self">self</span>.id())
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset_child_layouts(<span class="kw-2">&amp;</span><span class="self">self</span>) {

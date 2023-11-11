@@ -29,23 +29,25 @@
 <a href="#29" id="29">29</a>
 <a href="#30" id="30">30</a>
 <a href="#31" id="31">31</a>
+<a href="#32" id="32">32</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::context::EventContext;
 <span class="kw">use </span><span class="kw">crate</span>::styles::Styles;
+<span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrapperWidget};
 
 <span class="doccomment">/// A widget that applies a set of [`Styles`] to all contained widgets.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Style {
-    styles: Styles,
+    styles: Value&lt;Styles&gt;,
     child: WidgetRef,
 }
 
 <span class="kw">impl </span>Style {
     <span class="doccomment">/// Returns a new widget that applies `styles` to `child` and any children
     /// it may have.
-    </span><span class="kw">pub fn </span>new(styles: <span class="kw">impl </span>Into&lt;Styles&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(styles: <span class="kw">impl </span>IntoValue&lt;Styles&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            styles: styles.into(),
+            styles: styles.into_value(),
             child: WidgetRef::new(child),
         }
     }
