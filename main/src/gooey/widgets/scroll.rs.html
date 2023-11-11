@@ -341,14 +341,6 @@
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
-<a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
-<a href="#347" id="347">347</a>
-<a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a>
-<a href="#350" id="350">350</a>
-<a href="#351" id="351">351</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::time::Duration;
@@ -477,22 +469,17 @@
 
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::context::GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         context.redraw_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>.scrollbar_opacity);
-        <span class="kw">let </span><span class="prelude-val">Some</span>(visible_rect) = context.gfx.visible_rect() <span class="kw">else </span>{
-            <span class="kw">return</span>;
-        };
-        <span class="kw">let </span>visible_bottom_right = visible_rect.into_signed().extent();
 
         <span class="kw">let </span>managed = <span class="self">self</span>.contents.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         context.for_other(<span class="kw-2">&amp;</span>managed).redraw();
+
+        <span class="kw">let </span>size = context.gfx.region().size;
 
         <span class="kw">if </span><span class="self">self</span>.horizontal_bar.amount_hidden &gt; <span class="number">0 </span>{
             context.gfx.draw_shape(
                 <span class="kw-2">&amp;</span>Shape::filled_rect(
                     Rect::new(
-                        Point::new(
-                            <span class="self">self</span>.horizontal_bar.offset,
-                            <span class="self">self</span>.control_size.height - <span class="self">self</span>.bar_width,
-                        ),
+                        Point::new(<span class="self">self</span>.horizontal_bar.offset, size.height - <span class="self">self</span>.bar_width),
                         Size::new(<span class="self">self</span>.horizontal_bar.size, <span class="self">self</span>.bar_width),
                     ),
                     Color::new_f32(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="kw-2">*</span><span class="self">self</span>.scrollbar_opacity.get()),
@@ -507,10 +494,7 @@
             context.gfx.draw_shape(
                 <span class="kw-2">&amp;</span>Shape::filled_rect(
                     Rect::new(
-                        Point::new(
-                            visible_bottom_right.x - <span class="self">self</span>.bar_width,
-                            <span class="self">self</span>.vertical_bar.offset,
-                        ),
+                        Point::new(size.width - <span class="self">self</span>.bar_width, <span class="self">self</span>.vertical_bar.offset),
                         Size::new(<span class="self">self</span>.bar_width, <span class="self">self</span>.vertical_bar.size),
                     ),
                     Color::new_f32(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="kw-2">*</span><span class="self">self</span>.scrollbar_opacity.get()),
