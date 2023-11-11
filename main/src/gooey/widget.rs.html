@@ -1231,7 +1231,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::VisualOrder;
-<span class="kw">use </span><span class="kw">crate</span>::styles::{Component, NamedComponent, Styles};
+<span class="kw">use </span><span class="kw">crate</span>::styles::{IntoComponentValue, NamedComponent, Styles};
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Align, Expand, Scroll, Style};
@@ -1671,7 +1671,7 @@
     }
 
     <span class="doccomment">/// Associates a style component with `self`.
-    </span><span class="kw">fn </span>with(<span class="self">self</span>, name: <span class="kw-2">&amp;</span><span class="kw">impl </span>NamedComponent, component: <span class="kw">impl </span>Into&lt;Component&gt;) -&gt; Style {
+    </span><span class="kw">fn </span>with(<span class="self">self</span>, name: <span class="kw-2">&amp;</span><span class="kw">impl </span>NamedComponent, component: <span class="kw">impl </span>IntoComponentValue) -&gt; Style {
         <span class="kw">let </span><span class="kw-2">mut </span>styles = Styles::new();
         styles.insert(name, component);
         Style::new(styles, <span class="self">self</span>)

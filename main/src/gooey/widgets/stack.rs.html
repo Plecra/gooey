@@ -775,7 +775,7 @@
                                 <span class="kw">if let </span><span class="prelude-val">Some</span>(expand) = guard.downcast_ref::&lt;Expand&gt;() {
                                     <span class="kw">let </span>weight = expand.weight;
                                     (
-                                        WidgetRef::Unmounted(widget.clone()),
+                                        expand.child().clone(),
                                         StackDimension::Fractional { weight },
                                     )
                                 } <span class="kw">else if let </span><span class="prelude-val">Some</span>((child, size)) =
