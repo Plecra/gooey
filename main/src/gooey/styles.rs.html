@@ -1229,6 +1229,12 @@
 <a href="#1229" id="1229">1229</a>
 <a href="#1230" id="1230">1230</a>
 <a href="#1231" id="1231">1231</a>
+<a href="#1232" id="1232">1232</a>
+<a href="#1233" id="1233">1233</a>
+<a href="#1234" id="1234">1234</a>
+<a href="#1235" id="1235">1235</a>
+<a href="#1236" id="1236">1236</a>
+<a href="#1237" id="1237">1237</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1802,9 +1808,15 @@
 </span><span class="kw">pub struct </span>Group(Name);
 
 <span class="kw">impl </span>Group {
+    <span class="doccomment">/// Returns a new group with `name`.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>new(name: <span class="kw">impl </span>Into&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(Name::new(name))
+    }
+
     <span class="doccomment">/// Returns a new instance using the group name of `T`.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>new&lt;T&gt;() -&gt; <span class="self">Self
+    </span><span class="kw">pub fn </span>from_group&lt;T&gt;() -&gt; <span class="self">Self
     </span><span class="kw">where
         </span>T: ComponentGroup,
     {
@@ -1856,7 +1868,7 @@
 
     <span class="doccomment">/// Returns a new instance using `G` and `name`.
     </span><span class="kw">pub fn </span>named&lt;G: ComponentGroup&gt;(name: <span class="kw">impl </span>Into&lt;Name&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::new(Group::new::&lt;G&gt;(), name)
+        <span class="self">Self</span>::new(Group::from_group::&lt;G&gt;(), name)
     }
 }
 
@@ -2361,10 +2373,10 @@
     <span class="doccomment">/// Returns a new source with the given hue (in degrees) and saturation (0.0
     /// - 1.0).
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>new(hue: f32, saturation: f32) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(hue: <span class="kw">impl </span>Into&lt;OklabHue&gt;, saturation: <span class="kw">impl </span>Into&lt;ZeroToOne&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            hue: OklabHue::new(hue),
-            saturation: ZeroToOne::new(saturation),
+            hue: hue.into(),
+            saturation: saturation.into(),
         }
     }
 
