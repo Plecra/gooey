@@ -1235,6 +1235,74 @@
 <a href="#1235" id="1235">1235</a>
 <a href="#1236" id="1236">1236</a>
 <a href="#1237" id="1237">1237</a>
+<a href="#1238" id="1238">1238</a>
+<a href="#1239" id="1239">1239</a>
+<a href="#1240" id="1240">1240</a>
+<a href="#1241" id="1241">1241</a>
+<a href="#1242" id="1242">1242</a>
+<a href="#1243" id="1243">1243</a>
+<a href="#1244" id="1244">1244</a>
+<a href="#1245" id="1245">1245</a>
+<a href="#1246" id="1246">1246</a>
+<a href="#1247" id="1247">1247</a>
+<a href="#1248" id="1248">1248</a>
+<a href="#1249" id="1249">1249</a>
+<a href="#1250" id="1250">1250</a>
+<a href="#1251" id="1251">1251</a>
+<a href="#1252" id="1252">1252</a>
+<a href="#1253" id="1253">1253</a>
+<a href="#1254" id="1254">1254</a>
+<a href="#1255" id="1255">1255</a>
+<a href="#1256" id="1256">1256</a>
+<a href="#1257" id="1257">1257</a>
+<a href="#1258" id="1258">1258</a>
+<a href="#1259" id="1259">1259</a>
+<a href="#1260" id="1260">1260</a>
+<a href="#1261" id="1261">1261</a>
+<a href="#1262" id="1262">1262</a>
+<a href="#1263" id="1263">1263</a>
+<a href="#1264" id="1264">1264</a>
+<a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
+<a href="#1271" id="1271">1271</a>
+<a href="#1272" id="1272">1272</a>
+<a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a>
+<a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
+<a href="#1283" id="1283">1283</a>
+<a href="#1284" id="1284">1284</a>
+<a href="#1285" id="1285">1285</a>
+<a href="#1286" id="1286">1286</a>
+<a href="#1287" id="1287">1287</a>
+<a href="#1288" id="1288">1288</a>
+<a href="#1289" id="1289">1289</a>
+<a href="#1290" id="1290">1290</a>
+<a href="#1291" id="1291">1291</a>
+<a href="#1292" id="1292">1292</a>
+<a href="#1293" id="1293">1293</a>
+<a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
+<a href="#1296" id="1296">1296</a>
+<a href="#1297" id="1297">1297</a>
+<a href="#1298" id="1298">1298</a>
+<a href="#1299" id="1299">1299</a>
+<a href="#1300" id="1300">1300</a>
+<a href="#1301" id="1301">1301</a>
+<a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -2387,6 +2455,32 @@
             Okhsl::new(<span class="self">self</span>.hue, <span class="kw-2">*</span><span class="self">self</span>.saturation, <span class="kw-2">*</span>lightness.into_lightness()).into_color();
         Color::new_f32(rgb.red, rgb.blue, rgb.green, <span class="number">1.0</span>)
     }
+
+    <span class="doccomment">/// Calculates an approximate ratio between 0.0 and 1.0 of how contrasting
+    /// these colors are, with perfect constrast being two clors that are
+    /// opposite of each other on the hue circle and one fully desaturated and
+    /// the other fully saturated.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>contrast_between(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ZeroToOne {
+        <span class="kw">let </span>saturation_delta = <span class="self">self</span>.saturation.difference_between(other.saturation);
+        <span class="kw">let </span>self_hue = <span class="self">self</span>.hue.into_positive_degrees();
+        <span class="kw">let </span>other_hue = other.hue.into_positive_degrees();
+        <span class="comment">// Calculate the shortest distance between the hues, taking into account
+        // that 0 and 359 are one degree apart.
+        </span><span class="kw">let </span>hue_delta = ZeroToOne::new(
+            <span class="kw">if </span>self_hue &lt; other_hue {
+                <span class="kw">let </span>hue_delta_a = other_hue - self_hue;
+                <span class="kw">let </span>hue_delta_b = self_hue + <span class="number">360. </span>- other_hue;
+                hue_delta_a.min(hue_delta_b)
+            } <span class="kw">else </span>{
+                <span class="kw">let </span>hue_delta_a = self_hue - other_hue;
+                <span class="kw">let </span>hue_delta_b = other_hue + <span class="number">360. </span>- self_hue;
+                hue_delta_a.min(hue_delta_b)
+            } / <span class="number">180.</span>,
+        );
+
+        saturation_delta * hue_delta
+    }
 }
 
 <span class="doccomment">/// A value that can represent the lightness of a color.
@@ -2434,29 +2528,31 @@
         <span class="self">self</span>.into_source_and_lightness().<span class="number">1
     </span>}
 
+    <span class="doccomment">/// Returns the contrast between this color and the components provided.
+    ///
+    /// To achieve a contrast of 1.0:
+    ///
+    /// - `self`&#39;s hue and `check_source.hue` must be 180 degrees apart.
+    /// - `self`&#39;s saturation and `check_source.saturation` must be different by
+    ///   1.0.
+    /// - `self`&#39;s lightness and `check_lightness` must be different by 1.0.
+    /// - `self`&#39;s alpha and `check_alpha` must be different by 1.0.
+    ///
+    /// The algorithm currently used is purposely left undocumented as it will
+    /// likely change. It should be a reasonable heuristic until someone smarter
+    /// than @ecton comes along.
+    </span><span class="kw">fn </span>contrast_between(
+        <span class="self">self</span>,
+        check_source: ColorSource,
+        check_lightness: ZeroToOne,
+        check_alpha: ZeroToOne,
+    ) -&gt; ZeroToOne;
+
     <span class="doccomment">/// Returns the color in `others` that contrasts the most from `self`.
     </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>most_contrasting(<span class="self">self</span>, others: <span class="kw-2">&amp;</span>[<span class="self">Self</span>]) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span><span class="self">Self</span>: Copy,
-    {
-        <span class="comment">// TODO this currently only checks lightness. We should probably factor
-        // in hue/saturation changes too.
-        </span><span class="kw">let </span>check = <span class="self">self</span>.lightness();
-
-        <span class="kw">let </span><span class="kw-2">mut </span>others = others.iter().copied();
-        <span class="kw">let </span><span class="kw-2">mut </span>most_contrasting = others.next().expect(<span class="string">&quot;at least one comparison&quot;</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>most_contrast_amount = (<span class="kw-2">*</span>most_contrasting.lightness() - <span class="kw-2">*</span>check).abs();
-        <span class="kw">for </span>other <span class="kw">in </span>others {
-            <span class="kw">let </span>contrast_amount = (<span class="kw-2">*</span>other.lightness() - <span class="kw-2">*</span>check).abs();
-            <span class="kw">if </span>contrast_amount &gt; most_contrast_amount {
-                most_contrasting = other;
-                most_contrast_amount = contrast_amount;
-            }
-        }
-
-        most_contrasting
-    }
+        </span><span class="self">Self</span>: Copy;
 }
 
 <span class="kw">impl </span>ColorExt <span class="kw">for </span>Color {
@@ -2470,6 +2566,46 @@
             },
             ZeroToOne::new(hsl.lightness * <span class="self">self</span>.alpha_f32()),
         )
+    }
+
+    <span class="kw">fn </span>contrast_between(
+        <span class="self">self</span>,
+        check_source: ColorSource,
+        check_lightness: ZeroToOne,
+        check_alpha: ZeroToOne,
+    ) -&gt; ZeroToOne {
+        <span class="kw">let </span>(other_source, other_lightness) = <span class="self">self</span>.into_source_and_lightness();
+        <span class="kw">let </span>lightness_delta = other_lightness.difference_between(check_lightness);
+
+        <span class="kw">let </span>source_change = check_source.contrast_between(other_source);
+
+        <span class="kw">let </span>other_alpha = ZeroToOne::new(<span class="self">self</span>.alpha_f32());
+        <span class="kw">let </span>alpha_delta = check_alpha.difference_between(other_alpha);
+
+        lightness_delta * source_change * alpha_delta
+    }
+
+    <span class="kw">fn </span>most_contrasting(<span class="self">self</span>, others: <span class="kw-2">&amp;</span>[<span class="self">Self</span>]) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span><span class="self">Self</span>: Copy,
+    {
+        <span class="kw">let </span>(check_source, check_lightness) = <span class="self">self</span>.into_source_and_lightness();
+        <span class="kw">let </span>check_alpha = ZeroToOne::new(<span class="self">self</span>.alpha_f32());
+
+        <span class="kw">let </span><span class="kw-2">mut </span>others = others.iter().copied();
+        <span class="kw">let </span><span class="kw-2">mut </span>most_contrasting = others.next().expect(<span class="string">&quot;at least one comparison&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>most_contrast_amount =
+            most_contrasting.contrast_between(check_source, check_lightness, check_alpha);
+        <span class="kw">for </span>other <span class="kw">in </span>others {
+            <span class="kw">let </span>contrast_amount =
+                other.contrast_between(check_source, check_lightness, check_alpha);
+            <span class="kw">if </span>contrast_amount &gt; most_contrast_amount {
+                most_contrasting = other;
+                most_contrast_amount = contrast_amount;
+            }
+        }
+
+        most_contrasting
     }
 }
 </code></pre></div></section></main></body></html>
