@@ -1612,7 +1612,7 @@
         }
 
         <span class="kw">let </span>color = styles.get(<span class="kw-2">&amp;</span>HighlightColor, <span class="self">self</span>);
-        <span class="self">self</span>.stroke_outline::&lt;Lp&gt;(color, StrokeOptions::default());
+        <span class="self">self</span>.stroke_outline::&lt;Lp&gt;(color, StrokeOptions::lp_wide(Lp::points(<span class="number">2</span>)));
     }
 
     <span class="doccomment">/// Renders the default focus ring for this widget.
