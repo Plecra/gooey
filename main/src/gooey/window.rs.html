@@ -1489,7 +1489,7 @@
                 <span class="kw">let </span>new_min_size = (min_width &gt; <span class="number">0 </span>|| min_height &gt; <span class="number">0</span>)
                     .then_some(Size::&lt;Px&gt;::new(min_width, min_height).into_unsigned());
 
-                <span class="kw">if </span>new_min_size != <span class="self">self</span>.min_inner_size {
+                <span class="kw">if </span>new_min_size != <span class="self">self</span>.min_inner_size &amp;&amp; resizable {
                     window.set_min_inner_size(new_min_size);
                     <span class="self">self</span>.min_inner_size = new_min_size;
                 }
