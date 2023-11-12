@@ -358,7 +358,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::names::Name;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
-    AutoFocusableControls, Easing, IntrinsicPadding, SurfaceColor, TextColor,
+    AutoFocusableControls, Easing, IntrinsicPadding, OpaqueWidgetColor, SurfaceColor, TextColor,
 };
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ColorExt, ComponentGroup, Styles};
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
@@ -669,8 +669,8 @@
 <span class="macro">define_components! </span>{
     Button {
         <span class="doccomment">/// The background color of the button.
-        </span>ButtonBackground(Color, <span class="string">&quot;background_color&quot;</span>, .surface.highest_container) <span class="comment">// TODO highest_container seems wrong, but it&#39;s what material uses. Perhaps we should add another color so that buttons don&#39;t blend with the highest container level.
-        </span><span class="doccomment">/// The background color of the button when it is active (depressed).
+        </span>ButtonBackground(Color, <span class="string">&quot;background_color&quot;</span>, |context| context.query_style(<span class="kw-2">&amp;</span>OpaqueWidgetColor))
+        <span class="doccomment">/// The background color of the button when it is active (depressed).
         </span>ButtonActiveBackground(Color, <span class="string">&quot;active_background_color&quot;</span>, .surface.color)
         <span class="doccomment">/// The background color of the button when the mouse cursor is hovering over
         /// it.
