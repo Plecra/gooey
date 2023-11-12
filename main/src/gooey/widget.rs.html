@@ -1230,7 +1230,6 @@
 <a href="#1230" id="1230">1230</a>
 <a href="#1231" id="1231">1231</a>
 <a href="#1232" id="1232">1232</a>
-<a href="#1233" id="1233">1233</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1248,8 +1247,7 @@
 <span class="kw">use </span>kludgine::figures::{IntoSigned, IntoUnsigned, Point, Rect, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext};
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::VisualOrder;
-<span class="kw">use </span><span class="kw">crate</span>::styles::{IntoComponentValue, NamedComponent, Styles, ThemePair};
+<span class="kw">use </span><span class="kw">crate</span>::styles::{IntoComponentValue, NamedComponent, Styles, ThemePair, VisualOrder};
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Align, Expand, Scroll, Style};

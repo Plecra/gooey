@@ -1137,6 +1137,8 @@
 <a href="#1137" id="1137">1137</a>
 <a href="#1138" id="1138">1138</a>
 <a href="#1139" id="1139">1139</a>
+<a href="#1140" id="1140">1140</a>
+<a href="#1141" id="1141">1141</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
@@ -1152,8 +1154,10 @@
 <span class="kw">use </span>kludgine::{Color, Kludgine};
 
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, VisualOrder, WidgetBackground};
-<span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefaultvalue, ComponentDefinition, Styles, Theme, ThemePair};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, WidgetBackground};
+<span class="kw">use </span><span class="kw">crate</span>::styles::{
+    ComponentDefaultvalue, ComponentDefinition, Styles, Theme, ThemePair, VisualOrder,
+};
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, WidgetId, WidgetInstance, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
