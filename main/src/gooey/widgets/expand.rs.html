@@ -91,11 +91,11 @@
 <a href="#91" id="91">91</a>
 <a href="#92" id="92">92</a>
 <a href="#93" id="93">93</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::{Px, UPx};
-<span class="kw">use </span>kludgine::figures::{IntoSigned, Rect, Size};
+</pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::UPx;
+<span class="kw">use </span>kludgine::figures::{IntoSigned, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrapperWidget};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrappedLayout, WrapperWidget};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::Space;
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -164,7 +164,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
-    ) -&gt; Rect&lt;Px&gt; {
+    ) -&gt; WrappedLayout {
         <span class="kw">let </span>available_space = Size::new(
             ConstraintLimit::Known(available_space.width.max()),
             ConstraintLimit::Known(available_space.height.max()),

@@ -128,6 +128,8 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 
 </span><span class="kw">use </span>kludgine::figures::units::Lp;
@@ -156,9 +158,11 @@
 ///         /// This component whose default value is a color from the current theme.
 ///         ThemedComponent(Color, &quot;themed_component&quot;, .primary.color)
 ///         /// This component is a color whose default value is the currently defined `TextColor`.
-///         DependentComponent(Color, &quot;dependent_component&quot;, |context| context.query_style(&amp;TextColor))
+///         DependentComponent(Color, &quot;dependent_component&quot;, @TextColor)
 ///         /// This component defaults to picking a contrasting color between `TextColor` and `SurfaceColor`
 ///         ContrastingColor(Color, &quot;contrasting_color&quot;, contrasting!(ThemedComponent, TextColor, SurfaceColor))
+///         /// This component shows how to use a closure for nearly infinite flexibility in computing the default value.
+///         ClosureDefaultComponent(Color, &quot;closure_component&quot;, |context| context.query_style(&amp;TextColor))
 ///     }
 /// }
 /// ```
@@ -202,7 +206,7 @@
     (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>, <span class="macro">contrasting!</span>(<span class="macro-nonterminal">$bg</span>:ident, $(<span class="macro-nonterminal">$fg</span>:ident),+ $(,)<span class="question-mark">?</span>)) =&gt; {
         <span class="macro">define_components!</span>(<span class="macro-nonterminal">$</span><span class="kw">type</span>, |<span class="macro-nonterminal">context</span>| {
             <span class="kw">use </span><span class="macro-nonterminal">$crate::styles::ColorExt</span>;
-            <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="macro-nonterminal">$bg</span>, $(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$fg</span>),<span class="kw-2">*</span>]);
+            <span class="kw">let </span>styles = context.query_parent_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="macro-nonterminal">$bg</span>, $(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$fg</span>),<span class="kw-2">*</span>]);
             styles.get(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$bg</span>, context).most_contrasting(<span class="kw-2">&amp;</span>[
                 $(styles.get(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$fg</span>, context)),+
             ])

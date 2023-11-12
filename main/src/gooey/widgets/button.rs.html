@@ -653,7 +653,7 @@
 <span class="macro">define_components! </span>{
     Button {
         <span class="doccomment">/// The background color of the button.
-        </span>ButtonBackground(Color, <span class="string">&quot;background_color&quot;</span>, |context| context.query_style(<span class="kw-2">&amp;</span>OpaqueWidgetColor))
+        </span>ButtonBackground(Color, <span class="string">&quot;background_color&quot;</span>, @OpaqueWidgetColor)
         <span class="doccomment">/// The background color of the button when it is active (depressed).
         </span>ButtonActiveBackground(Color, <span class="string">&quot;active_background_color&quot;</span>, .surface.color)
         <span class="doccomment">/// The background color of the button when the mouse cursor is hovering over

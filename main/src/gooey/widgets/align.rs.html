@@ -210,6 +210,7 @@
 <a href="#210" id="210">210</a>
 <a href="#211" id="211">211</a>
 <a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span>kludgine::figures::units::UPx;
@@ -218,7 +219,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Edges, FlexibleDimension};
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrapperWidget};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrappedLayout, WrapperWidget};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A widget aligns its contents to its container&#39;s boundaries.
@@ -319,8 +320,8 @@
         Layout {
             margin: Edges {
                 left,
-                right,
                 top,
+                right,
                 bottom,
             },
             content: Size::new(width, height),
@@ -398,7 +399,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
-    ) -&gt; Rect&lt;kludgine::figures::units::Px&gt; {
+    ) -&gt; WrappedLayout {
         <span class="kw">let </span>layout = <span class="self">self</span>.measure(available_space, context);
 
         Rect::new(
@@ -408,6 +409,7 @@
             ),
             layout.content.into_signed(),
         )
+        .into()
     }
 }
 

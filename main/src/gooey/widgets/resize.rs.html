@@ -107,11 +107,11 @@
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::UPx;
-<span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, Rect, ScreenScale, Size};
+<span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, ScreenScale, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::DimensionRange;
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrapperWidget};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrappedLayout, WrapperWidget};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A widget that resizes its contained widget to an explicit size.
@@ -174,7 +174,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
-    ) -&gt; Rect&lt;kludgine::figures::units::Px&gt; {
+    ) -&gt; WrappedLayout {
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         <span class="kw">let </span>size = <span class="kw">if let </span>(<span class="prelude-val">Some</span>(width), <span class="prelude-val">Some</span>(height)) =
             (<span class="self">self</span>.width.exact_dimension(), <span class="self">self</span>.height.exact_dimension())
