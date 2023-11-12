@@ -1154,7 +1154,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, VisualOrder, WidgetBackground};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefaultvalue, ComponentDefinition, Styles, Theme, ThemePair};
-<span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, Value};
+<span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, WidgetId, WidgetInstance, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
 <span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, ThemeMode};
@@ -1335,7 +1335,7 @@
                     }
                     <span class="bool-val">true
                 </span>}
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
+                <span class="prelude-val">Err</span>(()) =&gt; <span class="bool-val">false</span>,
             };
             <span class="kw">if </span>new {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(active) = <span class="self">self</span>.pending_state.active.clone() {
@@ -1389,7 +1389,7 @@
                     }
                     <span class="bool-val">true
                 </span>}
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
+                <span class="prelude-val">Err</span>(()) =&gt; <span class="bool-val">false</span>,
             };
             <span class="kw">if </span>new {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.pending_state.focus.clone() {
@@ -2029,8 +2029,8 @@
     ///
     /// Style queries for children will return any values matching this
     /// collection.
-    </span><span class="kw">pub fn </span>attach_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, styles: Value&lt;Styles&gt;) {
-        <span class="self">self</span>.current_node.attach_styles(styles);
+    </span><span class="kw">pub fn </span>attach_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, styles: <span class="kw">impl </span>IntoValue&lt;Styles&gt;) {
+        <span class="self">self</span>.current_node.attach_styles(styles.into_value());
     }
 
     <span class="doccomment">/// Attaches `theme` to the widget hierarchy for this widget.

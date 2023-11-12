@@ -1303,6 +1303,8 @@
 <a href="#1303" id="1303">1303</a>
 <a href="#1304" id="1304">1304</a>
 <a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1327,7 +1329,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::utils::Lazy;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
 
-<span class="kw">pub mod </span>components;
+<span class="attr">#[macro_use]
+</span><span class="kw">pub mod </span>components;
 
 <span class="doccomment">/// A collection of style components organized by their name.
 </span><span class="attr">#[derive(Clone, Debug, Default)]
@@ -1363,7 +1366,7 @@
 
     <span class="doccomment">/// Adds a [`Component`] for the name provided and returns self.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>with(<span class="kw-2">mut </span><span class="self">self</span>, name: <span class="kw-2">&amp;</span><span class="kw">impl </span>NamedComponent, component: <span class="kw">impl </span>Into&lt;Component&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>with(<span class="kw-2">mut </span><span class="self">self</span>, name: <span class="kw-2">&amp;</span><span class="kw">impl </span>NamedComponent, component: <span class="kw">impl </span>IntoComponentValue) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.insert(name, component);
         <span class="self">self
     </span>}
@@ -2312,7 +2315,7 @@
         <span class="self">Self </span>{
             color: neutral.color(<span class="number">98</span>),
             dim_color: neutral_variant.color(<span class="number">70</span>),
-            bright_color: neutral.color(<span class="number">99</span>),
+            bright_color: neutral.color(<span class="number">100</span>),
             lowest_container: neutral.color(<span class="number">100</span>),
             low_container: neutral.color(<span class="number">96</span>),
             container: neutral.color(<span class="number">95</span>),
@@ -2332,7 +2335,7 @@
         <span class="self">Self </span>{
             color: neutral.color(<span class="number">10</span>),
             dim_color: neutral_variant.color(<span class="number">2</span>),
-            bright_color: neutral.color(<span class="number">10</span>),
+            bright_color: neutral.color(<span class="number">11</span>),
             lowest_container: neutral.color(<span class="number">15</span>),
             low_container: neutral.color(<span class="number">20</span>),
             container: neutral.color(<span class="number">25</span>),
@@ -2463,6 +2466,7 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>contrast_between(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ZeroToOne {
         <span class="kw">let </span>saturation_delta = <span class="self">self</span>.saturation.difference_between(other.saturation);
+
         <span class="kw">let </span>self_hue = <span class="self">self</span>.hue.into_positive_degrees();
         <span class="kw">let </span>other_hue = other.hue.into_positive_degrees();
         <span class="comment">// Calculate the shortest distance between the hues, taking into account
@@ -2582,7 +2586,7 @@
         <span class="kw">let </span>other_alpha = ZeroToOne::new(<span class="self">self</span>.alpha_f32());
         <span class="kw">let </span>alpha_delta = check_alpha.difference_between(other_alpha);
 
-        lightness_delta * source_change * alpha_delta
+        ZeroToOne::new((<span class="kw-2">*</span>lightness_delta + <span class="kw-2">*</span>source_change + <span class="kw-2">*</span>alpha_delta) / <span class="number">3.</span>)
     }
 
     <span class="kw">fn </span>most_contrasting(<span class="self">self</span>, others: <span class="kw-2">&amp;</span>[<span class="self">Self</span>]) -&gt; <span class="self">Self

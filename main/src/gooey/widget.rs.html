@@ -1225,6 +1225,12 @@
 <a href="#1225" id="1225">1225</a>
 <a href="#1226" id="1226">1226</a>
 <a href="#1227" id="1227">1227</a>
+<a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
+<a href="#1231" id="1231">1231</a>
+<a href="#1232" id="1232">1232</a>
+<a href="#1233" id="1233">1233</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1798,6 +1804,12 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>horizontal_scroll(<span class="self">self</span>) -&gt; Scroll {
         Scroll::horizontal(<span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Creates a [`WidgetRef`] for use as child widget.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">fn </span>widget_ref(<span class="self">self</span>) -&gt; WidgetRef {
+        WidgetRef::new(<span class="self">self</span>)
     }
 }
 
