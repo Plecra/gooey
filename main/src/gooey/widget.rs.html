@@ -1364,6 +1364,42 @@
 <a href="#1364" id="1364">1364</a>
 <a href="#1365" id="1365">1365</a>
 <a href="#1366" id="1366">1366</a>
+<a href="#1367" id="1367">1367</a>
+<a href="#1368" id="1368">1368</a>
+<a href="#1369" id="1369">1369</a>
+<a href="#1370" id="1370">1370</a>
+<a href="#1371" id="1371">1371</a>
+<a href="#1372" id="1372">1372</a>
+<a href="#1373" id="1373">1373</a>
+<a href="#1374" id="1374">1374</a>
+<a href="#1375" id="1375">1375</a>
+<a href="#1376" id="1376">1376</a>
+<a href="#1377" id="1377">1377</a>
+<a href="#1378" id="1378">1378</a>
+<a href="#1379" id="1379">1379</a>
+<a href="#1380" id="1380">1380</a>
+<a href="#1381" id="1381">1381</a>
+<a href="#1382" id="1382">1382</a>
+<a href="#1383" id="1383">1383</a>
+<a href="#1384" id="1384">1384</a>
+<a href="#1385" id="1385">1385</a>
+<a href="#1386" id="1386">1386</a>
+<a href="#1387" id="1387">1387</a>
+<a href="#1388" id="1388">1388</a>
+<a href="#1389" id="1389">1389</a>
+<a href="#1390" id="1390">1390</a>
+<a href="#1391" id="1391">1391</a>
+<a href="#1392" id="1392">1392</a>
+<a href="#1393" id="1393">1393</a>
+<a href="#1394" id="1394">1394</a>
+<a href="#1395" id="1395">1395</a>
+<a href="#1396" id="1396">1396</a>
+<a href="#1397" id="1397">1397</a>
+<a href="#1398" id="1398">1398</a>
+<a href="#1399" id="1399">1399</a>
+<a href="#1400" id="1400">1400</a>
+<a href="#1401" id="1401">1401</a>
+<a href="#1402" id="1402">1402</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1384,12 +1420,12 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{
-    ContainerLevel, Dimension, Edges, IntoComponentValue, NamedComponent, Styles, ThemePair,
-    VisualOrder,
+    ContainerLevel, Dimension, DimensionRange, Edges, IntoComponentValue, NamedComponent, Styles,
+    ThemePair, VisualOrder,
 };
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widgets::{Align, Container, Expand, Scroll, Stack, Style};
+<span class="kw">use </span><span class="kw">crate</span>::widgets::{Align, Container, Expand, Resize, Scroll, Stack, Style};
 <span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, ThemeMode, Window, WindowBehavior};
 <span class="kw">use crate</span>::{ConstraintLimit, Run};
 
@@ -1408,6 +1444,12 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt;;
+
+    <span class="doccomment">/// Return true if this widget should expand to fill the window when it is
+    /// the root widget.
+    </span><span class="kw">fn </span>expand_if_at_root(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;bool&gt; {
+        <span class="prelude-val">Some</span>(<span class="bool-val">false</span>)
+    }
 
     <span class="doccomment">/// The widget has been mounted into a parent widget.
     </span><span class="attr">#[allow(unused_variables)]
@@ -1593,9 +1635,8 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; WrappedLayout {
-        <span class="kw">let </span>child = <span class="self">self</span>.child_mut().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-
         <span class="kw">let </span>adjusted_space = <span class="self">self</span>.adjust_child_constraint(available_space, context);
+        <span class="kw">let </span>child = <span class="self">self</span>.child_mut().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         <span class="kw">let </span>size = context
             .for_other(<span class="kw-2">&amp;</span>child)
             .layout(adjusted_space)
@@ -1786,9 +1827,8 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>child = <span class="self">self</span>.child_mut().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-
         <span class="kw">let </span>layout = <span class="self">self</span>.layout_child(available_space, context);
+        <span class="kw">let </span>child = <span class="self">self</span>.child_mut().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         context.set_child_layout(<span class="kw-2">&amp;</span>child, layout.child);
         layout.size
     }
@@ -1970,6 +2010,38 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>expand_weighted(<span class="self">self</span>, weight: u8) -&gt; Expand {
         Expand::weighted(weight, <span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Expands `self` to grow to fill its parent horizontally.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">fn </span>expand_horizontally(<span class="self">self</span>) -&gt; Expand {
+        Expand::horizontal(<span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Expands `self` to grow to fill its parent vertically.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">fn </span>expand_vertically(<span class="self">self</span>) -&gt; Expand {
+        Expand::horizontal(<span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Resizes `self` to `width`.
+    ///
+    /// `width` can be an individual
+    /// [`Dimension`]/[`Px`]/[`Lp`](crate::kludgine::figures::units::Lp) or a
+    /// range.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">fn </span>width(<span class="self">self</span>, width: <span class="kw">impl </span>Into&lt;DimensionRange&gt;) -&gt; Resize {
+        Resize::from_width(width, <span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Resizes `self` to `height`.
+    ///
+    /// `height` can be an individual
+    /// [`Dimension`]/[`Px`]/[`Lp`](crate::kludgine::figures::units::Lp) or a
+    /// range.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">fn </span>height(<span class="self">self</span>, height: <span class="kw">impl </span>Into&lt;DimensionRange&gt;) -&gt; Resize {
+        Resize::from_height(height, <span class="self">self</span>)
     }
 
     <span class="doccomment">/// Aligns `self` to the center vertically and horizontally.

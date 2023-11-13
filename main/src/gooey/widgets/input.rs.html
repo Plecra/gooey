@@ -617,6 +617,17 @@
 <a href="#617" id="617">617</a>
 <a href="#618" id="618">618</a>
 <a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
+<a href="#628" id="628">628</a>
+<a href="#629" id="629">629</a>
+<a href="#630" id="630">630</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -636,7 +647,9 @@
 <span class="kw">use </span>kludgine::{Color, Kludgine};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, LayoutContext, WidgetContext};
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, LineHeight, OutlineColor, TextColor, TextSize};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{
+    HighlightColor, IntrinsicPadding, LineHeight, OutlineColor, TextColor, TextSize,
+};
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Generation, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{Callback, EventHandling, Widget, HANDLED, IGNORED};
@@ -814,6 +827,8 @@
         <span class="self">self</span>.cursor_state.update(context.elapsed());
         <span class="kw">let </span>cursor_state = <span class="self">self</span>.cursor_state;
         <span class="kw">let </span>size = context.gfx.size();
+        <span class="kw">let </span>padding = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_px(context.gfx.scale());
+        <span class="kw">let </span>padding = Point::&lt;Px&gt;::new(padding, padding);
         <span class="kw">let </span>highlight = context.get(<span class="kw-2">&amp;</span>HighlightColor);
         <span class="kw">let </span>editor = <span class="self">self</span>.editor_mut(<span class="kw-2">&amp;mut </span>context.gfx, <span class="kw-2">&amp;</span>context.widget);
         <span class="kw">let </span>cursor = editor.cursor();
@@ -847,7 +862,7 @@
                                     Rect::new(start_position, Size::new(width, line_height)),
                                     highlight,
                                 ),
-                                Point::default(),
+                                padding,
                                 <span class="prelude-val">None</span>,
                                 <span class="prelude-val">None</span>,
                             );
@@ -859,7 +874,7 @@
                                     Rect::new(start_position, Size::new(width, line_height)),
                                     highlight,
                                 ),
-                                Point::default(),
+                                padding,
                                 <span class="prelude-val">None</span>,
                                 <span class="prelude-val">None</span>,
                             );
@@ -875,7 +890,7 @@
                                         ),
                                         highlight,
                                     ),
-                                    Point::default(),
+                                    padding,
                                     <span class="prelude-val">None</span>,
                                     <span class="prelude-val">None</span>,
                                 );
@@ -889,7 +904,7 @@
                                     ),
                                     highlight,
                                 ),
-                                Point::default(),
+                                padding,
                                 <span class="prelude-val">None</span>,
                                 <span class="prelude-val">None</span>,
                             );
@@ -902,7 +917,7 @@
                                 Rect::new(start_position, Size::new(width, line_height)),
                                 highlight,
                             ),
-                            Point::default(),
+                            padding,
                             <span class="prelude-val">None</span>,
                             <span class="prelude-val">None</span>,
                         );
@@ -919,7 +934,7 @@
                                 ),
                                 highlight,
                             ),
-                            Point::default(),
+                            padding,
                             <span class="prelude-val">None</span>,
                             <span class="prelude-val">None</span>,
                         );
@@ -942,7 +957,7 @@
                             ),
                             highlight, <span class="comment">// TODO cursor should be a bold color, highlight probably not. This should have its own color.
                         </span>),
-                        Point::default(),
+                        padding,
                         <span class="prelude-val">None</span>,
                         <span class="prelude-val">None</span>,
                     );
@@ -959,14 +974,9 @@
         }
 
         <span class="kw">let </span>text_color = context.get(<span class="kw-2">&amp;</span>TextColor);
-        context.gfx.draw_text_buffer(
-            buffer,
-            text_color,
-            TextOrigin::TopLeft,
-            Point::&lt;Px&gt;::default(),
-            <span class="prelude-val">None</span>,
-            <span class="prelude-val">None</span>,
-        );
+        context
+            .gfx
+            .draw_text_buffer(buffer, text_color, TextOrigin::TopLeft, padding, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
     }
 
     <span class="kw">fn </span>layout(
@@ -974,22 +984,34 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
+        <span class="kw">let </span>padding = context
+            .get(<span class="kw-2">&amp;</span>IntrinsicPadding)
+            .into_px(context.gfx.scale())
+            .into_unsigned();
         <span class="kw">if </span><span class="self">self</span>.needs_to_select_all {
             <span class="self">self</span>.needs_to_select_all = <span class="bool-val">false</span>;
             <span class="self">self</span>.select_all();
         }
         <span class="kw">let </span>editor = <span class="self">self</span>.editor_mut(<span class="kw-2">&amp;mut </span>context.graphics.gfx, <span class="kw-2">&amp;</span>context.graphics.widget);
         <span class="kw">let </span>buffer = editor.buffer_mut();
-        buffer.set_size(
-            context.gfx.font_system(),
-            available_space.width.max().into_float(),
-            available_space.height.max().into_float(),
-        );
+        <span class="kw">let </span>width = available_space
+            .width
+            .max()
+            .saturating_sub(padding * <span class="number">2</span>)
+            .into_float();
+        <span class="kw">let </span>height = available_space
+            .height
+            .max()
+            .saturating_sub(padding * <span class="number">2</span>)
+            .into_float();
+
+        buffer.set_size(context.gfx.font_system(), width, height);
         context
             .gfx
             .measure_text_buffer::&lt;Px&gt;(buffer, Color::WHITE)
             .size
             .into_unsigned()
+            + Size::new(padding * <span class="number">2</span>, padding * <span class="number">2</span>)
     }
 
     <span class="kw">fn </span>keyboard_input(

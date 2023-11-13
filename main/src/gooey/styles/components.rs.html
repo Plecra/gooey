@@ -163,7 +163,7 @@
 ///         /// This component defaults to picking a contrasting color between `TextColor` and `SurfaceColor`
 ///         ContrastingColor(Color, &quot;contrasting_color&quot;, contrasting!(ThemedComponent, TextColor, SurfaceColor))
 ///         /// This component shows how to use a closure for nearly infinite flexibility in computing the default value.
-///         ClosureDefaultComponent(Color, &quot;closure_component&quot;, |context| context.query_style(&amp;TextColor))
+///         ClosureDefaultComponent(Color, &quot;closure_component&quot;, |context| context.get(&amp;TextColor))
 ///     }
 /// }
 /// ```

@@ -318,6 +318,10 @@
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
 </span><span class="kw">use </span>std::time::Duration;
 
@@ -496,12 +500,12 @@
                 .into_signed();
         <span class="kw">let </span>max_extents = Size::new(
             <span class="kw">if </span><span class="self">self</span>.enabled.x {
-                ConstraintLimit::ClippedAfter(UPx::MAX - scroll.x.into_unsigned())
+                ConstraintLimit::ClippedAfter((control_size.width).into_unsigned())
             } <span class="kw">else </span>{
                 available_space.width
             },
             <span class="kw">if </span><span class="self">self</span>.enabled.y {
-                ConstraintLimit::ClippedAfter(UPx::MAX - scroll.y.into_unsigned())
+                ConstraintLimit::ClippedAfter((control_size.height).into_unsigned())
             } <span class="kw">else </span>{
                 available_space.height
             },
@@ -562,16 +566,12 @@
 
         Size::new(
             <span class="kw">if </span><span class="self">self</span>.enabled.x {
-                available_space
-                    .width
-                    .fit_measured(<span class="self">self</span>.content_size.width, context.gfx.scale())
+                constrain_child(available_space.width, <span class="self">self</span>.content_size.width)
             } <span class="kw">else </span>{
                 <span class="self">self</span>.content_size.width.into_unsigned()
             },
             <span class="kw">if </span><span class="self">self</span>.enabled.y {
-                available_space
-                    .height
-                    .fit_measured(<span class="self">self</span>.content_size.height, context.gfx.scale())
+                constrain_child(available_space.height, <span class="self">self</span>.content_size.height)
             } <span class="kw">else </span>{
                 <span class="self">self</span>.content_size.height.into_unsigned()
             },
@@ -604,6 +604,14 @@
 
             HANDLED
         }
+    }
+}
+
+<span class="kw">fn </span>constrain_child(constraint: ConstraintLimit, measured: Px) -&gt; UPx {
+    <span class="kw">let </span>measured = measured.into_unsigned();
+    <span class="kw">match </span>constraint {
+        ConstraintLimit::Known(size) =&gt; size.min(measured),
+        ConstraintLimit::ClippedAfter(<span class="kw">_</span>) =&gt; measured,
     }
 }
 

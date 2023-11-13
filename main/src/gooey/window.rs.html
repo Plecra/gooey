@@ -1143,6 +1143,17 @@
 <a href="#1143" id="1143">1143</a>
 <a href="#1144" id="1144">1144</a>
 <a href="#1145" id="1145">1145</a>
+<a href="#1146" id="1146">1146</a>
+<a href="#1147" id="1147">1147</a>
+<a href="#1148" id="1148">1148</a>
+<a href="#1149" id="1149">1149</a>
+<a href="#1150" id="1150">1150</a>
+<a href="#1151" id="1151">1151</a>
+<a href="#1152" id="1152">1152</a>
+<a href="#1153" id="1153">1153</a>
+<a href="#1154" id="1154">1154</a>
+<a href="#1155" id="1155">1155</a>
+<a href="#1156" id="1156">1156</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -1181,7 +1192,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, DynamicReader, IntoDynamic, IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, Widget, WidgetInstance, HANDLED, IGNORED};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{
+    EventHandling, ManagedWidget, Widget, WidgetId, WidgetInstance, HANDLED, IGNORED,
+};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Expand, Resize};
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
 <span class="kw">use crate</span>::{initialize_tracing, ConstraintLimit, Run};
@@ -1986,6 +1999,9 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(state) = <span class="self">self</span>.mouse_state.devices.get(<span class="kw-2">&amp;</span>device_id) {
             <span class="comment">// Mouse Drag
             </span><span class="kw">for </span>(button, handler) <span class="kw">in </span>state {
+                <span class="kw">let </span><span class="prelude-val">Some</span>(handler) = <span class="self">self</span>.root.tree.widget(<span class="kw-2">*</span>handler) <span class="kw">else </span>{
+                    <span class="kw">continue</span>;
+                };
                 <span class="kw">let </span><span class="kw-2">mut </span>context = EventContext::new(
                     WidgetContext::new(
                         handler.clone(),
@@ -2023,7 +2039,7 @@
                 <span class="kw">if </span>widget_context.hit_test(relative) {
                     widget_context.hover(relative);
                     drop(widget_context);
-                    <span class="self">self</span>.mouse_state.widget = <span class="prelude-val">Some</span>(widget);
+                    <span class="self">self</span>.mouse_state.widget = <span class="prelude-val">Some</span>(widget.id());
                     <span class="kw">break</span>;
                 }
             }
@@ -2079,9 +2095,13 @@
                 )
                 .clear_focus();
 
-                <span class="kw">if let </span>(ElementState::Pressed, <span class="prelude-val">Some</span>(location), <span class="prelude-val">Some</span>(hovered)) =
-                    (state, <span class="kw-2">&amp;</span><span class="self">self</span>.mouse_state.location, <span class="kw-2">&amp;</span><span class="self">self</span>.mouse_state.widget)
-                {
+                <span class="kw">if let </span>(ElementState::Pressed, <span class="prelude-val">Some</span>(location), <span class="prelude-val">Some</span>(hovered)) = (
+                    state,
+                    <span class="kw-2">&amp;</span><span class="self">self</span>.mouse_state.location,
+                    <span class="self">self</span>.mouse_state
+                        .widget
+                        .and_then(|id| <span class="self">self</span>.root.tree.widget(id)),
+                ) {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(handler) = recursively_handle_event(
                         <span class="kw-2">&amp;mut </span>EventContext::new(
                             WidgetContext::new(
@@ -2103,7 +2123,7 @@
                             .devices
                             .entry(device_id)
                             .or_default()
-                            .insert(button, handler);
+                            .insert(button, handler.id());
                     }
                 }
             }
@@ -2117,7 +2137,9 @@
                 <span class="kw">if </span>device_buttons.is_empty() {
                     <span class="self">self</span>.mouse_state.devices.remove(<span class="kw-2">&amp;</span>device_id);
                 }
-
+                <span class="kw">let </span><span class="prelude-val">Some</span>(handler) = <span class="self">self</span>.root.tree.widget(handler) <span class="kw">else </span>{
+                    <span class="kw">return</span>;
+                };
                 <span class="kw">let </span><span class="kw-2">mut </span>context = EventContext::new(
                     WidgetContext::new(
                         handler,
@@ -2181,8 +2203,8 @@
 <span class="attr">#[derive(Default)]
 </span><span class="kw">struct </span>MouseState {
     location: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;,
-    widget: <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;,
-    devices: AHashMap&lt;DeviceId, AHashMap&lt;MouseButton, ManagedWidget&gt;&gt;,
+    widget: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
+    devices: AHashMap&lt;DeviceId, AHashMap&lt;MouseButton, WidgetId&gt;&gt;,
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>sealed {
