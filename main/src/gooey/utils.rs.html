@@ -122,6 +122,13 @@
 <a href="#122" id="122">122</a>
 <a href="#123" id="123">123</a>
 <a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::Deref;
 <span class="kw">use </span>std::sync::OnceLock;
 
@@ -225,13 +232,20 @@
     }
 }
 
-<span class="kw">pub struct </span>Lazy&lt;T&gt; {
+<span class="doccomment">/// A [`OnceLock`]-based lazy initializer.
+</span><span class="kw">pub struct </span>Lazy&lt;T&gt; {
     init: <span class="kw">fn</span>() -&gt; T,
     once: OnceLock&lt;T&gt;,
 }
 
 <span class="kw">impl</span>&lt;T&gt; Lazy&lt;T&gt; {
-    <span class="kw">pub const fn </span>new(init: <span class="kw">fn</span>() -&gt; T) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// Returns a type that initializes itself once upon being accessed.
+    ///
+    /// `init` is guaranteed to be called only once, but this type can&#39;t accept
+    /// `FnOnce` generic types due to being unable to allocate a `Box&lt;dyn T&gt;` in
+    /// `const` or being able to give a name to the type of a function so that
+    /// users could use this type in static variables.
+    </span><span class="kw">pub const fn </span>new(init: <span class="kw">fn</span>() -&gt; T) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             init,
             once: OnceLock::new(),

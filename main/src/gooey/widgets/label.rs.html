@@ -99,7 +99,6 @@
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A read-only text widget.
 
 </span><span class="kw">use </span>kludgine::figures::units::{Px, UPx};
@@ -162,7 +161,7 @@
 
         <span class="kw">let </span>size = context.gfx.region().size;
         <span class="kw">let </span>center = Point::from(size) / <span class="number">2</span>;
-        <span class="kw">let </span>text_color = context.query_style(<span class="kw-2">&amp;</span>TextColor);
+        <span class="kw">let </span>text_color = context.get(<span class="kw-2">&amp;</span>TextColor);
 
         <span class="kw">let </span>prepared_text = <span class="self">self</span>.prepared_text(context, text_color, size.width);
 
@@ -176,12 +175,11 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor, <span class="kw-2">&amp;</span>IntrinsicPadding]);
-        <span class="kw">let </span>padding = styles
-            .get(<span class="kw-2">&amp;</span>IntrinsicPadding, context)
+        <span class="kw">let </span>padding = context
+            .get(<span class="kw-2">&amp;</span>IntrinsicPadding)
             .into_px(context.gfx.scale())
             .into_unsigned();
-        <span class="kw">let </span>color = styles.get(<span class="kw-2">&amp;</span>TextColor, context);
+        <span class="kw">let </span>color = context.get(<span class="kw-2">&amp;</span>TextColor);
         <span class="kw">let </span>width = available_space.width.max().try_into().unwrap_or(Px::MAX);
         <span class="kw">let </span>prepared = <span class="self">self</span>.prepared_text(context, color, width);
 

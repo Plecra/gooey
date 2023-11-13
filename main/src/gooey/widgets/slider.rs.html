@@ -327,9 +327,6 @@
 <a href="#327" id="327">327</a>
 <a href="#328" id="328">328</a>
 <a href="#329" id="329">329</a>
-<a href="#330" id="330">330</a>
-<a href="#331" id="331">331</a>
-<a href="#332" id="332">332</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
 
@@ -497,14 +494,12 @@
         + <span class="lifetime">&#39;static</span>,
 {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="kw">let </span>styles =
-            context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TrackColor, <span class="kw-2">&amp;</span>InactiveTrackColor, <span class="kw-2">&amp;</span>KnobColor, <span class="kw-2">&amp;</span>TrackSize]);
-        <span class="kw">let </span>track_color = styles.get(<span class="kw-2">&amp;</span>TrackColor, context);
-        <span class="kw">let </span>inactive_track_color = styles.get(<span class="kw-2">&amp;</span>InactiveTrackColor, context);
-        <span class="kw">let </span>knob_color = styles.get(<span class="kw-2">&amp;</span>KnobColor, context);
+        <span class="kw">let </span>track_color = context.get(<span class="kw-2">&amp;</span>TrackColor);
+        <span class="kw">let </span>inactive_track_color = context.get(<span class="kw-2">&amp;</span>InactiveTrackColor);
+        <span class="kw">let </span>knob_color = context.get(<span class="kw-2">&amp;</span>KnobColor);
         <span class="kw">let </span>knob_size = <span class="self">self</span>.knob_size.into_signed();
-        <span class="kw">let </span>track_size = styles
-            .get(<span class="kw-2">&amp;</span>TrackSize, context)
+        <span class="kw">let </span>track_size = context
+            .get(<span class="kw-2">&amp;</span>TrackSize)
             .into_px(context.gfx.scale())
             .min(knob_size);
 
@@ -556,13 +551,12 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>KnobSize, <span class="kw-2">&amp;</span>MinimumSliderSize]);
-        <span class="self">self</span>.knob_size = styles
-            .get(<span class="kw-2">&amp;</span>KnobSize, context)
+        <span class="self">self</span>.knob_size = context
+            .get(<span class="kw-2">&amp;</span>KnobSize)
             .into_px(context.gfx.scale())
             .into_unsigned();
-        <span class="kw">let </span>minimum_size = styles
-            .get(<span class="kw-2">&amp;</span>MinimumSliderSize, context)
+        <span class="kw">let </span>minimum_size = context
+            .get(<span class="kw-2">&amp;</span>MinimumSliderSize)
             .into_px(context.gfx.scale())
             .into_unsigned();
 
@@ -653,13 +647,13 @@
         <span class="doccomment">/// The width and height of the draggable portion of a [`Slider`].
         </span>KnobSize(Dimension, <span class="string">&quot;knob_size&quot;</span>, Dimension::Lp(Lp::points(<span class="number">14</span>)))
         <span class="doccomment">/// The minimum length of the slidable dimension.
-        </span>MinimumSliderSize(Dimension, <span class="string">&quot;minimum_size&quot;</span>, |context| context.query_style(<span class="kw-2">&amp;</span>KnobSize) * <span class="number">2</span>)
+        </span>MinimumSliderSize(Dimension, <span class="string">&quot;minimum_size&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>KnobSize) * <span class="number">2</span>)
         <span class="doccomment">/// The color of the draggable portion of the knob.
         </span>KnobColor(Color, <span class="string">&quot;knob_color&quot;</span>, .primary.color) <span class="comment">// TODO make this pull from a component multiple widgets can share
         </span><span class="doccomment">/// The color of the track that the knob rests on.
-        </span>TrackColor(Color,<span class="string">&quot;track_color&quot;</span>, |context| context.query_style(<span class="kw-2">&amp;</span>KnobColor))
+        </span>TrackColor(Color,<span class="string">&quot;track_color&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>KnobColor))
         <span class="doccomment">/// The color of the track that the knob rests on.
-        </span>InactiveTrackColor(Color, <span class="string">&quot;inactive_track_color&quot;</span>, |context| context.query_style(<span class="kw-2">&amp;</span>OpaqueWidgetColor))
+        </span>InactiveTrackColor(Color, <span class="string">&quot;inactive_track_color&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>OpaqueWidgetColor))
     }
 }
 </code></pre></div></section></main></body></html>

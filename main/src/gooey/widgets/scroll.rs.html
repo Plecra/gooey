@@ -318,10 +318,6 @@
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
 </span><span class="kw">use </span>std::time::Duration;
 
@@ -410,18 +406,17 @@
     }
 
     <span class="kw">fn </span>show_scrollbars(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>EasingIn, <span class="kw-2">&amp;</span>EasingOut]);
         <span class="self">self</span>.scrollbar_opacity_animation = <span class="self">self
             </span>.scrollbar_opacity
             .transition_to(ZeroToOne::ONE)
             .over(Duration::from_millis(<span class="number">300</span>))
-            .with_easing(styles.get(<span class="kw-2">&amp;</span>EasingIn, context))
+            .with_easing(context.get(<span class="kw-2">&amp;</span>EasingIn))
             .and_then(Duration::from_secs(<span class="number">1</span>))
             .and_then(
                 <span class="self">self</span>.scrollbar_opacity
                     .transition_to(ZeroToOne::ZERO)
                     .over(Duration::from_millis(<span class="number">300</span>))
-                    .with_easing(styles.get(<span class="kw-2">&amp;</span>EasingOut, context)),
+                    .with_easing(context.get(<span class="kw-2">&amp;</span>EasingOut)),
             )
             .spawn();
     }
@@ -441,7 +436,7 @@
             </span>.scrollbar_opacity
             .transition_to(ZeroToOne::ZERO)
             .over(Duration::from_millis(<span class="number">300</span>))
-            .with_easing(context.query_style(<span class="kw-2">&amp;</span>EasingOut))
+            .with_easing(context.get(<span class="kw-2">&amp;</span>EasingOut))
             .spawn();
     }
 
@@ -489,13 +484,10 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>ScrollBarThickness, <span class="kw-2">&amp;</span>LineHeight]);
-        <span class="self">self</span>.bar_width = styles
-            .get(<span class="kw-2">&amp;</span>ScrollBarThickness, context)
+        <span class="self">self</span>.bar_width = context
+            .get(<span class="kw-2">&amp;</span>ScrollBarThickness)
             .into_px(context.gfx.scale());
-        <span class="self">self</span>.line_height = styles
-            .get(<span class="kw-2">&amp;</span>LineHeight, context)
-            .into_px(context.gfx.scale());
+        <span class="self">self</span>.line_height = context.get(<span class="kw-2">&amp;</span>LineHeight).into_px(context.gfx.scale());
 
         <span class="kw">let </span>(<span class="kw-2">mut </span>scroll, current_max_scroll) = <span class="self">self</span>.constrain_scroll();
 

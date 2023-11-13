@@ -406,7 +406,7 @@
     <span class="kw">fn </span>padding(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Edges&lt;Px&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.padding {
             <span class="prelude-val">Some</span>(padding) =&gt; padding.get(),
-            <span class="prelude-val">None </span>=&gt; Edges::from(context.query_style(<span class="kw-2">&amp;</span>IntrinsicPadding)),
+            <span class="prelude-val">None </span>=&gt; Edges::from(context.get(<span class="kw-2">&amp;</span>IntrinsicPadding)),
         }
         .map(|dim| dim.into_px(context.gfx.scale()))
     }
@@ -421,12 +421,12 @@
         <span class="kw">let </span>background = <span class="kw">match </span><span class="self">self</span>.background.get() {
             ContainerBackground::Color(color) =&gt; EffectiveBackground::Color(color),
             ContainerBackground::Level(level) =&gt; EffectiveBackground::Level(level),
-            ContainerBackground::Auto =&gt; EffectiveBackground::Level(
-                <span class="kw">match </span>context.query_parent_style(<span class="kw-2">&amp;</span>CurrentContainerBackground) {
+            ContainerBackground::Auto =&gt; {
+                EffectiveBackground::Level(<span class="kw">match </span>context.get(<span class="kw-2">&amp;</span>CurrentContainerBackground) {
                     EffectiveBackground::Color(<span class="kw">_</span>) =&gt; ContainerLevel::default(),
                     EffectiveBackground::Level(level) =&gt; level.next().unwrap_or_default(),
-                },
-            ),
+                })
+            }
         };
 
         <span class="kw">if </span><span class="self">self</span>.effective_background != <span class="prelude-val">Some</span>(background) {
@@ -511,7 +511,7 @@
 <span class="macro">define_components! </span>{
     Container {
         <span class="doccomment">/// The container background behind the current widget.
-        </span>CurrentContainerBackground(EffectiveBackground, <span class="string">&quot;background&quot;</span>, |context| EffectiveBackground::Color(context.query_style(<span class="kw-2">&amp;</span>SurfaceColor)))
+        </span>CurrentContainerBackground(EffectiveBackground, <span class="string">&quot;background&quot;</span>, |context| EffectiveBackground::Color(context.get(<span class="kw-2">&amp;</span>SurfaceColor)))
     }
 }
 </code></pre></div></section></main></body></html>

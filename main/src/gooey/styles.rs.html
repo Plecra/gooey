@@ -1578,7 +1578,7 @@
 
 </span><span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::borrow::Cow;
-<span class="kw">use </span>std::collections::{hash_map, HashMap};
+<span class="kw">use </span>std::collections::hash_map;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::ops::{
     Add, Bound, Div, Mul, Range, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
@@ -1586,6 +1586,7 @@
 <span class="kw">use </span>std::panic::{RefUnwindSafe, UnwindSafe};
 <span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>ahash::AHashMap;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{Fraction, IntoUnsigned, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::Color;
@@ -1602,7 +1603,7 @@
 
 <span class="doccomment">/// A collection of style components organized by their name.
 </span><span class="attr">#[derive(Clone, Debug, Default)]
-</span><span class="kw">pub struct </span>Styles(Arc&lt;HashMap&lt;Name, HashMap&lt;Name, Value&lt;Component&gt;&gt;&gt;&gt;);
+</span><span class="kw">pub struct </span>Styles(Arc&lt;AHashMap&lt;ComponentName, Value&lt;Component&gt;&gt;&gt;);
 
 <span class="kw">impl </span>Styles {
     <span class="doccomment">/// Returns an empty collection.
@@ -1615,15 +1616,12 @@
     /// without reallocating.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>with_capacity(capacity: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(Arc::new(HashMap::with_capacity(capacity)))
+        <span class="self">Self</span>(Arc::new(AHashMap::with_capacity(capacity)))
     }
 
     <span class="doccomment">/// Inserts a [`Component`] with a given name.
     </span><span class="kw">pub fn </span>insert_named(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: ComponentName, component: <span class="kw">impl </span>IntoComponentValue) {
-        Arc::make_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>.<span class="number">0</span>)
-            .entry(name.group)
-            .or_default()
-            .insert(name.name, component.into_component_value());
+        Arc::make_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>.<span class="number">0</span>).insert(name, component.into_component_value());
     }
 
     <span class="doccomment">/// Inserts a [`Component`] using then name provided.
@@ -1646,9 +1644,7 @@
         </span>Named: NamedComponent + <span class="question-mark">?</span>Sized,
     {
         <span class="kw">let </span>name = component.name();
-        <span class="self">self</span>.<span class="number">0
-            </span>.get(<span class="kw-2">&amp;</span>name.group)
-            .and_then(|group| group.get(<span class="kw-2">&amp;</span>name.name))
+        <span class="self">self</span>.<span class="number">0</span>.get(<span class="kw-2">&amp;</span>name)
     }
 
     <span class="doccomment">/// Returns the component associated with the given name, or if not found,
@@ -1664,13 +1660,20 @@
     {
         <span class="kw">let </span>name = component.name();
         <span class="self">self</span>.<span class="number">0
-            </span>.get(<span class="kw-2">&amp;</span>name.group)
-            .and_then(|group| group.get(<span class="kw-2">&amp;</span>name.name))
+            </span>.get(<span class="kw-2">&amp;</span>name)
             .and_then(|component| {
                 component.redraw_when_changed(context);
                 &lt;Named::ComponentType&gt;::try_from_component(component.get()).ok()
             })
             .unwrap_or_else(|| component.default_value(context))
+    }
+
+    <span class="doccomment">/// Inserts all components from `other`, overwriting any existing entries
+    /// with the same [`ComponentName`].
+    </span><span class="kw">pub fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: Styles) {
+        <span class="kw">for </span>(name, value) <span class="kw">in </span>other {
+            <span class="self">self</span>.insert_named(name, value);
+        }
     }
 }
 
@@ -1717,44 +1720,40 @@
 }
 
 <span class="kw">impl </span>IntoIterator <span class="kw">for </span>Styles {
-    <span class="kw">type </span>IntoIter = StylesIntoIter;
+    <span class="kw">type </span>IntoIter = hash_map::IntoIter&lt;ComponentName, Value&lt;Component&gt;&gt;;
     <span class="kw">type </span>Item = (ComponentName, Value&lt;Component&gt;);
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
-        StylesIntoIter {
-            main: Arc::try_unwrap(<span class="self">self</span>.<span class="number">0</span>)
-                .unwrap_or_else(|err| err.as_ref().clone())
-                .into_iter(),
-            names: <span class="prelude-val">None</span>,
-        }
+        Arc::try_unwrap(<span class="self">self</span>.<span class="number">0</span>)
+            .unwrap_or_else(|err| err.as_ref().clone())
+            .into_iter()
     }
 }
 
-<span class="doccomment">/// An iterator over the owned contents of a [`Styles`] instance.
-</span><span class="kw">pub struct </span>StylesIntoIter {
-    main: hash_map::IntoIter&lt;Name, HashMap&lt;Name, Value&lt;Component&gt;&gt;&gt;,
-    names: <span class="prelude-ty">Option</span>&lt;(Name, hash_map::IntoIter&lt;Name, Value&lt;Component&gt;&gt;)&gt;,
-}
+<span class="comment">// /// An iterator over the owned contents of a [`Styles`] instance.
+// pub struct StylesIntoIter {
+//     main: hash_map::IntoIter&lt;ComponentName, Value&lt;Component&gt;&gt;,
+// }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>StylesIntoIter {
-    <span class="kw">type </span>Item = (ComponentName, Value&lt;Component&gt;);
+// impl Iterator for StylesIntoIter {
+//     type Item = (ComponentName, Value&lt;Component&gt;);
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">loop </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>((group, names)) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.names {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>((name, component)) = names.next() {
-                    <span class="kw">return </span><span class="prelude-val">Some</span>((ComponentName::new(group.clone(), name), component));
-                }
-                <span class="self">self</span>.names = <span class="prelude-val">None</span>;
-            }
+//     fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+//         loop {
+//             if let Some((group, names)) = &amp;mut self.names {
+//                 if let Some((name, component)) = names.next() {
+//                     return Some((ComponentName::new(group.clone(), name), component));
+//                 }
+//                 self.names = None;
+//             }
 
-            <span class="kw">let </span>(group, names) = <span class="self">self</span>.main.next()<span class="question-mark">?</span>;
-            <span class="self">self</span>.names = <span class="prelude-val">Some</span>((group, names.into_iter()));
-        }
-    }
-}
+//             let (group, names) = self.main.next()?;
+//             self.names = Some((group, names.into_iter()));
+//         }
+//     }
+// }
 
-<span class="doccomment">/// A value of a style component.
+</span><span class="doccomment">/// A value of a style component.
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub enum </span>Component {
     <span class="doccomment">/// A color.
@@ -1765,8 +1764,6 @@
     </span>DimensionRange(DimensionRange),
     <span class="doccomment">/// A percentage between 0.0 and 1.0.
     </span>Percent(ZeroToOne),
-    <span class="doccomment">/// A custom component type.
-    </span>Custom(CustomComponent),
     <span class="doccomment">/// An easing function for animations.
     </span>Easing(EasingFunction),
     <span class="doccomment">/// A visual ordering to use for layout.
@@ -1776,6 +1773,9 @@
     <span class="doccomment">/// A description of the depth of a
     /// [`Container`](crate::widgets::Container).
     </span>ContainerLevel(ContainerLevel),
+
+    <span class="doccomment">/// A custom component type.
+    </span>Custom(CustomComponent),
 }
 
 <span class="kw">impl </span>From&lt;Color&gt; <span class="kw">for </span>Component {
@@ -2190,7 +2190,7 @@
 }
 
 <span class="doccomment">/// A fully-qualified style component name.
-</span><span class="attr">#[derive(Clone, Eq, PartialEq, Debug)]
+</span><span class="attr">#[derive(Clone, Eq, PartialEq, Debug, Hash)]
 </span><span class="kw">pub struct </span>ComponentName {
     <span class="doccomment">/// The group name.
     </span><span class="kw">pub </span>group: Name,

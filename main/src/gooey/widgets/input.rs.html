@@ -617,23 +617,6 @@
 <a href="#617" id="617">617</a>
 <a href="#618" id="618">618</a>
 <a href="#619" id="619">619</a>
-<a href="#620" id="620">620</a>
-<a href="#621" id="621">621</a>
-<a href="#622" id="622">622</a>
-<a href="#623" id="623">623</a>
-<a href="#624" id="624">624</a>
-<a href="#625" id="625">625</a>
-<a href="#626" id="626">626</a>
-<a href="#627" id="627">627</a>
-<a href="#628" id="628">628</a>
-<a href="#629" id="629">629</a>
-<a href="#630" id="630">630</a>
-<a href="#631" id="631">631</a>
-<a href="#632" id="632">632</a>
-<a href="#633" id="633">633</a>
-<a href="#634" id="634">634</a>
-<a href="#635" id="635">635</a>
-<a href="#636" id="636">636</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -654,7 +637,6 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, LineHeight, OutlineColor, TextColor, TextSize};
-<span class="kw">use </span><span class="kw">crate</span>::styles::Styles;
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Generation, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{Callback, EventHandling, Widget, HANDLED, IGNORED};
@@ -707,7 +689,6 @@
     <span class="kw">fn </span>editor_mut(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
-        styles: <span class="kw-2">&amp;</span>Styles,
         context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; <span class="kw-2">&amp;mut </span>Editor {
         <span class="kw">match </span>(<span class="kw-2">&amp;</span><span class="self">self</span>.editor, <span class="self">self</span>.text.generation()) {
@@ -717,8 +698,8 @@
                 <span class="kw">let </span><span class="kw-2">mut </span>buffer = Buffer::new(
                     kludgine.font_system(),
                     Metrics::new(
-                        styles.get(<span class="kw-2">&amp;</span>TextSize, context).into_px(scale).into_float(),
-                        styles.get(<span class="kw-2">&amp;</span>LineHeight, context).into_px(scale).into_float(),
+                        context.get(<span class="kw-2">&amp;</span>TextSize).into_px(scale).into_float(),
+                        context.get(<span class="kw-2">&amp;</span>LineHeight).into_px(scale).into_float(),
                     ),
                 );
                 <span class="self">self</span>.text.map(|text| {
@@ -737,10 +718,6 @@
         }
 
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.editor.as_mut().expect(<span class="string">&quot;just initialized&quot;</span>).editor
-    }
-
-    <span class="kw">fn </span>styles(context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Styles {
-        context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor, <span class="kw-2">&amp;</span>TextSize, <span class="kw-2">&amp;</span>LineHeight])
     }
 
     <span class="kw">fn </span>select_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
@@ -793,15 +770,13 @@
         <span class="self">self</span>.mouse_buttons_down += <span class="number">1</span>;
         context.focus();
         <span class="self">self</span>.needs_to_select_all = <span class="bool-val">false</span>;
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor]);
-        <span class="self">self</span>.editor_mut(context.kludgine, <span class="kw-2">&amp;</span>styles, <span class="kw-2">&amp;</span>context.widget)
-            .action(
-                context.kludgine.font_system(),
-                Action::Click {
-                    x: location.x.<span class="number">0</span>,
-                    y: location.y.<span class="number">0</span>,
-                },
-            );
+        <span class="self">self</span>.editor_mut(context.kludgine, <span class="kw-2">&amp;</span>context.widget).action(
+            context.kludgine.font_system(),
+            Action::Click {
+                x: location.x.<span class="number">0</span>,
+                y: location.y.<span class="number">0</span>,
+            },
+        );
         context.set_needs_redraw();
         HANDLED
     }
@@ -813,15 +788,13 @@
         _button: kludgine::app::winit::event::MouseButton,
         context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) {
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor]);
-        <span class="self">self</span>.editor_mut(context.kludgine, <span class="kw-2">&amp;</span>styles, <span class="kw-2">&amp;</span>context.widget)
-            .action(
-                context.kludgine.font_system(),
-                Action::Drag {
-                    x: location.x.<span class="number">0</span>,
-                    y: location.y.<span class="number">0</span>,
-                },
-            );
+        <span class="self">self</span>.editor_mut(context.kludgine, <span class="kw-2">&amp;</span>context.widget).action(
+            context.kludgine.font_system(),
+            Action::Drag {
+                x: location.x.<span class="number">0</span>,
+                y: location.y.<span class="number">0</span>,
+            },
+        );
         <span class="self">self</span>.cursor_state.force_on();
         context.set_needs_redraw();
     }
@@ -841,9 +814,8 @@
         <span class="self">self</span>.cursor_state.update(context.elapsed());
         <span class="kw">let </span>cursor_state = <span class="self">self</span>.cursor_state;
         <span class="kw">let </span>size = context.gfx.size();
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor, <span class="kw-2">&amp;</span>HighlightColor, <span class="kw-2">&amp;</span>OutlineColor]);
-        <span class="kw">let </span>highlight = styles.get(<span class="kw-2">&amp;</span>HighlightColor, context);
-        <span class="kw">let </span>editor = <span class="self">self</span>.editor_mut(<span class="kw-2">&amp;mut </span>context.gfx, <span class="kw-2">&amp;</span>styles, <span class="kw-2">&amp;</span>context.widget);
+        <span class="kw">let </span>highlight = context.get(<span class="kw-2">&amp;</span>HighlightColor);
+        <span class="kw">let </span>editor = <span class="self">self</span>.editor_mut(<span class="kw-2">&amp;mut </span>context.gfx, <span class="kw-2">&amp;</span>context.widget);
         <span class="kw">let </span>cursor = editor.cursor();
         <span class="kw">let </span>selection = editor.select_opt();
         <span class="kw">let </span>buffer = editor.buffer_mut();
@@ -855,7 +827,7 @@
         buffer.shape_until_scroll(context.gfx.font_system());
 
         <span class="kw">if </span>context.focused() {
-            context.draw_focus_ring_using(<span class="kw-2">&amp;</span>styles);
+            context.draw_focus_ring();
             context.set_ime_allowed(<span class="bool-val">true</span>);
             <span class="kw">let </span>line_height = Px::from_float(buffer.metrics().line_height);
             <span class="kw">if let </span><span class="prelude-val">Some</span>(selection) = selection {
@@ -982,11 +954,11 @@
                 }
             }
         } <span class="kw">else </span>{
-            <span class="kw">let </span>outline_color = styles.get(<span class="kw-2">&amp;</span>OutlineColor, context);
+            <span class="kw">let </span>outline_color = context.get(<span class="kw-2">&amp;</span>OutlineColor);
             context.stroke_outline::&lt;Lp&gt;(outline_color, StrokeOptions::default());
         }
 
-        <span class="kw">let </span>text_color = styles.get(<span class="kw-2">&amp;</span>TextColor, context);
+        <span class="kw">let </span>text_color = context.get(<span class="kw-2">&amp;</span>TextColor);
         context.gfx.draw_text_buffer(
             buffer,
             text_color,
@@ -1002,12 +974,11 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor]);
         <span class="kw">if </span><span class="self">self</span>.needs_to_select_all {
             <span class="self">self</span>.needs_to_select_all = <span class="bool-val">false</span>;
             <span class="self">self</span>.select_all();
         }
-        <span class="kw">let </span>editor = <span class="self">self</span>.editor_mut(<span class="kw-2">&amp;mut </span>context.graphics.gfx, <span class="kw-2">&amp;</span>styles, <span class="kw-2">&amp;</span>context.graphics.widget);
+        <span class="kw">let </span>editor = <span class="self">self</span>.editor_mut(<span class="kw-2">&amp;mut </span>context.graphics.gfx, <span class="kw-2">&amp;</span>context.graphics.widget);
         <span class="kw">let </span>buffer = editor.buffer_mut();
         buffer.set_size(
             context.gfx.font_system(),
@@ -1032,8 +1003,7 @@
             on_key.invoke(input.clone())<span class="question-mark">?</span>;
         }
 
-        <span class="kw">let </span>styles = context.query_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>TextColor]);
-        <span class="kw">let </span>editor = <span class="self">self</span>.editor_mut(context.kludgine, <span class="kw-2">&amp;</span>styles, <span class="kw-2">&amp;</span>context.widget);
+        <span class="kw">let </span>editor = <span class="self">self</span>.editor_mut(context.kludgine, <span class="kw-2">&amp;</span>context.widget);
 
         <span class="comment">// println!(
         //     &quot;Keyboard input: {:?}. {:?}, {:?}&quot;,
@@ -1125,12 +1095,8 @@
                 <span class="macro">tracing::warn!</span>(<span class="string">&quot;TODO: preview IME input {text}, cursor: {cursor:?}&quot;</span>);
             }
             Ime::Commit(text) =&gt; {
-                <span class="self">self</span>.editor_mut(
-                    context.kludgine,
-                    <span class="kw-2">&amp;</span><span class="self">Self</span>::styles(<span class="kw-2">&amp;</span>context.widget),
-                    <span class="kw-2">&amp;</span>context.widget,
-                )
-                .insert_string(<span class="kw-2">&amp;</span>text, <span class="prelude-val">None</span>);
+                <span class="self">self</span>.editor_mut(context.kludgine, <span class="kw-2">&amp;</span>context.widget)
+                    .insert_string(<span class="kw-2">&amp;</span>text, <span class="prelude-val">None</span>);
                 context.set_needs_redraw();
             }
         }

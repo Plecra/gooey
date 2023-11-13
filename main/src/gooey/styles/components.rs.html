@@ -130,6 +130,7 @@
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 
 </span><span class="kw">use </span>kludgine::figures::units::Lp;
@@ -176,11 +177,13 @@
         <span class="kw">const _</span>: () = {
             <span class="kw">use </span><span class="macro-nonterminal">$crate::styles</span>::{ComponentDefinition, ComponentName, NamedComponent};
             <span class="kw">use </span><span class="macro-nonterminal">$crate::context::WidgetContext</span>;
+            <span class="kw">use </span><span class="macro-nonterminal">$crate::Lazy</span>;
             <span class="kw">use </span>::std::borrow::Cow;
 
             <span class="kw">impl </span>NamedComponent <span class="kw">for </span><span class="macro-nonterminal">$component </span>{
                 <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cow&lt;<span class="lifetime">&#39;_</span>, ComponentName&gt; {
-                    Cow::Owned(ComponentName::new(<span class="macro">stringify!</span>(<span class="macro-nonterminal">$widget</span>), <span class="macro-nonterminal">$name</span>))
+                    <span class="kw">static </span>NAME: Lazy&lt;ComponentName&gt; = Lazy::new(|| ComponentName::new(<span class="macro">stringify!</span>(<span class="macro-nonterminal">$widget</span>), <span class="macro-nonterminal">$name</span>));
+                    Cow::Borrowed(<span class="kw-2">&amp;*</span>NAME)
                 }
             }
 
@@ -201,14 +204,13 @@
         }
     };
     (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>, @<span class="macro-nonterminal">$path</span>:path) =&gt; {
-        <span class="macro">define_components!</span>(<span class="macro-nonterminal">$</span><span class="kw">type</span>, |<span class="macro-nonterminal">context</span>| context.query_style(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$path</span>));
+        <span class="macro">define_components!</span>(<span class="macro-nonterminal">$</span><span class="kw">type</span>, |<span class="macro-nonterminal">context</span>| context.get(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$path</span>));
     };
     (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>, <span class="macro">contrasting!</span>(<span class="macro-nonterminal">$bg</span>:ident, $(<span class="macro-nonterminal">$fg</span>:ident),+ $(,)<span class="question-mark">?</span>)) =&gt; {
         <span class="macro">define_components!</span>(<span class="macro-nonterminal">$</span><span class="kw">type</span>, |<span class="macro-nonterminal">context</span>| {
             <span class="kw">use </span><span class="macro-nonterminal">$crate::styles::ColorExt</span>;
-            <span class="kw">let </span>styles = context.query_parent_styles(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="macro-nonterminal">$bg</span>, $(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$fg</span>),<span class="kw-2">*</span>]);
-            styles.get(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$bg</span>, context).most_contrasting(<span class="kw-2">&amp;</span>[
-                $(styles.get(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$fg</span>, context)),+
+            context.get(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$bg</span>).most_contrasting(<span class="kw-2">&amp;</span>[
+                $(context.get(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$fg</span>)),+
             ])
         });
     };
