@@ -64,70 +64,166 @@
 <a href="#64" id="64">64</a>
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>manyhow::bail;
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>manyhow::{bail, ensure};
 <span class="kw">use </span>quote::ToTokens;
-<span class="kw">use </span>syn::{Field, ItemStruct};
+<span class="kw">use </span>syn::{Data, DeriveInput, Field, Variant};
 
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub fn </span>linear_interpolate(
-    ItemStruct {
-        ident,
+    DeriveInput {
+        ident: item_ident,
         generics,
-        fields,
+        data,
         ..
-    }: ItemStruct,
+    }: DeriveInput,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;TokenStream&gt; {
     <span class="kw">if let </span><span class="prelude-val">Some</span>(generic) = generics.type_params().next() {
         <span class="macro">bail!</span>(generic, <span class="string">&quot;generics not supported&quot;</span>);
     }
 
-    <span class="kw">let </span>fields = <span class="kw">match </span>fields {
-        syn::Fields::Unit =&gt; <span class="macro">bail!</span>(ident, <span class="string">&quot;unit structs are not supported&quot;</span>),
-        fields =&gt; fields
-            .into_iter()
-            .enumerate()
-            .map(|(idx, Field {  ident, .. })| {
-                <span class="kw">let </span>ident = ident
-                    .map(ToTokens::into_token_stream)
-                    .unwrap_or_else(|| proc_macro2::Literal::usize_unsuffixed(idx).into_token_stream());
-                    <span class="macro">quote!</span>(#ident: ::gooey::animation::LinearInterpolate::lerp(<span class="kw-2">&amp;</span><span class="self">self</span>.#ident, <span class="kw-2">&amp;</span>__target.#ident, __percent),)
-            }),
+    <span class="kw">let </span>doc;
+
+    <span class="kw">let </span>body = <span class="kw">match </span>data {
+        Data::Struct(data) =&gt; {
+            <span class="kw">let </span>fields = <span class="kw">match </span>data.fields {
+                syn::Fields::Unit =&gt; <span class="macro">bail!</span>(item_ident, <span class="string">&quot;unit structs are not supported&quot;</span>),
+                fields =&gt; fields
+                    .into_iter()
+                    .enumerate()
+                    .map(|(idx, Field {  ident, .. })| {
+                        <span class="kw">let </span>ident = ident
+                            .map(ToTokens::into_token_stream)
+                            .unwrap_or_else(|| proc_macro2::Literal::usize_unsuffixed(idx).into_token_stream());
+                            <span class="macro">quote!</span>(#ident: ::gooey::animation::LinearInterpolate::lerp(<span class="kw-2">&amp;</span><span class="self">self</span>.#ident, <span class="kw-2">&amp;</span>__target.#ident, __percent),)
+                    }),
+            };
+            doc = <span class="string">&quot;# Panics\n Panics if any field&#39;s lerp panics (this should only happen on percentages outside 0..1 range).&quot;</span>;
+            <span class="macro">quote!</span>(#item_ident{#(#fields)<span class="kw-2">*</span>})
+        }
+        Data::Enum(data) =&gt; {
+            <span class="kw">let </span>variants = data
+                .variants
+                .into_iter()
+                .map(
+                    |Variant {
+                         ident,
+                         fields,
+                         discriminant,
+                         ..
+                     }| {
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(discriminant) = discriminant {
+                            <span class="macro">bail!</span>(discriminant, <span class="string">&quot;discriminants are not supported&quot;</span>);
+                        }
+                        <span class="macro">ensure!</span>(fields.is_empty(), fields, <span class="string">&quot;enum fields are not supported&quot;</span>);
+                        <span class="prelude-val">Ok</span>(<span class="macro">quote!</span>(#item_ident::#ident #fields))
+                    },
+                )
+                .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()<span class="question-mark">?</span>;
+            <span class="kw">let </span>last = variants
+                .last()
+                .map(ToTokens::to_token_stream)
+                .unwrap_or_else(|| <span class="macro">quote!</span>(<span class="macro">unreachable!</span>()));
+
+            <span class="kw">let </span>idx: Vec&lt;<span class="kw">_</span>&gt; = (<span class="number">0</span>..variants.len()).collect();
+            doc = <span class="string">&quot;# Panics\n Panics if the the enum variants are overflown (this can only happen on percentages outside 0..1 range).&quot;</span>;
+            <span class="macro">quote! </span>{
+                # <span class="kw">use </span>::gooey::animation::LinearInterpolate;
+                <span class="kw">fn </span>variant_to_index(__v: <span class="kw-2">&amp;</span>#item_ident) -&gt; usize {
+                    <span class="kw">match </span>__v {
+                        #(#variants =&gt; #idx,)*
+                    }
+                }
+                <span class="kw">let </span>__self = variant_to_index(<span class="kw-2">&amp;</span><span class="self">self</span>);
+                <span class="kw">let </span>__target = variant_to_index(<span class="kw-2">&amp;</span>__target);
+                <span class="kw">match </span>LinearInterpolate::lerp(<span class="kw-2">&amp;</span>__self, <span class="kw-2">&amp;</span>__target, __percent) {
+                    #(#idx =&gt; #variants,)*
+                    <span class="kw">_ </span>=&gt; #last,
+                }
+            }
+        }
+        Data::Union(union) =&gt; <span class="macro">bail!</span>((union.union_token, union.fields), <span class="string">&quot;unions not supported&quot;</span>),
     };
 
     <span class="prelude-val">Ok</span>(<span class="macro">quote! </span>{
-        <span class="kw">impl </span>::gooey::animation::LinearInterpolate <span class="kw">for </span>#ident {
-            <span class="kw">fn </span>lerp(<span class="kw-2">&amp;</span><span class="self">self</span>, __target: <span class="kw-2">&amp;</span><span class="self">Self</span>, __percent: f32) -&gt; <span class="self">Self </span>{
-                #ident{#(#fields)<span class="kw-2">*</span>}
+        <span class="kw">impl </span>::gooey::animation::LinearInterpolate <span class="kw">for </span>#item_ident {
+            <span class="attr">#[doc = #doc]
+            </span><span class="kw">fn </span>lerp(<span class="kw-2">&amp;</span><span class="self">self</span>, __target: <span class="kw-2">&amp;</span><span class="self">Self</span>, __percent: f32) -&gt; <span class="self">Self </span>{
+                #body
             }
         }
     })
 }
 
 <span class="attr">#[cfg(test)]
-</span><span class="macro">macro_rules! </span>expansion_snapshot {
-    (<span class="attr">#[derive(<span class="macro-nonterminal">$</span><span class="kw">fn</span>:<span class="macro-nonterminal">expr</span>)]</span>$(<span class="macro-nonterminal">$tokens</span>:tt)<span class="kw-2">*</span>) =&gt; {{
-        <span class="kw">use </span>insta::assert_snapshot;
-        <span class="kw">use </span>prettyplease::unparse;
-        <span class="kw">use </span>syn::{parse2, parse_quote};
-        <span class="kw">let </span>input = <span class="macro">parse_quote!</span>($(<span class="macro-nonterminal">$tokens</span>)<span class="kw-2">*</span>);
-        <span class="kw">let </span>output = <span class="macro-nonterminal">$</span><span class="kw">fn</span>(<span class="macro-nonterminal">input</span>).unwrap();
-        <span class="macro">assert_snapshot!</span>(unparse(<span class="kw-2">&amp;</span>parse2(output).unwrap()))
-    }};
-}
-
-<span class="attr">#[test]
-</span><span class="kw">fn </span>test() {
-    <span class="macro">expansion_snapshot! </span>{
+</span><span class="kw">mod </span>test {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="macro">expansion_snapshot! </span>{struct_
         <span class="attr">#[derive(linear_interpolate)]
         </span><span class="kw">struct </span>HelloWorld {
             fielda: Hello,
             fieldb: World,
         }
-    };
-    <span class="macro">expansion_snapshot! </span>{
+    }
+    <span class="macro">expansion_snapshot! </span>{tuple_struct
         <span class="attr">#[derive(linear_interpolate)]
         </span><span class="kw">struct </span>HelloWorld(Hello, World);
-    };
+    }
+    <span class="macro">expansion_snapshot! </span>{enum_
+        <span class="attr">#[derive(linear_interpolate)]
+        </span><span class="kw">enum </span>Enum{A, B}
+    }
+    <span class="macro">expansion_snapshot! </span>{empty_enum
+        <span class="attr">#[derive(linear_interpolate)]
+        </span><span class="kw">enum </span>Enum{}
+    }
 }
 </code></pre></div></section></main></body></html>
