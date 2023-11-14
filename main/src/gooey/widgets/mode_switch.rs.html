@@ -36,12 +36,12 @@
 
 <span class="doccomment">/// A widget that applies a set of [`ThemeMode`] to all contained widgets.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>ModeSwitch {
+</span><span class="kw">pub struct </span>ThemedMode {
     mode: Value&lt;ThemeMode&gt;,
     child: WidgetRef,
 }
 
-<span class="kw">impl </span>ModeSwitch {
+<span class="kw">impl </span>ThemedMode {
     <span class="doccomment">/// Returns a new widget that applies `mode` to all of its children.
     </span><span class="kw">pub fn </span>new(mode: <span class="kw">impl </span>IntoValue&lt;ThemeMode&gt;, child: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
@@ -51,7 +51,7 @@
     }
 }
 
-<span class="kw">impl </span>WrapperWidget <span class="kw">for </span>ModeSwitch {
+<span class="kw">impl </span>WrapperWidget <span class="kw">for </span>ThemedMode {
     <span class="kw">fn </span>child_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.child
     }

@@ -1251,6 +1251,22 @@
 <a href="#1251" id="1251">1251</a>
 <a href="#1252" id="1252">1252</a>
 <a href="#1253" id="1253">1253</a>
+<a href="#1254" id="1254">1254</a>
+<a href="#1255" id="1255">1255</a>
+<a href="#1256" id="1256">1256</a>
+<a href="#1257" id="1257">1257</a>
+<a href="#1258" id="1258">1258</a>
+<a href="#1259" id="1259">1259</a>
+<a href="#1260" id="1260">1260</a>
+<a href="#1261" id="1261">1261</a>
+<a href="#1262" id="1262">1262</a>
+<a href="#1263" id="1263">1263</a>
+<a href="#1264" id="1264">1264</a>
+<a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::cell::Cell;
@@ -1269,6 +1285,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::{WidgetContext, WindowHandle};
 <span class="kw">use </span><span class="kw">crate</span>::utils::{IgnorePoison, WithClone};
 <span class="kw">use </span><span class="kw">crate</span>::widget::WidgetId;
+<span class="kw">use </span><span class="kw">crate</span>::widgets::{Button, Input};
 
 <span class="doccomment">/// An instance of a value that provides APIs to observe and react to its
 /// contents.
@@ -2504,4 +2521,19 @@
 }
 
 <span class="macro">impl_all_tuples!</span>(impl_tuple_map_each);
+
+<span class="doccomment">/// A type that can be converted into a [`Value&lt;String&gt;`].
+</span><span class="kw">pub trait </span>StringValue: IntoValue&lt;String&gt; + Sized {
+    <span class="doccomment">/// Returns this string as a text input widget.
+    </span><span class="kw">fn </span>into_input(<span class="self">self</span>) -&gt; Input {
+        Input::new(<span class="self">self</span>.into_value())
+    }
+
+    <span class="doccomment">/// Returns this string as a clickable button.
+    </span><span class="kw">fn </span>into_button(<span class="self">self</span>) -&gt; Button {
+        Button::new(<span class="self">self</span>.into_value())
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; StringValue <span class="kw">for </span>T <span class="kw">where </span>T: IntoValue&lt;String&gt; {}
 </code></pre></div></section></main></body></html>

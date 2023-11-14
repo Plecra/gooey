@@ -1162,6 +1162,12 @@
 <a href="#1162" id="1162">1162</a>
 <a href="#1163" id="1163">1163</a>
 <a href="#1164" id="1164">1164</a>
+<a href="#1165" id="1165">1165</a>
+<a href="#1166" id="1166">1166</a>
+<a href="#1167" id="1167">1167</a>
+<a href="#1168" id="1168">1168</a>
+<a href="#1169" id="1169">1169</a>
+<a href="#1170" id="1170">1170</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -1303,7 +1309,7 @@
     ///
     /// `focused` will be initialized with an initial state
     /// of `false`.
-    </span><span class="kw">pub fn </span>with_focused(<span class="kw-2">mut </span><span class="self">self</span>, focused: <span class="kw">impl </span>IntoDynamic&lt;bool&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>focused(<span class="kw-2">mut </span><span class="self">self</span>, focused: <span class="kw">impl </span>IntoDynamic&lt;bool&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>focused = focused.into_dynamic();
         focused.update(<span class="bool-val">false</span>);
         <span class="self">self</span>.focused = <span class="prelude-val">Some</span>(focused);
@@ -1318,7 +1324,7 @@
     /// visible, this value will contain `true`.
     ///
     /// `occluded` will be initialized with an initial state of `false`.
-    </span><span class="kw">pub fn </span>with_occluded(<span class="kw-2">mut </span><span class="self">self</span>, occluded: <span class="kw">impl </span>IntoDynamic&lt;bool&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>occluded(<span class="kw-2">mut </span><span class="self">self</span>, occluded: <span class="kw">impl </span>IntoDynamic&lt;bool&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>occluded = occluded.into_dynamic();
         occluded.update(<span class="bool-val">false</span>);
         <span class="self">self</span>.occluded = <span class="prelude-val">Some</span>(occluded);
@@ -1338,8 +1344,14 @@
     /// Setting the [`Dynamic`]&#39;s value will also update the window with the new
     /// mode until a mode change is detected, upon which the new mode will be
     /// stored.
-    </span><span class="kw">pub fn </span>with_theme_mode(<span class="kw-2">mut </span><span class="self">self</span>, theme_mode: <span class="kw">impl </span>IntoValue&lt;ThemeMode&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>themed_mode(<span class="kw-2">mut </span><span class="self">self</span>, theme_mode: <span class="kw">impl </span>IntoValue&lt;ThemeMode&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.theme_mode = <span class="prelude-val">Some</span>(theme_mode.into_value());
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Applies `theme` to the widgets in this window.
+    </span><span class="kw">pub fn </span>themed(<span class="kw-2">mut </span><span class="self">self</span>, theme: <span class="kw">impl </span>IntoValue&lt;ThemePair&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.theme = theme.into_value();
         <span class="self">self
     </span>}
 }

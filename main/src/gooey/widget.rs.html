@@ -1406,6 +1406,16 @@
 <a href="#1406" id="1406">1406</a>
 <a href="#1407" id="1407">1407</a>
 <a href="#1408" id="1408">1408</a>
+<a href="#1409" id="1409">1409</a>
+<a href="#1410" id="1410">1410</a>
+<a href="#1411" id="1411">1411</a>
+<a href="#1412" id="1412">1412</a>
+<a href="#1413" id="1413">1413</a>
+<a href="#1414" id="1414">1414</a>
+<a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
+<a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1432,7 +1442,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widgets::{Align, Container, Expand, Resize, Scroll, Stack, Style};
+<span class="kw">use </span><span class="kw">crate</span>::widgets::{Align, Container, Expand, Resize, Scroll, Stack, Style, Themed, ThemedMode};
 <span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, ThemeMode, Window, WindowBehavior};
 <span class="kw">use crate</span>::{ConstraintLimit, Run};
 
@@ -2134,6 +2144,16 @@
     <span class="doccomment">/// Wraps `self` with the specified padding.
     </span><span class="kw">fn </span>pad_by(<span class="self">self</span>, padding: <span class="kw">impl </span>IntoValue&lt;Edges&lt;Dimension&gt;&gt;) -&gt; Container {
         <span class="self">self</span>.contain().transparent().pad_by(padding)
+    }
+
+    <span class="doccomment">/// Applies `theme` to `self` and its children.
+    </span><span class="kw">fn </span>themed(<span class="self">self</span>, theme: <span class="kw">impl </span>IntoValue&lt;ThemePair&gt;) -&gt; Themed {
+        Themed::new(theme, <span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Applies `mode` to `self` and its children.
+    </span><span class="kw">fn </span>themed_mode(<span class="self">self</span>, mode: <span class="kw">impl </span>IntoValue&lt;ThemeMode&gt;) -&gt; ThemedMode {
+        ThemedMode::new(mode, <span class="self">self</span>)
     }
 }
 

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["InactiveTrackColor","KnobColor","KnobSize","MinimumSliderSize","Slider","TrackColor","TrackSize"],"trait":["Slidable"]};
