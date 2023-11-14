@@ -1788,6 +1788,13 @@
 <a href="#1788" id="1788">1788</a>
 <a href="#1789" id="1789">1789</a>
 <a href="#1790" id="1790">1790</a>
+<a href="#1791" id="1791">1791</a>
+<a href="#1792" id="1792">1792</a>
+<a href="#1793" id="1793">1793</a>
+<a href="#1794" id="1794">1794</a>
+<a href="#1795" id="1795">1795</a>
+<a href="#1796" id="1796">1796</a>
+<a href="#1797" id="1797">1797</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -3171,12 +3178,19 @@
         <span class="kw">let </span>(other_source, other_lightness) = <span class="self">self</span>.into_source_and_lightness();
         <span class="kw">let </span>lightness_delta = other_lightness.difference_between(check_lightness);
 
+        <span class="kw">let </span>average_lightness = ZeroToOne::new((<span class="kw-2">*</span>check_lightness + <span class="kw-2">*</span>other_lightness) / <span class="number">2.</span>);
+
         <span class="kw">let </span>source_change = check_source.contrast_between(other_source);
 
         <span class="kw">let </span>other_alpha = ZeroToOne::new(<span class="self">self</span>.alpha_f32());
         <span class="kw">let </span>alpha_delta = check_alpha.difference_between(other_alpha);
 
-        ZeroToOne::new((<span class="kw-2">*</span>lightness_delta + <span class="kw-2">*</span>source_change + <span class="kw-2">*</span>alpha_delta) / <span class="number">3.</span>)
+        ZeroToOne::new(
+            (<span class="kw-2">*</span>lightness_delta
+                + <span class="kw-2">*</span>average_lightness * <span class="kw-2">*</span>source_change
+                + <span class="kw-2">*</span>average_lightness * <span class="kw-2">*</span>alpha_delta)
+                / <span class="number">3.</span>,
+        )
     }
 
     <span class="kw">fn </span>most_contrasting(<span class="self">self</span>, others: <span class="kw-2">&amp;</span>[<span class="self">Self</span>]) -&gt; <span class="self">Self
