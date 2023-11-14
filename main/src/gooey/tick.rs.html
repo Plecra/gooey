@@ -179,19 +179,16 @@
 <a href="#179" id="179">179</a>
 <a href="#180" id="180">180</a>
 <a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::sync::atomic::{AtomicUsize, Ordering};
-<span class="kw">use </span>std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError};
+<span class="kw">use </span>std::sync::{Arc, Condvar, Mutex, MutexGuard};
 <span class="kw">use </span>std::time::{Duration, Instant};
 
 <span class="kw">use </span>kludgine::app::winit::event::KeyEvent;
 <span class="kw">use </span>kludgine::app::winit::keyboard::Key;
 
 <span class="kw">use </span><span class="kw">crate</span>::context::WidgetContext;
+<span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::Dynamic;
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, HANDLED, IGNORED};
 
@@ -308,9 +305,7 @@
 
 <span class="kw">impl </span>TickData {
     <span class="kw">fn </span>state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MutexGuard&lt;<span class="lifetime">&#39;_</span>, TickState&gt; {
-        <span class="self">self</span>.state
-            .lock()
-            .map_or_else(PoisonError::into_inner, |g| g)
+        <span class="self">self</span>.state.lock().ignore_poison()
     }
 }
 
@@ -358,10 +353,7 @@
         </span><span class="kw">while </span>state.keep_running {
             <span class="kw">let </span>current_frame = data.rendered_frame.load(Ordering::Acquire);
             <span class="kw">if </span>state.frame == current_frame {
-                state = data
-                    .sync
-                    .wait(state)
-                    .map_or_else(PoisonError::into_inner, |g| g);
+                state = data.sync.wait(state).ignore_poison();
             } <span class="kw">else </span>{
                 <span class="kw">break</span>;
             }

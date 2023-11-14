@@ -1113,12 +1113,64 @@
 <a href="#1113" id="1113">1113</a>
 <a href="#1114" id="1114">1114</a>
 <a href="#1115" id="1115">1115</a>
+<a href="#1116" id="1116">1116</a>
+<a href="#1117" id="1117">1117</a>
+<a href="#1118" id="1118">1118</a>
+<a href="#1119" id="1119">1119</a>
+<a href="#1120" id="1120">1120</a>
+<a href="#1121" id="1121">1121</a>
+<a href="#1122" id="1122">1122</a>
+<a href="#1123" id="1123">1123</a>
+<a href="#1124" id="1124">1124</a>
+<a href="#1125" id="1125">1125</a>
+<a href="#1126" id="1126">1126</a>
+<a href="#1127" id="1127">1127</a>
+<a href="#1128" id="1128">1128</a>
+<a href="#1129" id="1129">1129</a>
+<a href="#1130" id="1130">1130</a>
+<a href="#1131" id="1131">1131</a>
+<a href="#1132" id="1132">1132</a>
+<a href="#1133" id="1133">1133</a>
+<a href="#1134" id="1134">1134</a>
+<a href="#1135" id="1135">1135</a>
+<a href="#1136" id="1136">1136</a>
+<a href="#1137" id="1137">1137</a>
+<a href="#1138" id="1138">1138</a>
+<a href="#1139" id="1139">1139</a>
+<a href="#1140" id="1140">1140</a>
+<a href="#1141" id="1141">1141</a>
+<a href="#1142" id="1142">1142</a>
+<a href="#1143" id="1143">1143</a>
+<a href="#1144" id="1144">1144</a>
+<a href="#1145" id="1145">1145</a>
+<a href="#1146" id="1146">1146</a>
+<a href="#1147" id="1147">1147</a>
+<a href="#1148" id="1148">1148</a>
+<a href="#1149" id="1149">1149</a>
+<a href="#1150" id="1150">1150</a>
+<a href="#1151" id="1151">1151</a>
+<a href="#1152" id="1152">1152</a>
+<a href="#1153" id="1153">1153</a>
+<a href="#1154" id="1154">1154</a>
+<a href="#1155" id="1155">1155</a>
+<a href="#1156" id="1156">1156</a>
+<a href="#1157" id="1157">1157</a>
+<a href="#1158" id="1158">1158</a>
+<a href="#1159" id="1159">1159</a>
+<a href="#1160" id="1160">1160</a>
+<a href="#1161" id="1161">1161</a>
+<a href="#1162" id="1162">1162</a>
+<a href="#1163" id="1163">1163</a>
+<a href="#1164" id="1164">1164</a>
+<a href="#1165" id="1165">1165</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
+<span class="kw">use </span>std::hash::Hash;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
-<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard};
 
+<span class="kw">use </span>kempt::Set;
 <span class="kw">use </span>kludgine::app::winit::event::{
     DeviceId, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
@@ -1130,6 +1182,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, WidgetBackground};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, Styles, Theme, ThemePair, VisualOrder};
+<span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, WidgetId, WidgetInstance, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
@@ -1687,14 +1740,23 @@
     /// context&#39;s widget and returns the result.
     </span><span class="kw">pub fn </span>layout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, available_space: Size&lt;ConstraintLimit&gt;) -&gt; Size&lt;UPx&gt; {
         <span class="kw">if </span><span class="self">self</span>.persist_layout {
-            <span class="self">self</span>.graphics.current_node.reset_child_layouts();
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(cached) = <span class="self">self</span>.graphics.current_node.begin_layout(available_space) {
+                <span class="kw">return </span>cached;
+            }
         }
-        <span class="self">self</span>.graphics
+        <span class="kw">let </span>result = <span class="self">self
+            </span>.graphics
             .current_node
             .clone()
             .lock()
             .as_widget()
-            .layout(available_space, <span class="self">self</span>)
+            .layout(available_space, <span class="self">self</span>);
+        <span class="kw">if </span><span class="self">self</span>.persist_layout {
+            <span class="self">self</span>.graphics
+                .current_node
+                .persist_layout(available_space, result);
+        }
+        result
     }
 
     <span class="doccomment">/// Sets the layout for `child` to `layout`.
@@ -1779,7 +1841,7 @@
 /// specific widget.
 </span><span class="kw">pub struct </span>WidgetContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; {
     current_node: ManagedWidget,
-    redraw_status: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>RedrawStatus,
+    redraw_status: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>InvalidationStatus,
     window: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt;,
     theme: Cow&lt;<span class="lifetime">&#39;context</span>, ThemePair&gt;,
     pending_state: PendingState&lt;<span class="lifetime">&#39;context</span>&gt;,
@@ -1790,7 +1852,7 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; WidgetContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
         current_node: ManagedWidget,
-        redraw_status: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>RedrawStatus,
+        redraw_status: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>InvalidationStatus,
         theme: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>ThemePair,
         window: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt;,
         theme_mode: ThemeMode,
@@ -1868,6 +1930,11 @@
     <span class="doccomment">/// Ensures that this widget will be redrawn when `value` has been updated.
     </span><span class="kw">pub fn </span>redraw_when_changed&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>Dynamic&lt;T&gt;) {
         value.redraw_when_changed(<span class="self">self</span>.handle());
+    }
+
+    <span class="doccomment">/// Ensures that this widget will be redrawn when `value` has been updated.
+    </span><span class="kw">pub fn </span>invalidate_when_changed&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>Dynamic&lt;T&gt;) {
+        value.invalidate_when_changed(<span class="self">self</span>.handle(), <span class="self">self</span>.current_node.id());
     }
 
     <span class="doccomment">/// Returns the last layout of this widget.
@@ -2078,13 +2145,36 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>WindowHandle {
     kludgine: kludgine::app::WindowHandle&lt;WindowCommand&gt;,
-    redraw_status: RedrawStatus,
+    redraw_status: InvalidationStatus,
+}
+
+<span class="kw">impl </span>Eq <span class="kw">for </span>WindowHandle {}
+
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>WindowHandle {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        Arc::ptr_eq(
+            <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status.invalidated,
+            <span class="kw-2">&amp;</span>other.redraw_status.invalidated,
+        )
+    }
+}
+
+<span class="kw">impl </span>Hash <span class="kw">for </span>WindowHandle {
+    <span class="kw">fn </span>hash&lt;H: std::hash::Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
+        Arc::as_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status.invalidated).hash(state);
+    }
 }
 
 <span class="kw">impl </span>WindowHandle {
     <span class="kw">pub fn </span>redraw(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">if </span><span class="self">self</span>.redraw_status.should_send_refresh() {
             <span class="kw">let </span>_result = <span class="self">self</span>.kludgine.send(WindowCommand::Redraw);
+        }
+    }
+
+    <span class="kw">pub fn </span>invalidate(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: WidgetId) {
+        <span class="kw">if </span><span class="self">self</span>.redraw_status.invalidate(widget) {
+            <span class="self">self</span>.redraw();
         }
     }
 }
@@ -2151,11 +2241,12 @@
 }
 
 <span class="attr">#[derive(Default, Clone)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RedrawStatus {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>InvalidationStatus {
     refresh_sent: Arc&lt;AtomicBool&gt;,
+    invalidated: Arc&lt;Mutex&lt;Set&lt;WidgetId&gt;&gt;&gt;,
 }
 
-<span class="kw">impl </span>RedrawStatus {
+<span class="kw">impl </span>InvalidationStatus {
     <span class="kw">pub fn </span>should_send_refresh(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.refresh_sent
             .compare_exchange(<span class="bool-val">false</span>, <span class="bool-val">true</span>, Ordering::Release, Ordering::Acquire)
@@ -2164,6 +2255,15 @@
 
     <span class="kw">pub fn </span>refresh_received(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="self">self</span>.refresh_sent.store(<span class="bool-val">false</span>, Ordering::Release);
+    }
+
+    <span class="kw">pub fn </span>invalidate(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: WidgetId) -&gt; bool {
+        <span class="kw">let </span><span class="kw-2">mut </span>invalidated = <span class="self">self</span>.invalidated.lock().ignore_poison();
+        invalidated.insert(widget)
+    }
+
+    <span class="kw">pub fn </span>invalidations(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MutexGuard&lt;<span class="lifetime">&#39;_</span>, Set&lt;WidgetId&gt;&gt; {
+        <span class="self">self</span>.invalidated.lock().ignore_poison()
     }
 }
 

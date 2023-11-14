@@ -99,6 +99,11 @@
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A read-only text widget.
 
 </span><span class="kw">use </span>kludgine::figures::units::{Px, UPx};
@@ -108,7 +113,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{IntrinsicPadding, TextColor};
-<span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
+<span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, Generation, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, Widget, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -117,7 +122,7 @@
 </span><span class="kw">pub struct </span>Label {
     <span class="doccomment">/// The contents of the label.
     </span><span class="kw">pub </span>text: Value&lt;String&gt;,
-    prepared_text: <span class="prelude-ty">Option</span>&lt;(MeasuredText&lt;Px&gt;, Px, Color)&gt;,
+    prepared_text: <span class="prelude-ty">Option</span>&lt;(MeasuredText&lt;Px&gt;, <span class="prelude-ty">Option</span>&lt;Generation&gt;, Px, Color)&gt;,
 }
 
 <span class="kw">impl </span>Label {
@@ -135,29 +140,34 @@
         color: Color,
         width: Px,
     ) -&gt; <span class="kw-2">&amp;</span>MeasuredText&lt;Px&gt; {
+        <span class="kw">let </span>check_generation = <span class="self">self</span>.text.generation();
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.prepared_text {
-            <span class="prelude-val">Some</span>((<span class="kw">_</span>, prepared_width, prepared_color))
-                <span class="kw">if </span><span class="kw-2">*</span>prepared_color == color &amp;&amp; <span class="kw-2">*</span>prepared_width == width =&gt; {}
+            <span class="prelude-val">Some</span>((prepared, prepared_generation, prepared_width, prepared_color))
+                <span class="kw">if </span><span class="kw-2">*</span>prepared_generation == check_generation
+                    &amp;&amp; <span class="kw-2">*</span>prepared_color == color
+                    &amp;&amp; (<span class="kw-2">*</span>prepared_width == width
+                        || (<span class="kw-2">*</span>prepared_width &lt; width
+                            &amp;&amp; prepared.line_height == prepared.size.height)) =&gt; {}
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">let </span>measured = <span class="self">self</span>.text.map(|text| {
                     context
                         .gfx
                         .measure_text(Text::new(text, color).wrap_at(width))
                 });
-                <span class="self">self</span>.prepared_text = <span class="prelude-val">Some</span>((measured, width, color));
+                <span class="self">self</span>.prepared_text = <span class="prelude-val">Some</span>((measured, check_generation, width, color));
             }
         }
 
         <span class="self">self</span>.prepared_text
             .as_ref()
-            .map(|(prepared, <span class="kw">_</span>, <span class="kw">_</span>)| prepared)
+            .map(|(prepared, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>)| prepared)
             .expect(<span class="string">&quot;always initialized&quot;</span>)
     }
 }
 
 <span class="kw">impl </span>Widget <span class="kw">for </span>Label {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="self">self</span>.text.redraw_when_changed(context);
+        <span class="self">self</span>.text.invalidate_when_changed(context);
 
         <span class="kw">let </span>size = context.gfx.region().size;
         <span class="kw">let </span>center = Point::from(size) / <span class="number">2</span>;

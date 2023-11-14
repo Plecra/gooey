@@ -712,7 +712,7 @@
                         context.get(<span class="kw-2">&amp;</span>LineHeight).into_px(scale).into_float(),
                     ),
                 );
-                <span class="self">self</span>.text.map(|text| {
+                <span class="self">self</span>.text.map_tracking_invalidate(context, |text| {
                     buffer.set_text(
                         kludgine.font_system(),
                         text,

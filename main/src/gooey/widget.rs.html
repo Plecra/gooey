@@ -1400,6 +1400,12 @@
 <a href="#1400" id="1400">1400</a>
 <a href="#1401" id="1401">1401</a>
 <a href="#1402" id="1402">1402</a>
+<a href="#1403" id="1403">1403</a>
+<a href="#1404" id="1404">1404</a>
+<a href="#1405" id="1405">1405</a>
+<a href="#1406" id="1406">1406</a>
+<a href="#1407" id="1407">1407</a>
+<a href="#1408" id="1408">1408</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1408,7 +1414,7 @@
 <span class="kw">use </span>std::ops::{ControlFlow, Deref, DerefMut};
 <span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::sync::atomic::{<span class="self">self</span>, AtomicU64};
-<span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard, PoisonError};
+<span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard};
 
 <span class="kw">use </span>alot::LotId;
 <span class="kw">use </span>kludgine::app::winit::event::{
@@ -1424,6 +1430,7 @@
     ThemePair, VisualOrder,
 };
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
+<span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Align, Container, Expand, Resize, Scroll, Stack, Style};
 <span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, ThemeMode, Window, WindowBehavior};
@@ -2310,13 +2317,9 @@
     <span class="doccomment">/// Locks the widget for exclusive access. Locking widgets should only be
     /// done for brief moments of time when you are certain no deadlocks can
     /// occur due to other widget locks being held.
+    </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; WidgetGuard&lt;<span class="lifetime">&#39;_</span>&gt; {
-        WidgetGuard(
-            <span class="self">self</span>.data
-                .widget
-                .lock()
-                .map_or_else(PoisonError::into_inner, |g| g),
-        )
+        WidgetGuard(<span class="self">self</span>.data.widget.lock().ignore_poison())
     }
 
     <span class="doccomment">/// Runs this widget instance as an application.
@@ -2443,6 +2446,11 @@
         <span class="self">self</span>.widget.lock()
     }
 
+    <span class="doccomment">/// Invalidates this widget.
+    </span><span class="kw">pub fn </span>invalidate(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.tree.invalidate(<span class="self">self</span>.node_id, <span class="bool-val">false</span>);
+    }
+
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_layout(<span class="kw-2">&amp;</span><span class="self">self</span>, rect: Rect&lt;Px&gt;) {
         <span class="self">self</span>.tree.set_layout(<span class="self">self</span>.node_id, rect);
     }
@@ -2532,8 +2540,12 @@
         <span class="self">self</span>.tree.overriden_theme(<span class="self">self</span>.node_id)
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset_child_layouts(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="self">self</span>.tree.reset_child_layouts(<span class="self">self</span>.node_id);
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>begin_layout(<span class="kw-2">&amp;</span><span class="self">self</span>, constraints: Size&lt;ConstraintLimit&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Size&lt;UPx&gt;&gt; {
+        <span class="self">self</span>.tree.begin_layout(<span class="self">self</span>.node_id, constraints)
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>persist_layout(<span class="kw-2">&amp;</span><span class="self">self</span>, constraints: Size&lt;ConstraintLimit&gt;, size: Size&lt;UPx&gt;) {
+        <span class="self">self</span>.tree.persist_layout(<span class="self">self</span>.node_id, constraints, size);
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>visually_ordered_children(<span class="kw-2">&amp;</span><span class="self">self</span>, order: VisualOrder) -&gt; Vec&lt;ManagedWidget&gt; {
@@ -2745,7 +2757,7 @@
 ///
 /// Each [`WidgetInstance`] is guaranteed to have a unique [`WidgetId`] across
 /// the lifetime of an application.
-</span><span class="attr">#[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
+</span><span class="attr">#[derive(Clone, Copy, Eq, PartialEq, Debug, Hash, Ord, PartialOrd)]
 </span><span class="kw">pub struct </span>WidgetId(u64);
 
 <span class="kw">impl </span>WidgetId {

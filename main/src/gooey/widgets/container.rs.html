@@ -256,6 +256,12 @@
 <a href="#256" id="256">256</a>
 <a href="#257" id="257">257</a>
 <a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A visual container widget.
 
 </span><span class="kw">use </span>kludgine::figures::units::Px;
@@ -264,7 +270,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{IntrinsicPadding, SurfaceColor};
-<span class="kw">use </span><span class="kw">crate</span>::styles::{Component, ContainerLevel, Dimension, Edges, Styles};
+<span class="kw">use </span><span class="kw">crate</span>::styles::{Component, ContainerLevel, Dimension, Edges, RequireInvalidation, Styles};
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrappedLayout, WrapperWidget};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
@@ -506,6 +512,12 @@
             EffectiveBackground::Color(color) =&gt; <span class="self">Self</span>::Color(color),
         }
     }
+}
+
+<span class="kw">impl </span>RequireInvalidation <span class="kw">for </span>EffectiveBackground {
+    <span class="kw">fn </span>requires_invalidation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="bool-val">false
+    </span>}
 }
 
 <span class="macro">define_components! </span>{

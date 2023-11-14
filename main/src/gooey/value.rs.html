@@ -1209,6 +1209,48 @@
 <a href="#1209" id="1209">1209</a>
 <a href="#1210" id="1210">1210</a>
 <a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
+<a href="#1219" id="1219">1219</a>
+<a href="#1220" id="1220">1220</a>
+<a href="#1221" id="1221">1221</a>
+<a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
+<a href="#1225" id="1225">1225</a>
+<a href="#1226" id="1226">1226</a>
+<a href="#1227" id="1227">1227</a>
+<a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
+<a href="#1231" id="1231">1231</a>
+<a href="#1232" id="1232">1232</a>
+<a href="#1233" id="1233">1233</a>
+<a href="#1234" id="1234">1234</a>
+<a href="#1235" id="1235">1235</a>
+<a href="#1236" id="1236">1236</a>
+<a href="#1237" id="1237">1237</a>
+<a href="#1238" id="1238">1238</a>
+<a href="#1239" id="1239">1239</a>
+<a href="#1240" id="1240">1240</a>
+<a href="#1241" id="1241">1241</a>
+<a href="#1242" id="1242">1242</a>
+<a href="#1243" id="1243">1243</a>
+<a href="#1244" id="1244">1244</a>
+<a href="#1245" id="1245">1245</a>
+<a href="#1246" id="1246">1246</a>
+<a href="#1247" id="1247">1247</a>
+<a href="#1248" id="1248">1248</a>
+<a href="#1249" id="1249">1249</a>
+<a href="#1250" id="1250">1250</a>
+<a href="#1251" id="1251">1251</a>
+<a href="#1252" id="1252">1252</a>
+<a href="#1253" id="1253">1253</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::cell::Cell;
@@ -1216,15 +1258,17 @@
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::panic::AssertUnwindSafe;
-<span class="kw">use </span>std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError, TryLockError};
+<span class="kw">use </span>std::sync::{Arc, Condvar, Mutex, MutexGuard, TryLockError};
 <span class="kw">use </span>std::task::{Poll, Waker};
 <span class="kw">use </span>std::thread::ThreadId;
 
+<span class="kw">use </span>ahash::AHashSet;
 <span class="kw">use </span>intentional::Assert;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{DynamicTransition, LinearInterpolate};
 <span class="kw">use </span><span class="kw">crate</span>::context::{WidgetContext, WindowHandle};
-<span class="kw">use </span><span class="kw">crate</span>::utils::WithClone;
+<span class="kw">use </span><span class="kw">crate</span>::utils::{IgnorePoison, WithClone};
+<span class="kw">use </span><span class="kw">crate</span>::widget::WidgetId;
 
 <span class="doccomment">/// An instance of a value that provides APIs to observe and react to its
 /// contents.
@@ -1241,9 +1285,10 @@
                     generation: Generation::default(),
                 },
                 callbacks: Vec::new(),
-                windows: Vec::new(),
+                windows: AHashSet::new(),
                 readers: <span class="number">0</span>,
                 wakers: Vec::new(),
+                widgets: AHashSet::new(),
             }),
             during_callback_state: Mutex::default(),
             sync: AssertUnwindSafe(Condvar::new()),
@@ -1369,6 +1414,10 @@
         <span class="self">self</span>.<span class="number">0</span>.redraw_when_changed(window);
     }
 
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>invalidate_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, window: WindowHandle, widget: WidgetId) {
+        <span class="self">self</span>.<span class="number">0</span>.invalidate_when_changed(window, widget);
+    }
+
     <span class="doccomment">/// Returns a clone of the currently contained value.
     ///
     /// # Panics
@@ -1392,11 +1441,28 @@
     /// This function panics if this value is already locked by the current
     /// thread.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>get_tracked(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
+    </span><span class="kw">pub fn </span>get_tracking_refresh(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
     <span class="kw">where
         </span>T: Clone,
     {
         context.redraw_when_changed(<span class="self">self</span>);
+        <span class="self">self</span>.get()
+    }
+
+    <span class="doccomment">/// Returns a clone of the currently contained value.
+    ///
+    /// `context` will be invalidated when the value is updated.
+    ///
+    /// # Panics
+    ///
+    /// This function panics if this value is already locked by the current
+    /// thread.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>get_tracking_invalidate(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
+    <span class="kw">where
+        </span>T: Clone,
+    {
+        context.invalidate_when_changed(<span class="self">self</span>);
         <span class="self">self</span>.get()
     }
 
@@ -1620,11 +1686,7 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Drop <span class="kw">for </span>DynamicMutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="kw">let </span><span class="kw-2">mut </span>during_state = <span class="self">self
-            </span>.dynamic
-            .during_callback_state
-            .lock()
-            .map_or_else(PoisonError::into_inner, |g| g);
+        <span class="kw">let </span><span class="kw-2">mut </span>during_state = <span class="self">self</span>.dynamic.during_callback_state.lock().ignore_poison();
         <span class="kw-2">*</span>during_state = <span class="prelude-val">None</span>;
         drop(during_state);
         <span class="self">self</span>.dynamic.sync.notify_all();
@@ -1661,10 +1723,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; DynamicData&lt;T&gt; {
     <span class="kw">fn </span>state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;DynamicMutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;, DeadlockError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>during_sync = <span class="self">self
-            </span>.during_callback_state
-            .lock()
-            .map_or_else(PoisonError::into_inner, |g| g);
+        <span class="kw">let </span><span class="kw-2">mut </span>during_sync = <span class="self">self</span>.during_callback_state.lock().ignore_poison();
 
         <span class="kw">let </span>current_thread_id = std::thread::current().id();
         <span class="kw">let </span>guard = <span class="kw">loop </span>{
@@ -1677,10 +1736,7 @@
                             <span class="kw">return </span><span class="prelude-val">Err</span>(DeadlockError)
                         }
                         <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; {
-                            during_sync = <span class="self">self
-                                </span>.sync
-                                .wait(during_sync)
-                                .map_or_else(PoisonError::into_inner, |g| g);
+                            during_sync = <span class="self">self</span>.sync.wait(during_sync).ignore_poison();
                         }
                         <span class="prelude-val">None </span>=&gt; <span class="kw">break</span>,
                     }
@@ -1698,7 +1754,12 @@
 
     <span class="kw">pub fn </span>redraw_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, window: WindowHandle) {
         <span class="kw">let </span><span class="kw-2">mut </span>state = <span class="self">self</span>.state().expect(<span class="string">&quot;deadlocked&quot;</span>);
-        state.windows.push(window);
+        state.windows.insert(window);
+    }
+
+    <span class="kw">pub fn </span>invalidate_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, window: WindowHandle, widget: WidgetId) {
+        <span class="kw">let </span><span class="kw-2">mut </span>state = <span class="self">self</span>.state().expect(<span class="string">&quot;deadlocked&quot;</span>);
+        state.widgets.insert((window, widget));
     }
 
     <span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;GenerationalValue&lt;T&gt;, DeadlockError&gt;
@@ -1790,7 +1851,8 @@
 <span class="kw">struct </span>State&lt;T&gt; {
     wrapped: GenerationalValue&lt;T&gt;,
     callbacks: Vec&lt;Box&lt;<span class="kw">dyn </span>ValueCallback&lt;T&gt;&gt;&gt;,
-    windows: Vec&lt;WindowHandle&gt;,
+    windows: AHashSet&lt;WindowHandle&gt;,
+    widgets: AHashSet&lt;(WindowHandle, WidgetId)&gt;,
     wakers: Vec&lt;Waker&gt;,
     readers: usize,
 }
@@ -1802,7 +1864,10 @@
         <span class="kw">for </span>callback <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.callbacks {
             callback.update(<span class="kw-2">&amp;</span><span class="self">self</span>.wrapped);
         }
-        <span class="kw">for </span>window <span class="kw">in </span><span class="self">self</span>.windows.drain(..) {
+        <span class="kw">for </span>(window, widget) <span class="kw">in </span><span class="self">self</span>.widgets.drain() {
+            window.invalidate(widget);
+        }
+        <span class="kw">for </span>window <span class="kw">in </span><span class="self">self</span>.windows.drain() {
             window.redraw();
         }
         <span class="kw">for </span>waker <span class="kw">in </span><span class="self">self</span>.wakers.drain(..) {
@@ -1937,11 +2002,7 @@
     /// This function panics if this value is already locked by the current
     /// thread.
     </span><span class="kw">pub fn </span>block_until_updated(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">let </span><span class="kw-2">mut </span>deadlock_state = <span class="self">self
-            </span>.source
-            .during_callback_state
-            .lock()
-            .map_or_else(PoisonError::into_inner, |g| g);
+        <span class="kw">let </span><span class="kw-2">mut </span>deadlock_state = <span class="self">self</span>.source.during_callback_state.lock().ignore_poison();
         <span class="macro">assert!</span>(
             deadlock_state
                 .as_ref()
@@ -1950,11 +2011,7 @@
             <span class="string">&quot;deadlocked&quot;
         </span>);
         <span class="kw">loop </span>{
-            <span class="kw">let </span>state = <span class="self">self
-                </span>.source
-                .state
-                .lock()
-                .map_or_else(PoisonError::into_inner, |g| g);
+            <span class="kw">let </span>state = <span class="self">self</span>.source.state.lock().ignore_poison();
             <span class="kw">if </span>state.wrapped.generation != <span class="self">self</span>.read_generation {
                 <span class="kw">return </span><span class="bool-val">true</span>;
             } <span class="kw">else if </span>state.readers == Arc::strong_count(<span class="kw-2">&amp;</span><span class="self">self</span>.source) {
@@ -1963,11 +2020,7 @@
             drop(state);
 
             <span class="comment">// Wait for a notification of a change, which is synch
-            </span>deadlock_state = <span class="self">self
-                </span>.source
-                .sync
-                .wait(deadlock_state)
-                .map_or_else(PoisonError::into_inner, |g| g);
+            </span>deadlock_state = <span class="self">self</span>.source.sync.wait(deadlock_state).ignore_poison();
         }
     }
 
@@ -2147,11 +2200,33 @@
     ///
     /// If `self` is a dynamic, `context` will be invalidated when the value is
     /// updated.
-    </span><span class="kw">pub fn </span>map_tracked&lt;R&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;, map: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>T) -&gt; R) -&gt; R {
+    </span><span class="kw">pub fn </span>map_tracking_redraw&lt;R&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        map: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>T) -&gt; R,
+    ) -&gt; R {
         <span class="kw">match </span><span class="self">self </span>{
             Value::Constant(value) =&gt; map(value),
             Value::Dynamic(dynamic) =&gt; {
                 context.redraw_when_changed(dynamic);
+                dynamic.map_ref(map)
+            }
+        }
+    }
+
+    <span class="doccomment">/// Maps the current contents to `map` and returns the result.
+    ///
+    /// If `self` is a dynamic, `context` will be invalidated when the value is
+    /// updated.
+    </span><span class="kw">pub fn </span>map_tracking_invalidate&lt;R&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        map: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>T) -&gt; R,
+    ) -&gt; R {
+        <span class="kw">match </span><span class="self">self </span>{
+            Value::Constant(value) =&gt; map(value),
+            Value::Dynamic(dynamic) =&gt; {
+                context.invalidate_when_changed(dynamic);
                 dynamic.map_ref(map)
             }
         }
@@ -2195,7 +2270,7 @@
     <span class="kw">where
         </span>T: Clone,
     {
-        <span class="self">self</span>.map_tracked(context, Clone::clone)
+        <span class="self">self</span>.map_tracking_redraw(context, Clone::clone)
     }
 
     <span class="doccomment">/// Returns the current generation of the data stored, if the contained
@@ -2213,6 +2288,15 @@
     </span><span class="kw">pub fn </span>redraw_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">if let </span>Value::Dynamic(dynamic) = <span class="self">self </span>{
             context.redraw_when_changed(dynamic);
+        }
+    }
+
+    <span class="doccomment">/// Marks the widget for redraw when this value is updated.
+    ///
+    /// This function has no effect if the value is constant.
+    </span><span class="kw">pub fn </span>invalidate_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
+        <span class="kw">if let </span>Value::Dynamic(dynamic) = <span class="self">self </span>{
+            context.invalidate_when_changed(dynamic);
         }
     }
 }
@@ -2366,7 +2450,7 @@
             <span class="kw">move </span>|<span class="macro-nonterminal">$var</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">type</span>| {
                 $(<span class="kw">let </span><span class="macro-nonterminal">$rvar </span>= <span class="macro-nonterminal">$rvar</span>.lock();)+
                 <span class="kw">let </span><span class="kw-2">mut </span>for_each =
-                    for_each.lock().map_or_else(PoisonError::into_inner, |g| g);
+                    for_each.lock().ignore_poison();
                 (for_each)(($(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$avar</span>,)+));
             }
         }));
