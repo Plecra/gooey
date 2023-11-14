@@ -1163,6 +1163,34 @@
 <a href="#1163" id="1163">1163</a>
 <a href="#1164" id="1164">1164</a>
 <a href="#1165" id="1165">1165</a>
+<a href="#1166" id="1166">1166</a>
+<a href="#1167" id="1167">1167</a>
+<a href="#1168" id="1168">1168</a>
+<a href="#1169" id="1169">1169</a>
+<a href="#1170" id="1170">1170</a>
+<a href="#1171" id="1171">1171</a>
+<a href="#1172" id="1172">1172</a>
+<a href="#1173" id="1173">1173</a>
+<a href="#1174" id="1174">1174</a>
+<a href="#1175" id="1175">1175</a>
+<a href="#1176" id="1176">1176</a>
+<a href="#1177" id="1177">1177</a>
+<a href="#1178" id="1178">1178</a>
+<a href="#1179" id="1179">1179</a>
+<a href="#1180" id="1180">1180</a>
+<a href="#1181" id="1181">1181</a>
+<a href="#1182" id="1182">1182</a>
+<a href="#1183" id="1183">1183</a>
+<a href="#1184" id="1184">1184</a>
+<a href="#1185" id="1185">1185</a>
+<a href="#1186" id="1186">1186</a>
+<a href="#1187" id="1187">1187</a>
+<a href="#1188" id="1188">1188</a>
+<a href="#1189" id="1189">1189</a>
+<a href="#1190" id="1190">1190</a>
+<a href="#1191" id="1191">1191</a>
+<a href="#1192" id="1192">1192</a>
+<a href="#1193" id="1193">1193</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -1180,8 +1208,8 @@
 <span class="kw">use </span>kludgine::{Color, Kludgine};
 
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, WidgetBackground};
-<span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, Styles, Theme, ThemePair, VisualOrder};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, LayoutOrder, WidgetBackground};
+<span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, Styles, Theme, ThemePair};
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, WidgetId, WidgetInstance, WidgetRef};
@@ -1400,10 +1428,12 @@
                     .accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>focus))
                 {
                     <span class="kw">break </span><span class="prelude-val">Some</span>(focus);
-                } <span class="kw">else if let </span><span class="prelude-val">Some</span>(next_focus) = focus.next_focus() {
+                } <span class="kw">else if let </span><span class="prelude-val">Some</span>(next_focus) =
+                    focus.explicit_focus_target(<span class="self">self</span>.pending_state.focus_is_advancing)
+                {
                     focus = next_focus;
                 } <span class="kw">else </span>{
-                    <span class="kw">break </span><span class="self">self</span>.next_focus_after(focus, VisualOrder::left_to_right());
+                    <span class="kw">break </span><span class="self">self</span>.next_focus_after(focus, <span class="self">self</span>.pending_state.focus_is_advancing);
                 }
             });
             <span class="kw">let </span>new = <span class="kw">match </span><span class="self">self
@@ -1437,17 +1467,17 @@
     <span class="kw">fn </span>next_focus_after(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         <span class="kw-2">mut </span>focus: ManagedWidget,
-        order: VisualOrder,
+        advance: bool,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
         <span class="comment">// First, look within the current focus for any focusable children.
         </span><span class="kw">let </span>stop_at = focus.id();
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>focus, <span class="prelude-val">None</span>, stop_at, order) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>focus, <span class="prelude-val">None</span>, stop_at, advance) {
             <span class="kw">return </span><span class="prelude-val">Some</span>(focus);
         }
 
         <span class="comment">// Now, look for the next widget in each hierarchy
         </span><span class="kw">let </span>root = <span class="kw">loop </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_sibling(<span class="kw-2">&amp;</span>focus, stop_at, order) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_sibling(<span class="kw-2">&amp;</span>focus, stop_at, advance) {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(focus);
             }
             <span class="kw">let </span><span class="prelude-val">Some</span>(parent) = focus.parent() <span class="kw">else </span>{
@@ -1458,16 +1488,16 @@
 
         <span class="comment">// We&#39;ve exhausted a forward scan, we can now start searching the final
         // parent, which is the root.
-        </span><span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>root, <span class="prelude-val">None</span>, stop_at, order)
+        </span><span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>root, <span class="prelude-val">None</span>, stop_at, advance)
     }
 
     <span class="kw">fn </span>next_focus_sibling(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         focus: <span class="kw-2">&amp;</span>ManagedWidget,
         stop_at: WidgetId,
-        order: VisualOrder,
+        advance: bool,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
-        <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>focus.parent()<span class="question-mark">?</span>, <span class="prelude-val">Some</span>(focus.id()), stop_at, order)
+        <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>focus.parent()<span class="question-mark">?</span>, <span class="prelude-val">Some</span>(focus.id()), stop_at, advance)
     }
 
     <span class="doccomment">/// Searches for the next focus inside of `focus`, returning `None` if
@@ -1478,10 +1508,14 @@
         focus: <span class="kw-2">&amp;</span>ManagedWidget,
         start_at: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
         stop_at: WidgetId,
-        order: VisualOrder,
+        advance: bool,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>visual_order = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>LayoutOrder);
+        <span class="kw">if </span>!advance {
+            visual_order = visual_order.rev();
+        }
         <span class="kw">let </span><span class="kw-2">mut </span>children = focus
-            .visually_ordered_children(order)
+            .visually_ordered_children(visual_order)
             .into_iter()
             .peekable();
         <span class="kw">if let </span><span class="prelude-val">Some</span>(start_at) = start_at {
@@ -1505,7 +1539,9 @@
                 .accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>child))
             {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(child);
-            } <span class="kw">else if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>child, <span class="prelude-val">None</span>, stop_at, order) {
+            } <span class="kw">else if let </span><span class="prelude-val">Some</span>(next_focus) = <span class="self">self</span>.widget().explicit_focus_target(advance) {
+                <span class="kw">return </span><span class="prelude-val">Some</span>(next_focus);
+            } <span class="kw">else if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>child, <span class="prelude-val">None</span>, stop_at, advance) {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(focus);
             }
         }
@@ -1513,14 +1549,31 @@
         <span class="prelude-val">None
     </span>}
 
-    <span class="doccomment">/// Advances the focus from this widget to the next widget in `direction`.
+    <span class="doccomment">/// Advances the focus to the next widget after this widget in the
+    /// configured focus order.
     ///
-    /// This widget does not need to be focused.
-    </span><span class="kw">pub fn </span>advance_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, direction: VisualOrder) {
-        <span class="comment">// TODO check to see if the current node has an explicit next_focus (or
-        // if we&#39;re going in the opposite direction, previous_focus).
+    /// To focus in the reverse order, use [`EventContext::return_focus()`].
+    </span><span class="kw">pub fn </span>advance_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.move_focus(<span class="bool-val">true</span>);
+    }
 
-        </span><span class="self">self</span>.pending_state.focus = <span class="self">self</span>.next_focus_after(<span class="self">self</span>.current_node.clone(), direction);
+    <span class="doccomment">/// Returns the focus to the previous widget before this widget in the
+    /// configured fous order.
+    ///
+    /// To focus in the forward order, use [`EventContext::advance_focus()`].
+    </span><span class="kw">pub fn </span>return_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.move_focus(<span class="bool-val">false</span>);
+    }
+
+    <span class="kw">fn </span>move_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, advance: bool) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(explicit_next_focus) = <span class="self">self</span>.current_node.explicit_focus_target(advance) {
+            <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>explicit_next_focus).focus();
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.pending_state.focus = <span class="self">self</span>.next_focus_after(<span class="self">self</span>.current_node.clone(), advance);
+        }
+        <span class="comment">// It is important to set focus-is_advancing after `focus()` because it
+        // sets it to `true` explicitly.
+        </span><span class="self">self</span>.pending_state.focus_is_advancing = advance;
     }
 }
 
@@ -1867,6 +1920,7 @@
                     .tree
                     .active_widget()
                     .and_then(|id| current_node.tree.widget_from_node(id)),
+                focus_is_advancing: <span class="bool-val">false</span>,
             }),
             effective_styles: current_node.effective_styles(),
             current_node,
@@ -1948,6 +2002,7 @@
     /// Widget events relating to focus changes are deferred until after the all
     /// contexts for the currently firing event are dropped.
     </span><span class="kw">pub fn </span>focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.pending_state.focus_is_advancing = <span class="bool-val">true</span>;
         <span class="self">self</span>.pending_state.focus = <span class="prelude-val">Some</span>(<span class="self">self</span>.current_node.clone());
     }
 
@@ -2210,6 +2265,7 @@
 
 <span class="attr">#[derive(Default)]
 </span><span class="kw">struct </span>PendingWidgetState {
+    focus_is_advancing: bool,
     focus: <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;,
     active: <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;,
 }

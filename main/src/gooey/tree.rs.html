@@ -521,6 +521,7 @@
 <a href="#521" id="521">521</a>
 <a href="#522" id="522">522</a>
 <a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::sync::{Arc, Mutex};
 
@@ -579,12 +580,8 @@
             <span class="kw">let </span>parent = <span class="kw-2">&amp;mut </span>data.nodes[parent];
             parent.children.push(node_id);
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(next_focus) = widget
-            .next_focus()
-            .and_then(|id| data.nodes_by_id.get(<span class="kw-2">&amp;</span>id))
-            .copied()
-        {
-            data.previous_focuses.insert(next_focus, node_id);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(next_focus) = widget.next_focus() {
+            data.previous_focuses.insert(next_focus, id);
         }
         ManagedWidget {
             node_id,
@@ -775,6 +772,12 @@
         data.update_tracked_widget(new_focus, <span class="self">self</span>, |data| <span class="kw-2">&amp;mut </span>data.focus)
     }
 
+    <span class="kw">pub fn </span>previous_focus(<span class="kw-2">&amp;</span><span class="self">self</span>, focus: WidgetId) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+        <span class="kw">let </span>data = <span class="self">self</span>.data.lock().ignore_poison();
+        <span class="kw">let </span>previous = <span class="kw-2">*</span>data.previous_focuses.get(<span class="kw-2">&amp;</span>focus)<span class="question-mark">?</span>;
+        data.widget_from_id(previous, <span class="self">self</span>)
+    }
+
     <span class="kw">pub fn </span>activate(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         new_active: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ManagedWidget&gt;,
@@ -895,7 +898,7 @@
     defaults: Vec&lt;LotId&gt;,
     escapes: Vec&lt;LotId&gt;,
     render_order: Vec&lt;LotId&gt;,
-    previous_focuses: AHashMap&lt;LotId, LotId&gt;,
+    previous_focuses: AHashMap&lt;WidgetId, WidgetId&gt;,
 }
 
 <span class="kw">impl </span>TreeData {
@@ -958,17 +961,16 @@
         parent.children.remove(index);
         <span class="kw">let </span><span class="kw-2">mut </span>detached_nodes = removed_node.children;
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(next_focus) = removed_node
-            .widget
-            .next_focus()
-            .and_then(|id| <span class="self">self</span>.nodes_by_id.get(<span class="kw-2">&amp;</span>id))
-        {
-            <span class="self">self</span>.previous_focuses.remove(next_focus);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(next_focus) = removed_node.widget.next_focus() {
+            <span class="self">self</span>.previous_focuses.remove(<span class="kw-2">&amp;</span>next_focus);
         }
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>(node) = detached_nodes.pop() {
             <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.nodes.remove(node).expect(<span class="string">&quot;detached node missing&quot;</span>);
             <span class="self">self</span>.nodes_by_id.remove(<span class="kw-2">&amp;</span>node.widget.id());
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(next_focus) = node.widget.next_focus() {
+                <span class="self">self</span>.previous_focuses.remove(<span class="kw-2">&amp;</span>next_focus);
+            }
             detached_nodes.append(<span class="kw-2">&amp;mut </span>node.children);
         }
     }

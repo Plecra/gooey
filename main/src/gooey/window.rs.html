@@ -1157,7 +1157,6 @@
 <a href="#1157" id="1157">1157</a>
 <a href="#1158" id="1158">1158</a>
 <a href="#1159" id="1159">1159</a>
-<a href="#1160" id="1160">1160</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
 //! window.
 
@@ -1191,7 +1190,6 @@
     WidgetContext,
 };
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::LayoutOrder;
 <span class="kw">use </span><span class="kw">crate</span>::styles::ThemePair;
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
@@ -1896,11 +1894,11 @@
                             ),
                             kludgine,
                         );
-                        <span class="kw">let </span><span class="kw-2">mut </span>visual_order = target.get(<span class="kw-2">&amp;</span>LayoutOrder);
                         <span class="kw">if </span>reverse {
-                            visual_order = visual_order.rev();
+                            target.return_focus();
+                        } <span class="kw">else </span>{
+                            target.advance_focus();
                         }
-                        target.advance_focus(visual_order);
                     }
                 }
                 Key::Enter =&gt; {
