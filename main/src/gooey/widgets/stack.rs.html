@@ -701,6 +701,15 @@
 <a href="#701" id="701">701</a>
 <a href="#702" id="702">702</a>
 <a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines a collection of [`Children`] widgets into one.
 </span><span class="comment">// TODO on scale change, all `Lp` children need to resize
 
@@ -1103,6 +1112,11 @@
         <span class="kw">let </span>allocated_space =
             <span class="self">self</span>.allocated_space.<span class="number">0 </span>+ <span class="self">self</span>.allocated_space.<span class="number">1</span>.into_px(scale).into_unsigned();
         <span class="kw">let </span><span class="kw-2">mut </span>remaining = available_space.saturating_sub(allocated_space);
+        <span class="comment">// If our `other_constraint` is not known, we will need to give child
+        // widgets an opportunity to lay themselves out in the full area. This
+        // requires one extra layout call, so we avoid persisting layouts during
+        // the first loop if this is the case.
+        </span><span class="kw">let </span>needs_final_layout = !<span class="macro">matches!</span>(other_constraint, ConstraintLimit::Known(<span class="kw">_</span>));
 
         <span class="comment">// Measure the children that fit their content
         </span><span class="self">self</span>.other = UPx(<span class="number">0</span>);
@@ -1112,7 +1126,7 @@
                 index,
                 <span class="self">self</span>.orientation
                     .make_size(ConstraintLimit::ClippedAfter(remaining), other_constraint),
-                <span class="bool-val">false</span>,
+                !needs_final_layout,
             ));
             <span class="self">self</span>.layouts[index].size = measured;
             <span class="self">self</span>.other = <span class="self">self</span>.other.max(other);
@@ -1153,7 +1167,7 @@
                         ),
                         other_constraint,
                     ),
-                    <span class="bool-val">true</span>,
+                    !needs_final_layout,
                 ));
                 <span class="self">self</span>.other = <span class="self">self</span>.other.max(measured);
             }
@@ -1164,19 +1178,23 @@
             ConstraintLimit::ClippedAfter(clip_limit) =&gt; <span class="self">self</span>.other.min(clip_limit),
         };
 
-        <span class="comment">// Finally layout the widgets with the final constraints
+        <span class="comment">// Finally, compute the offsets of all of the widgets.
         </span><span class="kw">let </span><span class="kw-2">mut </span>offset = UPx(<span class="number">0</span>);
         <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.children.len() {
             <span class="self">self</span>.layouts[index].offset = offset;
             offset += <span class="self">self</span>.layouts[index].size;
-            <span class="self">self</span>.orientation.split_size(measure(
-                index,
-                <span class="self">self</span>.orientation.make_size(
-                    ConstraintLimit::Known(<span class="self">self</span>.layouts[index].size.into_px(scale).into_unsigned()),
-                    ConstraintLimit::Known(<span class="self">self</span>.other),
-                ),
-                <span class="bool-val">true</span>,
-            ));
+            <span class="kw">if </span>needs_final_layout {
+                <span class="self">self</span>.orientation.split_size(measure(
+                    index,
+                    <span class="self">self</span>.orientation.make_size(
+                        ConstraintLimit::Known(
+                            <span class="self">self</span>.layouts[index].size.into_px(scale).into_unsigned(),
+                        ),
+                        ConstraintLimit::Known(<span class="self">self</span>.other),
+                    ),
+                    <span class="bool-val">true</span>,
+                ));
+            }
         }
 
         <span class="self">self</span>.orientation.make_size(offset, <span class="self">self</span>.other)
