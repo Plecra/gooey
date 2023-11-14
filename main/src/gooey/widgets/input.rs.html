@@ -625,9 +625,6 @@
 <a href="#625" id="625">625</a>
 <a href="#626" id="626">626</a>
 <a href="#627" id="627">627</a>
-<a href="#628" id="628">628</a>
-<a href="#629" id="629">629</a>
-<a href="#630" id="630">630</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -951,10 +948,7 @@
                 <span class="kw">if </span>window_focused &amp;&amp; cursor_state.visible {
                     context.gfx.draw_shape(
                         <span class="kw-2">&amp;</span>Shape::filled_rect(
-                            Rect::new(
-                                location,
-                                Size::new(Px(<span class="number">1</span>), line_height),
-                            ),
+                            Rect::new(location, Size::new(Px(<span class="number">1</span>), line_height)),
                             highlight, <span class="comment">// TODO cursor should be a bold color, highlight probably not. This should have its own color.
                         </span>),
                         padding,

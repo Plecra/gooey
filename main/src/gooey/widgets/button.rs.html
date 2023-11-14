@@ -324,16 +324,36 @@
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
 <a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>kludgine::app::winit::event::{DeviceId, ElementState, KeyEvent, MouseButton};
-<span class="kw">use </span>kludgine::figures::units::{Px, UPx};
+<span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size};
+<span class="kw">use </span>kludgine::shapes::StrokeOptions;
 <span class="kw">use </span>kludgine::Color;
 
-<span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, AnimationTarget, Spawn};
+<span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, AnimationTarget, LinearInterpolate, Spawn};
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
     AutoFocusableControls, Easing, IntrinsicPadding, OpaqueWidgetColor, SurfaceColor, TextColor,
@@ -354,9 +374,15 @@
     </span><span class="kw">pub </span>enabled: Value&lt;bool&gt;,
     currently_enabled: bool,
     buttons_pressed: usize,
-    background_color: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;Color&gt;&gt;,
-    text_color: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;Color&gt;&gt;,
+    active_style: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;ButtonStyle&gt;&gt;,
     color_animation: AnimationHandle,
+}
+
+<span class="attr">#[derive(Debug, PartialEq, Eq, Clone, Copy, LinearInterpolate)]
+</span><span class="kw">struct </span>ButtonStyle {
+    background: Color,
+    foreground: Color,
+    outline: Color,
 }
 
 <span class="kw">impl </span>Button {
@@ -368,8 +394,7 @@
             enabled: Value::Constant(<span class="bool-val">true</span>),
             currently_enabled: <span class="bool-val">true</span>,
             buttons_pressed: <span class="number">0</span>,
-            background_color: <span class="prelude-val">None</span>,
-            text_color: <span class="prelude-val">None</span>,
+            active_style: <span class="prelude-val">None</span>,
             color_animation: AnimationHandle::default(),
         }
     }
@@ -403,62 +428,63 @@
     }
 
     <span class="kw">fn </span>update_colors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;, immediate: bool) {
-        <span class="kw">let </span>(background_color, text_color) = <span class="kw">match </span>() {
-            () <span class="kw">if </span>!<span class="self">self</span>.enabled.get() =&gt; (
-                context.get(<span class="kw-2">&amp;</span>ButtonDisabledBackground),
-                context.get(<span class="kw-2">&amp;</span>ButtonDisabledForeground),
-            ),
+        <span class="kw">let </span>new_style = <span class="kw">match </span>() {
+            () <span class="kw">if </span>!<span class="self">self</span>.enabled.get() =&gt; ButtonStyle {
+                background: context.get(<span class="kw-2">&amp;</span>ButtonDisabledBackground),
+                foreground: context.get(<span class="kw-2">&amp;</span>ButtonDisabledForeground),
+                outline: context.get(<span class="kw-2">&amp;</span>ButtonDisabledOutline),
+            },
             <span class="comment">// TODO this probably should use actual style.
-            </span>() <span class="kw">if </span>context.is_default() =&gt; (
-                context.theme().primary.color,
-                context.theme().primary.on_color,
-            ),
-            () <span class="kw">if </span>context.active() =&gt; (
-                context.get(<span class="kw-2">&amp;</span>ButtonActiveBackground),
-                context.get(<span class="kw-2">&amp;</span>ButtonActiveForeground),
-            ),
-            () <span class="kw">if </span>context.hovered() =&gt; (
-                context.get(<span class="kw-2">&amp;</span>ButtonHoverBackground),
-                context.get(<span class="kw-2">&amp;</span>ButtonHoverForeground),
-            ),
-            () =&gt; (
-                context.get(<span class="kw-2">&amp;</span>ButtonBackground),
-                context.get(<span class="kw-2">&amp;</span>ButtonForeground),
-            ),
+            </span>() <span class="kw">if </span>context.is_default() =&gt; ButtonStyle {
+                background: context.theme().primary.color,
+                foreground: context.theme().primary.on_color,
+                outline: Color::CLEAR_BLACK,
+            },
+            () <span class="kw">if </span>context.active() =&gt; ButtonStyle {
+                background: context.get(<span class="kw-2">&amp;</span>ButtonActiveBackground),
+                foreground: context.get(<span class="kw-2">&amp;</span>ButtonActiveForeground),
+                outline: context.get(<span class="kw-2">&amp;</span>ButtonActiveOutline),
+            },
+            () <span class="kw">if </span>context.hovered() =&gt; ButtonStyle {
+                background: context.get(<span class="kw-2">&amp;</span>ButtonHoverBackground),
+                foreground: context.get(<span class="kw-2">&amp;</span>ButtonHoverForeground),
+                outline: context.get(<span class="kw-2">&amp;</span>ButtonHoverOutline),
+            },
+            () =&gt; ButtonStyle {
+                background: context.get(<span class="kw-2">&amp;</span>ButtonBackground),
+                foreground: context.get(<span class="kw-2">&amp;</span>ButtonForeground),
+                outline: context.get(<span class="kw-2">&amp;</span>ButtonOutline),
+            },
         };
 
-        <span class="kw">match </span>(immediate, <span class="kw-2">&amp;</span><span class="self">self</span>.background_color, <span class="kw-2">&amp;</span><span class="self">self</span>.text_color) {
-            (<span class="bool-val">false</span>, <span class="prelude-val">Some</span>(bg), <span class="prelude-val">Some</span>(text)) =&gt; {
-                <span class="self">self</span>.color_animation = (
-                    bg.transition_to(background_color),
-                    text.transition_to(text_color),
-                )
+        <span class="kw">match </span>(immediate, <span class="kw-2">&amp;</span><span class="self">self</span>.active_style) {
+            (<span class="bool-val">false</span>, <span class="prelude-val">Some</span>(style)) =&gt; {
+                <span class="self">self</span>.color_animation = (style.transition_to(new_style))
                     .over(Duration::from_millis(<span class="number">150</span>))
                     .with_easing(context.get(<span class="kw-2">&amp;</span>Easing))
                     .spawn();
             }
-            (<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(bg), <span class="prelude-val">Some</span>(text)) =&gt; {
-                bg.update(background_color);
-                text.update(text_color);
+            (<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(style)) =&gt; {
+                style.update(new_style);
                 <span class="self">self</span>.color_animation.clear();
             }
             <span class="kw">_ </span>=&gt; {
-                <span class="self">self</span>.background_color = <span class="prelude-val">Some</span>(Dynamic::new(background_color));
-                <span class="kw">let </span>text_color = Dynamic::new(text_color);
-                <span class="self">self</span>.text_color = <span class="prelude-val">Some</span>(text_color.clone());
-                context.attach_styles(Styles::new().with(<span class="kw-2">&amp;</span>TextColor, text_color));
+                <span class="kw">let </span>new_style = Dynamic::new(new_style);
+                <span class="kw">let </span>foreground = new_style.map_each(|s| s.foreground);
+                <span class="self">self</span>.active_style = <span class="prelude-val">Some</span>(new_style);
+                context.attach_styles(Styles::new().with(<span class="kw-2">&amp;</span>TextColor, foreground));
             }
         }
     }
 
-    <span class="kw">fn </span>current_background(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; Color {
-        <span class="kw">if </span><span class="self">self</span>.background_color.is_none() {
+    <span class="kw">fn </span>current_style(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; ButtonStyle {
+        <span class="kw">if </span><span class="self">self</span>.active_style.is_none() {
             <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
         }
 
-        <span class="kw">let </span>background_color = <span class="self">self</span>.background_color.as_ref().expect(<span class="string">&quot;always initialized&quot;</span>);
-        context.redraw_when_changed(background_color);
-        background_color.get()
+        <span class="kw">let </span>style = <span class="self">self</span>.active_style.as_ref().expect(<span class="string">&quot;always initialized&quot;</span>);
+        context.redraw_when_changed(style);
+        style.get()
     }
 }
 
@@ -475,8 +501,10 @@
 
         <span class="self">self</span>.enabled.redraw_when_changed(context);
 
-        <span class="kw">let </span>background_color = <span class="self">self</span>.current_background(context);
-        context.gfx.fill(background_color);
+        <span class="kw">let </span>style = <span class="self">self</span>.current_style(context);
+        context.gfx.fill(style.background);
+
+        context.stroke_outline::&lt;Lp&gt;(style.outline, StrokeOptions::default());
 
         <span class="kw">if </span>context.focused() {
             context.draw_focus_ring();
@@ -648,6 +676,16 @@
         <span class="doccomment">/// The foreground color of the button when the mouse cursor is hovering over
         /// it.
         </span>ButtonDisabledForeground(Color, <span class="string">&quot;disabled_foreground_color&quot;</span>, <span class="macro">contrasting!</span>(ButtonDisabledBackground, ButtonForeground, TextColor, SurfaceColor))
+        <span class="doccomment">/// The outline color of the button.
+        </span>ButtonOutline(Color, <span class="string">&quot;outline_color&quot;</span>, Color::CLEAR_BLACK)
+        <span class="doccomment">/// The outline color of the button when it is active (depressed).
+        </span>ButtonActiveOutline(Color, <span class="string">&quot;active_outline_color&quot;</span>, <span class="macro">contrasting!</span>(ButtonActiveBackground, ButtonOutline, TextColor, SurfaceColor))
+        <span class="doccomment">/// The outline color of the button when the mouse cursor is hovering over
+        /// it.
+        </span>ButtonHoverOutline(Color, <span class="string">&quot;hover_outline_color&quot;</span>, <span class="macro">contrasting!</span>(ButtonHoverBackground, ButtonOutline, TextColor, SurfaceColor))
+        <span class="doccomment">/// The outline color of the button when the mouse cursor is hovering over
+        /// it.
+        </span>ButtonDisabledOutline(Color, <span class="string">&quot;disabled_outline_color&quot;</span>, <span class="macro">contrasting!</span>(ButtonDisabledBackground, ButtonOutline, TextColor, SurfaceColor))
     }
 }
 </code></pre></div></section></main></body></html>

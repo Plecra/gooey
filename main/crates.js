@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["gooey"];
+window.ALL_CRATES = ["gooey","gooey_macros"];
