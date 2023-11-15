@@ -565,6 +565,23 @@
 <a href="#565" id="565">565</a>
 <a href="#566" id="566">566</a>
 <a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
@@ -785,7 +802,7 @@
         }
     }
 
-    <span class="kw">fn </span>determine_stateful_colors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; ButtonColors {
+    <span class="kw">fn </span>determine_stateful_colors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; ButtonColors {
         <span class="kw">let </span>kind = <span class="self">self</span>.kind.get_tracked(context);
         <span class="kw">let </span>visual_state = <span class="self">self</span>.visual_style(context);
 
@@ -793,6 +810,10 @@
             enabled: !<span class="macro">matches!</span>(visual_state, VisualState::Disabled),
             kind,
         };
+
+        <span class="kw">if </span>!<span class="self">self</span>.cached_state.enabled {
+            context.blur();
+        }
 
         <span class="kw">if </span>context.is_default() {
             kind.colors_for_default(visual_state, context)
@@ -805,7 +826,7 @@
         }
     }
 
-    <span class="kw">fn </span>update_colors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;, immediate: bool) {
+    <span class="kw">fn </span>update_colors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;, immediate: bool) {
         <span class="kw">let </span>new_style = <span class="self">self</span>.determine_stateful_colors(context);
 
         <span class="kw">match </span>(immediate, <span class="kw-2">&amp;</span><span class="self">self</span>.active_colors) {
@@ -828,7 +849,7 @@
         }
     }
 
-    <span class="kw">fn </span>current_style(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; ButtonColors {
+    <span class="kw">fn </span>current_style(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; ButtonColors {
         <span class="kw">if </span><span class="self">self</span>.active_colors.is_none() {
             <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
         }
@@ -1030,14 +1051,27 @@
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>padding = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_upx(context.gfx.scale());
+        <span class="kw">let </span>double_padding = padding * <span class="number">2</span>;
         <span class="kw">let </span>mounted = <span class="self">self</span>.content.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
+        <span class="kw">let </span>available_space = Size::new(
+            available_space.width - double_padding,
+            available_space.height - double_padding,
+        );
         <span class="kw">let </span>size = context.for_other(<span class="kw-2">&amp;</span>mounted).layout(available_space);
+        <span class="kw">let </span>size = Size::new(
+            available_space
+                .width
+                .fit_measured(size.width, context.gfx.scale()),
+            available_space
+                .height
+                .fit_measured(size.height, context.gfx.scale()),
+        );
         context.set_child_layout(
             <span class="kw-2">&amp;</span>mounted,
             Rect::new(Point::new(padding, padding), size).into_signed(),
         );
-        size + padding * <span class="number">2
-    </span>}
+        size + double_padding
+    }
 
     <span class="kw">fn </span>keyboard_input(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
