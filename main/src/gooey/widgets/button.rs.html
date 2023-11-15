@@ -583,7 +583,9 @@
 <span class="kw">use </span>kludgine::Color;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, AnimationTarget, LinearInterpolate, Spawn};
-<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext, WidgetContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{
+    AsEventContext, EventContext, GraphicsContext, LayoutContext, WidgetCacheKey, WidgetContext,
+};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
     AutoFocusableControls, Easing, HighlightColor, IntrinsicPadding, OpaqueWidgetColor,
     OutlineColor, SurfaceColor, TextColor,
@@ -610,7 +612,7 @@
 
 <span class="attr">#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 </span><span class="kw">struct </span>CacheState {
-    enabled: bool,
+    key: WidgetCacheKey,
     kind: ButtonKind,
 }
 
@@ -703,7 +705,7 @@
             content: content.widget_ref(),
             on_click: <span class="prelude-val">None</span>,
             cached_state: CacheState {
-                enabled: <span class="bool-val">true</span>,
+                key: WidgetCacheKey::default(),
                 kind: ButtonKind::default(),
             },
             buttons_pressed: <span class="number">0</span>,
@@ -787,11 +789,12 @@
         <span class="kw">let </span>visual_state = <span class="self">Self</span>::visual_style(context);
 
         <span class="self">self</span>.cached_state = CacheState {
-            enabled: !<span class="macro">matches!</span>(visual_state, VisualState::Disabled),
+            key: context.cache_key(),
             kind,
         };
 
-        <span class="kw">if </span>!<span class="self">self</span>.cached_state.enabled {
+        <span class="comment">// TODO this should be genericized to happen automatically.
+        </span><span class="kw">if </span>!context.enabled() {
             context.blur();
         }
 
@@ -905,12 +908,9 @@
 <span class="kw">impl </span>Widget <span class="kw">for </span>Button {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="attr">#![allow(clippy::similar_names)]
-        </span><span class="kw">let </span>enabled = context.enabled();
 
-        <span class="comment">// TODO This seems ugly. It needs context, so it can&#39;t be moved into the
-        // dynamic system.
         </span><span class="kw">let </span>current_style = <span class="self">self</span>.kind.get_tracked(context);
-        <span class="kw">if </span><span class="self">self</span>.cached_state.enabled != enabled || <span class="self">self</span>.cached_state.kind != current_style {
+        <span class="kw">if </span><span class="self">self</span>.cached_state.key != context.cache_key() || <span class="self">self</span>.cached_state.kind != current_style {
             <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
         }
 

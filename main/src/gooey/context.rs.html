@@ -1207,6 +1207,38 @@
 <a href="#1207" id="1207">1207</a>
 <a href="#1208" id="1208">1208</a>
 <a href="#1209" id="1209">1209</a>
+<a href="#1210" id="1210">1210</a>
+<a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
+<a href="#1219" id="1219">1219</a>
+<a href="#1220" id="1220">1220</a>
+<a href="#1221" id="1221">1221</a>
+<a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
+<a href="#1225" id="1225">1225</a>
+<a href="#1226" id="1226">1226</a>
+<a href="#1227" id="1227">1227</a>
+<a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
+<a href="#1231" id="1231">1231</a>
+<a href="#1232" id="1232">1232</a>
+<a href="#1233" id="1233">1233</a>
+<a href="#1234" id="1234">1234</a>
+<a href="#1235" id="1235">1235</a>
+<a href="#1236" id="1236">1236</a>
+<a href="#1237" id="1237">1237</a>
+<a href="#1238" id="1238">1238</a>
+<a href="#1239" id="1239">1239</a>
+<a href="#1240" id="1240">1240</a>
+<a href="#1241" id="1241">1241</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -1915,9 +1947,8 @@
     window: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt;,
     theme: Cow&lt;<span class="lifetime">&#39;context</span>, ThemePair&gt;,
     pending_state: PendingState&lt;<span class="lifetime">&#39;context</span>&gt;,
-    theme_mode: ThemeMode,
     effective_styles: Styles,
-    enabled: bool,
+    cache: WidgetCacheKey,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; WidgetContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; {
@@ -1945,11 +1976,14 @@
                 focus_is_advancing: <span class="bool-val">false</span>,
             }),
             effective_styles: current_node.effective_styles(),
-            enabled,
+            cache: WidgetCacheKey {
+                theme_mode,
+                enabled,
+                invalidation: current_node.invalidation(),
+            },
             current_node,
             redraw_status,
             theme: Cow::Borrowed(theme),
-            theme_mode,
             window,
         }
     }
@@ -1962,9 +1996,8 @@
             window: <span class="kw-2">&amp;mut *</span><span class="self">self</span>.window,
             theme: Cow::Borrowed(<span class="self">self</span>.theme.as_ref()),
             pending_state: <span class="self">self</span>.pending_state.borrowed(),
-            theme_mode: <span class="self">self</span>.theme_mode,
+            cache: <span class="self">self</span>.cache,
             effective_styles: <span class="self">self</span>.effective_styles.clone(),
-            enabled: <span class="self">self</span>.enabled,
         }
     }
 
@@ -1987,17 +2020,20 @@
             <span class="kw">let </span>theme_mode = <span class="kw">if let </span><span class="prelude-val">Some</span>(mode) = theme_mode {
                 mode.get_tracked(<span class="self">self</span>)
             } <span class="kw">else </span>{
-                <span class="self">self</span>.theme_mode
+                <span class="self">self</span>.cache.theme_mode
             };
             WidgetContext {
                 effective_styles,
-                enabled: current_node.enabled(<span class="kw-2">&amp;</span><span class="self">self</span>.handle()),
+                cache: WidgetCacheKey {
+                    theme_mode,
+                    enabled: current_node.enabled(<span class="kw-2">&amp;</span><span class="self">self</span>.handle()),
+                    invalidation: current_node.invalidation(),
+                },
                 current_node,
                 redraw_status: <span class="self">self</span>.redraw_status,
                 window: <span class="kw-2">&amp;mut *</span><span class="self">self</span>.window,
                 theme,
                 pending_state: <span class="self">self</span>.pending_state.borrowed(),
-                theme_mode,
             }
         })
     }
@@ -2005,7 +2041,7 @@
     <span class="doccomment">/// Returns true if this widget is enabled.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub const fn </span>enabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.enabled
+        <span class="self">self</span>.cache.enabled
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
@@ -2213,7 +2249,7 @@
     <span class="doccomment">/// Returns the current theme in either light or dark mode.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>theme(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Theme {
-        <span class="kw">match </span><span class="self">self</span>.theme_mode {
+        <span class="kw">match </span><span class="self">self</span>.cache.theme_mode {
             ThemeMode::Light =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.light,
             ThemeMode::Dark =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.dark,
         }
@@ -2222,10 +2258,17 @@
     <span class="doccomment">/// Returns the opposite theme of [`Self::theme()`].
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>inverse_theme(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Theme {
-        <span class="kw">match </span><span class="self">self</span>.theme_mode {
+        <span class="kw">match </span><span class="self">self</span>.cache.theme_mode {
             ThemeMode::Light =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.dark,
             ThemeMode::Dark =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.theme.light,
         }
+    }
+
+    <span class="doccomment">/// Returns a key that can be checked to see if a widget should invalidate
+    /// caches it stores.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>cache_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; WidgetCacheKey {
+        <span class="self">self</span>.cache
     }
 }
 
@@ -2414,6 +2457,27 @@
 
     <span class="kw">fn </span>map(<span class="self">self</span>, map: <span class="kw">impl </span>FnOnce(ManagedWidget) -&gt; T) -&gt; <span class="self">Self</span>::Result {
         map(<span class="self">self</span>)
+    }
+}
+
+<span class="doccomment">/// An type that contains information about the state of a widget.
+///
+/// This value can be stored and compared in future widget events. If the cache
+/// keys are not equal, the widget should clear all caches.
+</span><span class="attr">#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+</span><span class="kw">pub struct </span>WidgetCacheKey {
+    theme_mode: ThemeMode,
+    enabled: bool,
+    invalidation: u64,
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>WidgetCacheKey {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            theme_mode: ThemeMode::default().inverse(),
+            enabled: <span class="bool-val">false</span>,
+            invalidation: u64::MAX,
+        }
     }
 }
 </code></pre></div></section></main></body></html>
