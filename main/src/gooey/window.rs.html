@@ -1156,6 +1156,9 @@
 <a href="#1156" id="1156">1156</a>
 <a href="#1157" id="1157">1157</a>
 <a href="#1158" id="1158">1158</a>
+<a href="#1159" id="1159">1159</a>
+<a href="#1160" id="1160">1160</a>
+<a href="#1161" id="1161">1161</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
@@ -2026,7 +2029,9 @@
                     ),
                     kludgine,
                 );
-                <span class="kw">let </span>last_rendered_at = context.last_layout().expect(<span class="string">&quot;passed hit test&quot;</span>);
+                <span class="kw">let </span><span class="prelude-val">Some</span>(last_rendered_at) = context.last_layout() <span class="kw">else </span>{
+                    <span class="kw">continue</span>;
+                };
                 context.mouse_drag(location - last_rendered_at.origin, device_id, <span class="kw-2">*</span>button);
             }
         } <span class="kw">else </span>{
@@ -2044,11 +2049,10 @@
             <span class="self">self</span>.mouse_state.widget = <span class="prelude-val">None</span>;
             <span class="kw">for </span>widget <span class="kw">in </span><span class="self">self</span>.root.tree.widgets_at_point(location) {
                 <span class="kw">let </span><span class="kw-2">mut </span>widget_context = context.for_other(<span class="kw-2">&amp;</span>widget);
-                <span class="kw">let </span>relative = location
-                    - widget_context
-                        .last_layout()
-                        .expect(<span class="string">&quot;passed hit test&quot;</span>)
-                        .origin;
+                <span class="kw">let </span><span class="prelude-val">Some</span>(widget_layout) = widget_context.last_layout() <span class="kw">else </span>{
+                    <span class="kw">continue</span>;
+                };
+                <span class="kw">let </span>relative = location - widget_layout.origin;
 
                 <span class="kw">if </span>widget_context.hit_test(relative) {
                     widget_context.hover(relative);
@@ -2128,8 +2132,10 @@
                             kludgine,
                         ),
                         |context| {
-                            <span class="kw">let </span>relative =
-                                <span class="kw-2">*</span>location - context.last_layout().expect(<span class="string">&quot;passed hit test&quot;</span>).origin;
+                            <span class="kw">let </span><span class="prelude-val">Some</span>(layout) = context.last_layout() <span class="kw">else </span>{
+                                <span class="kw">return </span>IGNORED;
+                            };
+                            <span class="kw">let </span>relative = <span class="kw-2">*</span>location - layout.origin;
                             context.mouse_down(relative, device_id, button)
                         },
                     ) {
