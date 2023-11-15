@@ -601,6 +601,12 @@
 <a href="#601" id="601">601</a>
 <a href="#602" id="602">602</a>
 <a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::sync::{Arc, Mutex};
 
@@ -834,24 +840,27 @@
         <span class="kw">let </span>hovered = new_hover
             .map(|new_hover| data.widget_hierarchy(new_hover.node_id, <span class="self">self</span>))
             .unwrap_or_default();
-        <span class="kw">let </span>unhovered = <span class="kw">match </span>data.update_tracked_widget(new_hover, <span class="self">self</span>, |data| <span class="kw-2">&amp;mut </span>data.hover) {
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(old_hover)) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>old_hovered = data.widget_hierarchy(old_hover.node_id, <span class="self">self</span>);
-                <span class="comment">// For any widgets that were shared, remove them, as they don&#39;t
-                // need to have their events fired again.
-                </span><span class="kw">let </span><span class="kw-2">mut </span>new_index = <span class="number">0</span>;
-                <span class="kw">while </span>!old_hovered.is_empty() &amp;&amp; old_hovered.get(<span class="number">0</span>) == hovered.get(new_index) {
-                    old_hovered.remove(<span class="number">0</span>);
-                    new_index += <span class="number">1</span>;
+        <span class="kw">let </span>unhovered =
+            <span class="kw">match </span>data.update_tracked_widget(new_hover.map(ManagedWidget::id), <span class="self">self</span>, |data| {
+                <span class="kw-2">&amp;mut </span>data.hover
+            }) {
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(old_hover)) =&gt; {
+                    <span class="kw">let </span><span class="kw-2">mut </span>old_hovered = data.widget_hierarchy(old_hover.node_id, <span class="self">self</span>);
+                    <span class="comment">// For any widgets that were shared, remove them, as they don&#39;t
+                    // need to have their events fired again.
+                    </span><span class="kw">let </span><span class="kw-2">mut </span>new_index = <span class="number">0</span>;
+                    <span class="kw">while </span>!old_hovered.is_empty() &amp;&amp; old_hovered.get(<span class="number">0</span>) == hovered.get(new_index) {
+                        old_hovered.remove(<span class="number">0</span>);
+                        new_index += <span class="number">1</span>;
+                    }
+                    old_hovered
                 }
-                old_hovered
-            }
-            <span class="kw">_ </span>=&gt; Vec::new(),
-        };
+                <span class="kw">_ </span>=&gt; Vec::new(),
+            };
         HoverResults { unhovered, hovered }
     }
 
-    <span class="kw">pub fn </span>focus(<span class="kw-2">&amp;</span><span class="self">self</span>, new_focus: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ManagedWidget&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;, ()&gt; {
+    <span class="kw">pub fn </span>focus(<span class="kw-2">&amp;</span><span class="self">self</span>, new_focus: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;, ()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         data.update_tracked_widget(new_focus, <span class="self">self</span>, |data| <span class="kw-2">&amp;mut </span>data.focus)
     }
@@ -867,7 +876,9 @@
         new_active: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ManagedWidget&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;, ()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().ignore_poison();
-        data.update_tracked_widget(new_active, <span class="self">self</span>, |data| <span class="kw-2">&amp;mut </span>data.active)
+        data.update_tracked_widget(new_active.map(ManagedWidget::id), <span class="self">self</span>, |data| {
+            <span class="kw-2">&amp;mut </span>data.active
+        })
     }
 
     <span class="kw">pub fn </span>widget(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
@@ -937,7 +948,7 @@
         <span class="self">self</span>.data.lock().ignore_poison().focus
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>widgets_at_point(<span class="kw-2">&amp;</span><span class="self">self</span>, point: Point&lt;Px&gt;) -&gt; Vec&lt;ManagedWidget&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>widgets_under_point(<span class="kw-2">&amp;</span><span class="self">self</span>, point: Point&lt;Px&gt;) -&gt; Vec&lt;ManagedWidget&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         data.render_info.widgets_under_point(point, <span class="kw-2">&amp;</span>data, <span class="self">self</span>)
     }
@@ -1092,12 +1103,13 @@
 
     <span class="kw">fn </span>update_tracked_widget(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        new_widget: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ManagedWidget&gt;,
+        new_widget: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
         tree: <span class="kw-2">&amp;</span>Tree,
         property: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span><span class="self">Self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;LotId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;, ()&gt; {
+        <span class="kw">let </span>new_widget = new_widget.and_then(|w| <span class="self">self</span>.widget_from_id(w, tree));
         <span class="kw">match </span>(
-            mem::replace(property(<span class="self">self</span>), new_widget.map(|w| w.node_id)),
+            mem::replace(property(<span class="self">self</span>), new_widget.as_ref().map(|w| w.node_id)),
             new_widget,
         ) {
             (<span class="prelude-val">Some</span>(old_widget), <span class="prelude-val">Some</span>(new_widget)) <span class="kw">if </span>old_widget == new_widget.node_id =&gt; <span class="prelude-val">Err</span>(()),

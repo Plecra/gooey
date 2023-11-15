@@ -567,11 +567,6 @@
 <a href="#567" id="567">567</a>
 <a href="#568" id="568">568</a>
 <a href="#569" id="569">569</a>
-<a href="#570" id="570">570</a>
-<a href="#571" id="571">571</a>
-<a href="#572" id="572">572</a>
-<a href="#573" id="573">573</a>
-<a href="#574" id="574">574</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
@@ -792,11 +787,6 @@
             key: context.cache_key(),
             kind,
         };
-
-        <span class="comment">// TODO this should be genericized to happen automatically.
-        </span><span class="kw">if </span>!context.enabled() {
-            context.blur();
-        }
 
         <span class="kw">if </span>context.is_default() {
             kind.colors_for_default(visual_state, context)
