@@ -131,6 +131,10 @@
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 
 </span><span class="kw">use </span>kludgine::figures::units::Lp;
@@ -229,6 +233,8 @@
         </span>SurfaceColor(Color, <span class="string">&quot;surface_color&quot;</span>, .surface.color)
         <span class="doccomment">/// The [`Color`] to use when rendering text.
         </span>TextColor(Color, <span class="string">&quot;text_color&quot;</span>, .surface.on_color)
+        <span class="doccomment">/// The [`Color`] to use when rendering text in a more subdued tone.
+        </span>TextColorVariant(Color, <span class="string">&quot;text_color_variant&quot;</span>, .surface.on_color_variant)
         <span class="doccomment">/// A [`Color`] to be used as a highlight color.
         </span>HighlightColor(Color,<span class="string">&quot;highlight_color&quot;</span>,.primary.color.with_alpha(<span class="number">128</span>))
         <span class="doccomment">/// Intrinsic, uniform padding for a widget.
@@ -255,6 +261,8 @@
         </span>AutoFocusableControls(FocusableWidgets, <span class="string">&quot;focus&quot;</span>, FocusableWidgets::default())
         <span class="doccomment">/// A [`Color`] to be used as the background color of a widget.
         </span>WidgetBackground(Color, <span class="string">&quot;widget_backgrond_color&quot;</span>, Color::CLEAR_WHITE)
+        <span class="doccomment">/// A [`Color`] to be used to accent a widget.
+        </span>WidgetAccentColor(Color, <span class="string">&quot;widget_accent_color&quot;</span>, .primary.color)
         <span class="doccomment">/// A [`Color`] to be used as an outline color.
         </span>OutlineColor(Color, <span class="string">&quot;outline_color&quot;</span>, .surface.outline)
         <span class="doccomment">/// A [`Color`] to be used as an outline color.

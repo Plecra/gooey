@@ -1443,6 +1443,28 @@
 <a href="#1443" id="1443">1443</a>
 <a href="#1444" id="1444">1444</a>
 <a href="#1445" id="1445">1445</a>
+<a href="#1446" id="1446">1446</a>
+<a href="#1447" id="1447">1447</a>
+<a href="#1448" id="1448">1448</a>
+<a href="#1449" id="1449">1449</a>
+<a href="#1450" id="1450">1450</a>
+<a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
+<a href="#1453" id="1453">1453</a>
+<a href="#1454" id="1454">1454</a>
+<a href="#1455" id="1455">1455</a>
+<a href="#1456" id="1456">1456</a>
+<a href="#1457" id="1457">1457</a>
+<a href="#1458" id="1458">1458</a>
+<a href="#1459" id="1459">1459</a>
+<a href="#1460" id="1460">1460</a>
+<a href="#1461" id="1461">1461</a>
+<a href="#1462" id="1462">1462</a>
+<a href="#1463" id="1463">1463</a>
+<a href="#1464" id="1464">1464</a>
+<a href="#1465" id="1465">1465</a>
+<a href="#1466" id="1466">1466</a>
+<a href="#1467" id="1467">1467</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1673,6 +1695,18 @@
     <span class="doccomment">/// Returns the child widget.
     </span><span class="kw">fn </span>child_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef;
 
+    <span class="doccomment">/// Draws the background of the widget.
+    ///
+    /// This is invoked before the wrapped widget is drawn.
+    </span><span class="attr">#[allow(unused_variables)]
+    </span><span class="kw">fn </span>redraw_background(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {}
+
+    <span class="doccomment">/// Draws the foreground of the widget.
+    ///
+    /// This is invoked after the wrapped widget is drawn.
+    </span><span class="attr">#[allow(unused_variables)]
+    </span><span class="kw">fn </span>redraw_foreground(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {}
+
     <span class="doccomment">/// Returns the rectangle that the child widget should occupy given
     /// `available_space`.
     </span><span class="attr">#[allow(unused_variables)]
@@ -1711,7 +1745,7 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; WrappedLayout {
-        Size::&lt;UPx&gt;::new(
+        Size::new(
             available_space
                 .width
                 .fit_measured(size.width, context.gfx.scale()),
@@ -1864,8 +1898,12 @@
             context.gfx.fill(color);
         }
 
+        <span class="self">self</span>.redraw_background(context);
+
         <span class="kw">let </span>child = <span class="self">self</span>.child_mut().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         context.for_other(<span class="kw-2">&amp;</span>child).redraw();
+
+        <span class="self">self</span>.redraw_foreground(context);
     }
 
     <span class="kw">fn </span>layout(
@@ -2072,9 +2110,12 @@
 
     <span class="doccomment">/// Resizes `self` to `width`.
     ///
-    /// `width` can be an individual
-    /// [`Dimension`]/[`Px`]/[`Lp`](crate::kludgine::figures::units::Lp) or a
-    /// range.
+    /// `width` can be an any of:
+    ///
+    /// - [`Dimension`]
+    /// - [`Px`]
+    /// - [`Lp`](crate::kludgine::figures::units::Lp)
+    /// - A range of any fo the above.
     </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>width(<span class="self">self</span>, width: <span class="kw">impl </span>Into&lt;DimensionRange&gt;) -&gt; Resize {
         Resize::from_width(width, <span class="self">self</span>)
@@ -2082,9 +2123,12 @@
 
     <span class="doccomment">/// Resizes `self` to `height`.
     ///
-    /// `height` can be an individual
-    /// [`Dimension`]/[`Px`]/[`Lp`](crate::kludgine::figures::units::Lp) or a
-    /// range.
+    /// `height` can be an any of:
+    ///
+    /// - [`Dimension`]
+    /// - [`Px`]
+    /// - [`Lp`](crate::kludgine::figures::units::Lp)
+    /// - A range of any fo the above.
     </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>height(<span class="self">self</span>, height: <span class="kw">impl </span>Into&lt;DimensionRange&gt;) -&gt; Resize {
         Resize::from_height(height, <span class="self">self</span>)

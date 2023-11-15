@@ -1674,7 +1674,7 @@
     <span class="doccomment">/// Strokes an outline around this widget&#39;s contents.
     </span><span class="kw">pub fn </span>stroke_outline&lt;Unit&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color, options: StrokeOptions&lt;Unit&gt;)
     <span class="kw">where
-        </span>Unit: ScreenScale&lt;Px = Px, Lp = Lp&gt;,
+        </span>Unit: ScreenScale&lt;Px = Px, Lp = Lp, UPx = UPx&gt;,
     {
         <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
         <span class="kw">let </span>focus_ring =

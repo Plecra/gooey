@@ -207,14 +207,10 @@
 <a href="#207" id="207">207</a>
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span>kludgine::figures::units::UPx;
-<span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size};
+<span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, Point, Rect, ScreenScale, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Edges, FlexibleDimension};
@@ -338,15 +334,11 @@
     <span class="kw">fn </span>new(scale: Fraction, a: FlexibleDimension, b: FlexibleDimension) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>a = <span class="kw">match </span>a {
             FlexibleDimension::Auto =&gt; <span class="prelude-val">None</span>,
-            FlexibleDimension::Dimension(dimension) =&gt; {
-                <span class="prelude-val">Some</span>(dimension.into_px(scale).into_unsigned())
-            }
+            FlexibleDimension::Dimension(dimension) =&gt; <span class="prelude-val">Some</span>(dimension.into_upx(scale)),
         };
         <span class="kw">let </span>b = <span class="kw">match </span>b {
             FlexibleDimension::Auto =&gt; <span class="prelude-val">None</span>,
-            FlexibleDimension::Dimension(dimension) =&gt; {
-                <span class="prelude-val">Some</span>(dimension.into_px(scale).into_unsigned())
-            }
+            FlexibleDimension::Dimension(dimension) =&gt; <span class="prelude-val">Some</span>(dimension.into_upx(scale)),
         };
         <span class="self">Self </span>{ a, b }
     }

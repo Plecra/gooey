@@ -135,9 +135,7 @@
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::UPx;
-<span class="kw">use </span>kludgine::figures::{IntoSigned, Size};
+</pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::{IntoSigned, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrappedLayout, WrapperWidget};
@@ -271,7 +269,7 @@
             ),
         };
 
-        Size::&lt;UPx&gt;::new(width, height).into_signed().into()
+        Size::new(width, height).into_signed().into()
     }
 }
 </code></pre></div></section></main></body></html>

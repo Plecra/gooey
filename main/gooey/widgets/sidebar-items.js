@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["button","container","label","scroll","slider","stack"],"struct":["Align","Canvas","Expand","Input","Resize","Space","Style","Switcher","Themed","ThemedMode","TileMap"]};
+window.SIDEBAR_ITEMS = {"mod":["button","checkbox","container","label","scroll","slider","stack"],"struct":["Align","Canvas","Expand","Input","Resize","Space","Style","Switcher","Themed","ThemedMode","TileMap"]};

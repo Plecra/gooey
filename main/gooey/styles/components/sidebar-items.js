@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["AutoFocusableControls","DisabledOutlineColor","Easing","EasingIn","EasingOut","HighlightColor","IntrinsicPadding","LayoutOrder","LineHeight","OpaqueWidgetColor","OutlineColor","SurfaceColor","TextColor","TextSize","WidgetBackground"]};
+window.SIDEBAR_ITEMS = {"struct":["AutoFocusableControls","DisabledOutlineColor","Easing","EasingIn","EasingOut","HighlightColor","IntrinsicPadding","LayoutOrder","LineHeight","OpaqueWidgetColor","OutlineColor","SurfaceColor","TextColor","TextColorVariant","TextSize","WidgetAccentColor","WidgetBackground"]};

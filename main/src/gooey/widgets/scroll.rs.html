@@ -321,7 +321,6 @@
 <a href="#321" id="321">321</a>
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
 </span><span class="kw">use </span>std::time::Duration;
 
@@ -496,8 +495,7 @@
         <span class="kw">let </span>(<span class="kw-2">mut </span>scroll, current_max_scroll) = <span class="self">self</span>.constrain_scroll();
 
         <span class="kw">let </span>control_size =
-            Size::&lt;UPx&gt;::new(available_space.width.max(), available_space.height.max())
-                .into_signed();
+            Size::new(available_space.width.max(), available_space.height.max()).into_signed();
         <span class="kw">let </span>max_extents = Size::new(
             <span class="kw">if </span><span class="self">self</span>.enabled.x {
                 ConstraintLimit::ClippedAfter((control_size.width).into_unsigned())

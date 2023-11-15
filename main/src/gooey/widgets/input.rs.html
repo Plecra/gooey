@@ -622,9 +622,6 @@
 <a href="#622" id="622">622</a>
 <a href="#623" id="623">623</a>
 <a href="#624" id="624">624</a>
-<a href="#625" id="625">625</a>
-<a href="#626" id="626">626</a>
-<a href="#627" id="627">627</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -978,10 +975,7 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>padding = context
-            .get(<span class="kw-2">&amp;</span>IntrinsicPadding)
-            .into_px(context.gfx.scale())
-            .into_unsigned();
+        <span class="kw">let </span>padding = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_upx(context.gfx.scale());
         <span class="kw">if </span><span class="self">self</span>.needs_to_select_all {
             <span class="self">self</span>.needs_to_select_all = <span class="bool-val">false</span>;
             <span class="self">self</span>.select_all();

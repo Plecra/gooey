@@ -365,10 +365,6 @@
 <a href="#365" id="365">365</a>
 <a href="#366" id="366">366</a>
 <a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that allows a user to &quot;slide&quot; between values.
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -376,15 +372,15 @@
 <span class="kw">use </span>kludgine::app::winit::event::{DeviceId, MouseButton};
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{
-    FloatConversion, FromComponents, IntoComponents, IntoSigned, IntoUnsigned, Point, Ranged, Rect,
-    ScreenScale, Size,
+    FloatConversion, FromComponents, IntoComponents, IntoSigned, Point, Ranged, Rect, ScreenScale,
+    Size,
 };
 <span class="kw">use </span>kludgine::shapes::Shape;
 <span class="kw">use </span>kludgine::{Color, Origin};
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{LinearInterpolate, PercentBetween};
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, LayoutContext};
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::OpaqueWidgetColor;
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{OpaqueWidgetColor, WidgetAccentColor};
 <span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoDynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, Widget, HANDLED};
@@ -594,14 +590,10 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="self">self</span>.knob_size = context
-            .get(<span class="kw-2">&amp;</span>KnobSize)
-            .into_px(context.gfx.scale())
-            .into_unsigned();
+        <span class="self">self</span>.knob_size = context.get(<span class="kw-2">&amp;</span>KnobSize).into_upx(context.gfx.scale());
         <span class="kw">let </span>minimum_size = context
             .get(<span class="kw-2">&amp;</span>MinimumSliderSize)
-            .into_px(context.gfx.scale())
-            .into_unsigned();
+            .into_upx(context.gfx.scale());
 
         <span class="kw">match </span>(available_space.width, available_space.height) {
             (ConstraintLimit::Known(width), ConstraintLimit::Known(height)) =&gt; {
@@ -692,8 +684,8 @@
         <span class="doccomment">/// The minimum length of the slidable dimension.
         </span>MinimumSliderSize(Dimension, <span class="string">&quot;minimum_size&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>KnobSize) * <span class="number">2</span>)
         <span class="doccomment">/// The color of the draggable portion of the knob.
-        </span>KnobColor(Color, <span class="string">&quot;knob_color&quot;</span>, .primary.color) <span class="comment">// TODO make this pull from a component multiple widgets can share
-        </span><span class="doccomment">/// The color of the track that the knob rests on.
+        </span>KnobColor(Color, <span class="string">&quot;knob_color&quot;</span>, @WidgetAccentColor)
+        <span class="doccomment">/// The color of the track that the knob rests on.
         </span>TrackColor(Color,<span class="string">&quot;track_color&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>KnobColor))
         <span class="doccomment">/// The color of the track that the knob rests on.
         </span>InactiveTrackColor(Color, <span class="string">&quot;inactive_track_color&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>OpaqueWidgetColor))

@@ -128,8 +128,10 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::units::UPx;
-<span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, ScreenScale, Size};
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, ScreenScale, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::DimensionRange;
@@ -178,9 +180,12 @@
 
     <span class="doccomment">/// Resizes `self` to `width`.
     ///
-    /// `width` can be an individual
-    /// [`Dimension`]/[`Px`]/[`Lp`](crate::kludgine::figures::units::Lp) or a
-    /// range.
+    /// `width` can be an any of:
+    ///
+    /// - [`Dimension`](crate::styles::Dimension)
+    /// - [`Px`](crate::kludgine::figures::units::Px)
+    /// - [`Lp`](crate::kludgine::figures::units::Lp)
+    /// - A range of any fo the above.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>width(<span class="kw-2">mut </span><span class="self">self</span>, width: <span class="kw">impl </span>Into&lt;DimensionRange&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.width = width.into();
@@ -189,9 +194,12 @@
 
     <span class="doccomment">/// Resizes `self` to `height`.
     ///
-    /// `width` can be an individual
-    /// [`Dimension`]/[`Px`]/[`Lp`](crate::kludgine::figures::units::Lp) or a
-    /// range.
+    /// `height` can be an any of:
+    ///
+    /// - [`Dimension`](crate::styles::Dimension)
+    /// - [`Px`](crate::kludgine::figures::units::Px)
+    /// - [`Lp`](crate::kludgine::figures::units::Lp)
+    /// - A range of any fo the above.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>height(<span class="kw-2">mut </span><span class="self">self</span>, height: <span class="kw">impl </span>Into&lt;DimensionRange&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.height = height.into();
@@ -224,8 +232,8 @@
             (<span class="self">self</span>.width.exact_dimension(), <span class="self">self</span>.height.exact_dimension())
         {
             Size::new(
-                width.into_px(context.gfx.scale()).into_unsigned(),
-                height.into_px(context.gfx.scale()).into_unsigned(),
+                width.into_upx(context.gfx.scale()),
+                height.into_upx(context.gfx.scale()),
             )
         } <span class="kw">else </span>{
             <span class="kw">let </span>available_space = Size::new(
@@ -234,7 +242,7 @@
             );
             context.for_other(<span class="kw-2">&amp;</span>child).layout(available_space)
         };
-        Size::&lt;UPx&gt;::new(
+        Size::new(
             <span class="self">self</span>.width.clamp(size.width, context.gfx.scale()),
             <span class="self">self</span>.height.clamp(size.height, context.gfx.scale()),
         )
@@ -251,9 +259,7 @@
     <span class="kw">match </span>constraint {
         ConstraintLimit::Known(size) =&gt; ConstraintLimit::Known(range.clamp(size, scale)),
         ConstraintLimit::ClippedAfter(clipped_after) =&gt; <span class="kw">match </span>(range.minimum(), range.maximum()) {
-            (<span class="prelude-val">Some</span>(min), <span class="prelude-val">Some</span>(max)) <span class="kw">if </span>min == max =&gt; {
-                ConstraintLimit::Known(min.into_px(scale).into_unsigned())
-            }
+            (<span class="prelude-val">Some</span>(min), <span class="prelude-val">Some</span>(max)) <span class="kw">if </span>min == max =&gt; ConstraintLimit::Known(min.into_upx(scale)),
             <span class="kw">_ </span>=&gt; ConstraintLimit::ClippedAfter(range.clamp(clipped_after, scale)),
         },
     }

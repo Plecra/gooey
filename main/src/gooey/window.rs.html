@@ -1156,9 +1156,7 @@
 <a href="#1156" id="1156">1156</a>
 <a href="#1157" id="1157">1157</a>
 <a href="#1158" id="1158">1158</a>
-<a href="#1159" id="1159">1159</a>
-</pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`](crate::widget::Widget) inside of a desktop
-//! window.
+</pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::ffi::OsStr;
@@ -1541,14 +1539,14 @@
                     .map_or(Px::MAX, |height| height.into_px(graphics.scale()));
 
                 <span class="kw">let </span>new_min_size = (min_width &gt; <span class="number">0 </span>|| min_height &gt; <span class="number">0</span>)
-                    .then_some(Size::&lt;Px&gt;::new(min_width, min_height).into_unsigned());
+                    .then_some(Size::new(min_width, min_height).into_unsigned());
 
                 <span class="kw">if </span>new_min_size != <span class="self">self</span>.min_inner_size &amp;&amp; resizable {
                     window.set_min_inner_size(new_min_size);
                     <span class="self">self</span>.min_inner_size = new_min_size;
                 }
                 <span class="kw">let </span>new_max_size = (max_width &gt; <span class="number">0 </span>|| max_height &gt; <span class="number">0</span>)
-                    .then_some(Size::&lt;Px&gt;::new(max_width, max_height).into_unsigned());
+                    .then_some(Size::new(max_width, max_height).into_unsigned());
 
                 <span class="kw">if </span>new_max_size != <span class="self">self</span>.max_inner_size &amp;&amp; resizable {
                     window.set_max_inner_size(new_max_size);
