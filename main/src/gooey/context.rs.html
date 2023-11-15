@@ -1271,6 +1271,10 @@
 <a href="#1271" id="1271">1271</a>
 <a href="#1272" id="1272">1272</a>
 <a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a>
+<a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -1501,10 +1505,14 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>focus_changes = <span class="number">0</span>;
         <span class="kw">while </span>focus_changes &lt; MAX_ITERS {
-            <span class="kw">let </span>focus = <span class="self">self
+            <span class="kw">let </span>focus = <span class="kw">match </span><span class="self">self
                 </span>.pending_state
                 .focus
-                .and_then(|w| <span class="self">self</span>.current_node.tree.widget(w));
+                .and_then(|w| <span class="self">self</span>.current_node.tree.widget(w))
+            {
+                <span class="prelude-val">Some</span>(focus) =&gt; <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>focus).enabled().then_some(focus),
+                <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
+            };
             <span class="kw">if </span><span class="self">self</span>.current_node.tree.focused_widget() == focus.as_ref().map(|w| w.node_id) {
                 <span class="kw">break</span>;
             }
@@ -1650,11 +1658,11 @@
                 <span class="kw">break</span>;
             }
 
-            <span class="kw">if </span>child
-                .lock()
-                .as_widget()
-                .accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>child))
-            {
+            <span class="kw">let </span><span class="kw-2">mut </span>child_context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>child);
+            <span class="kw">let </span>accept_focus = child_context.enabled()
+                &amp;&amp; child.lock().as_widget().accept_focus(<span class="kw-2">&amp;mut </span>child_context);
+            drop(child_context);
+            <span class="kw">if </span>accept_focus {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(child.id());
             } <span class="kw">else if let </span><span class="prelude-val">Some</span>(next_focus) = <span class="self">self</span>.widget().explicit_focus_target(advance) {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(next_focus.id());
