@@ -1271,10 +1271,6 @@
 <a href="#1271" id="1271">1271</a>
 <a href="#1272" id="1272">1272</a>
 <a href="#1273" id="1273">1273</a>
-<a href="#1274" id="1274">1274</a>
-<a href="#1275" id="1275">1275</a>
-<a href="#1276" id="1276">1276</a>
-<a href="#1277" id="1277">1277</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -2053,7 +2049,6 @@
             cache: WidgetCacheKey {
                 theme_mode,
                 enabled,
-                invalidation: current_node.invalidation(),
             },
             cursor,
             current_node,
@@ -2103,7 +2098,6 @@
                 cache: WidgetCacheKey {
                     theme_mode,
                     enabled: current_node.enabled(<span class="kw-2">&amp;</span><span class="self">self</span>.handle()),
-                    invalidation: current_node.invalidation(),
                 },
                 current_node,
                 redraw_status: <span class="self">self</span>.redraw_status,
@@ -2540,7 +2534,6 @@
 </span><span class="kw">pub struct </span>WidgetCacheKey {
     theme_mode: ThemeMode,
     enabled: bool,
-    invalidation: u64,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>WidgetCacheKey {
@@ -2548,7 +2541,6 @@
         <span class="self">Self </span>{
             theme_mode: ThemeMode::default().inverse(),
             enabled: <span class="bool-val">false</span>,
-            invalidation: u64::MAX,
         }
     }
 }
