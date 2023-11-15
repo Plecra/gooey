@@ -572,16 +572,6 @@
 <a href="#572" id="572">572</a>
 <a href="#573" id="573">573</a>
 <a href="#574" id="574">574</a>
-<a href="#575" id="575">575</a>
-<a href="#576" id="576">576</a>
-<a href="#577" id="577">577</a>
-<a href="#578" id="578">578</a>
-<a href="#579" id="579">579</a>
-<a href="#580" id="580">580</a>
-<a href="#581" id="581">581</a>
-<a href="#582" id="582">582</a>
-<a href="#583" id="583">583</a>
-<a href="#584" id="584">584</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
@@ -610,8 +600,6 @@
     </span><span class="kw">pub </span>content: WidgetRef,
     <span class="doccomment">/// The callback that is invoked when the button is clicked.
     </span><span class="kw">pub </span>on_click: <span class="prelude-ty">Option</span>&lt;Callback&lt;()&gt;&gt;,
-    <span class="doccomment">/// The enabled state of the button.
-    </span><span class="kw">pub </span>enabled: Value&lt;bool&gt;,
     <span class="doccomment">/// The kind of button to draw.
     </span><span class="kw">pub </span>kind: Value&lt;ButtonKind&gt;,
     buttons_pressed: usize,
@@ -714,7 +702,6 @@
         <span class="self">Self </span>{
             content: content.widget_ref(),
             on_click: <span class="prelude-val">None</span>,
-            enabled: Value::Constant(<span class="bool-val">true</span>),
             cached_state: CacheState {
                 enabled: <span class="bool-val">true</span>,
                 kind: ButtonKind::default(),
@@ -745,23 +732,16 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Sets the value to use for the button&#39;s enabled status.
-    </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>enabled(<span class="kw-2">mut </span><span class="self">self</span>, enabled: <span class="kw">impl </span>IntoValue&lt;bool&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.enabled = enabled.into_value();
-        <span class="self">self
-    </span>}
-
-    <span class="kw">fn </span>invoke_on_click(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="kw">if </span><span class="self">self</span>.enabled.get() {
+    <span class="kw">fn </span>invoke_on_click(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
+        <span class="kw">if </span>context.enabled() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(on_click) = <span class="self">self</span>.on_click.as_mut() {
                 on_click.invoke(());
             }
         }
     }
 
-    <span class="kw">fn </span>visual_style(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; VisualState {
-        <span class="kw">if </span>!<span class="self">self</span>.enabled.get_tracked(context) {
+    <span class="kw">fn </span>visual_style(context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; VisualState {
+        <span class="kw">if </span>!context.enabled() {
             VisualState::Disabled
         } <span class="kw">else if </span>context.active() {
             VisualState::Active
@@ -804,7 +784,7 @@
 
     <span class="kw">fn </span>determine_stateful_colors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; ButtonColors {
         <span class="kw">let </span>kind = <span class="self">self</span>.kind.get_tracked(context);
-        <span class="kw">let </span>visual_state = <span class="self">self</span>.visual_style(context);
+        <span class="kw">let </span>visual_state = <span class="self">Self</span>::visual_style(context);
 
         <span class="self">self</span>.cached_state = CacheState {
             enabled: !<span class="macro">matches!</span>(visual_state, VisualState::Disabled),
@@ -925,7 +905,7 @@
 <span class="kw">impl </span>Widget <span class="kw">for </span>Button {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="attr">#![allow(clippy::similar_names)]
-        </span><span class="kw">let </span>enabled = <span class="self">self</span>.enabled.get_tracked(context);
+        </span><span class="kw">let </span>enabled = context.enabled();
 
         <span class="comment">// TODO This seems ugly. It needs context, so it can&#39;t be moved into the
         // dynamic system.
@@ -987,7 +967,7 @@
     </span>}
 
     <span class="kw">fn </span>accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
-        <span class="self">self</span>.enabled.get() &amp;&amp; context.get(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
+        context.get(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
     }
 
     <span class="kw">fn </span>mouse_down(
@@ -1039,7 +1019,7 @@
                 {
                     context.focus();
 
-                    <span class="self">self</span>.invoke_on_click();
+                    <span class="self">self</span>.invoke_on_click(context);
                 }
             }
         }
@@ -1087,7 +1067,7 @@
                     <span class="kw">let </span>changed = context.activate();
                     <span class="kw">if </span>!changed {
                         <span class="comment">// The widget was already active. This is now a repeated keypress
-                        </span><span class="self">self</span>.invoke_on_click();
+                        </span><span class="self">self</span>.invoke_on_click(context);
                     }
                     changed
                 }
@@ -1122,7 +1102,7 @@
         <span class="comment">// If we have no buttons pressed, the event should fire on activate not
         // on deactivate.
         </span><span class="kw">if </span><span class="self">self</span>.buttons_pressed == <span class="number">0 </span>{
-            <span class="self">self</span>.invoke_on_click();
+            <span class="self">self</span>.invoke_on_click(context);
         }
         <span class="self">self</span>.update_colors(context, <span class="bool-val">true</span>);
     }

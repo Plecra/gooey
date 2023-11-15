@@ -1191,6 +1191,22 @@
 <a href="#1191" id="1191">1191</a>
 <a href="#1192" id="1192">1192</a>
 <a href="#1193" id="1193">1193</a>
+<a href="#1194" id="1194">1194</a>
+<a href="#1195" id="1195">1195</a>
+<a href="#1196" id="1196">1196</a>
+<a href="#1197" id="1197">1197</a>
+<a href="#1198" id="1198">1198</a>
+<a href="#1199" id="1199">1199</a>
+<a href="#1200" id="1200">1200</a>
+<a href="#1201" id="1201">1201</a>
+<a href="#1202" id="1202">1202</a>
+<a href="#1203" id="1203">1203</a>
+<a href="#1204" id="1204">1204</a>
+<a href="#1205" id="1205">1205</a>
+<a href="#1206" id="1206">1206</a>
+<a href="#1207" id="1207">1207</a>
+<a href="#1208" id="1208">1208</a>
+<a href="#1209" id="1209">1209</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -1422,11 +1438,12 @@
             focus_changes += <span class="number">1</span>;
 
             <span class="self">self</span>.pending_state.focus = focus.and_then(|<span class="kw-2">mut </span>focus| <span class="kw">loop </span>{
-                <span class="kw">if </span>focus
-                    .lock()
-                    .as_widget()
-                    .accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>focus))
-                {
+                <span class="kw">let </span><span class="kw-2">mut </span>focus_context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>focus);
+                <span class="kw">let </span>accept_focus = focus_context.enabled()
+                    &amp;&amp; focus.lock().as_widget().accept_focus(<span class="kw-2">&amp;mut </span>focus_context);
+                drop(focus_context);
+
+                <span class="kw">if </span>accept_focus {
                     <span class="kw">break </span><span class="prelude-val">Some</span>(focus);
                 } <span class="kw">else if let </span><span class="prelude-val">Some</span>(next_focus) =
                     focus.explicit_focus_target(<span class="self">self</span>.pending_state.focus_is_advancing)
@@ -1900,6 +1917,7 @@
     pending_state: PendingState&lt;<span class="lifetime">&#39;context</span>&gt;,
     theme_mode: ThemeMode,
     effective_styles: Styles,
+    enabled: bool,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; WidgetContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; {
@@ -1910,6 +1928,10 @@
         window: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt;,
         theme_mode: ThemeMode,
     ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>enabled = current_node.enabled(<span class="kw-2">&amp;</span>WindowHandle {
+            kludgine: window.handle(),
+            redraw_status: redraw_status.clone(),
+        });
         <span class="self">Self </span>{
             pending_state: PendingState::Owned(PendingWidgetState {
                 focus: current_node
@@ -1923,6 +1945,7 @@
                 focus_is_advancing: <span class="bool-val">false</span>,
             }),
             effective_styles: current_node.effective_styles(),
+            enabled,
             current_node,
             redraw_status,
             theme: Cow::Borrowed(theme),
@@ -1941,6 +1964,7 @@
             pending_state: <span class="self">self</span>.pending_state.borrowed(),
             theme_mode: <span class="self">self</span>.theme_mode,
             effective_styles: <span class="self">self</span>.effective_styles.clone(),
+            enabled: <span class="self">self</span>.enabled,
         }
     }
 
@@ -1967,6 +1991,7 @@
             };
             WidgetContext {
                 effective_styles,
+                enabled: current_node.enabled(<span class="kw-2">&amp;</span><span class="self">self</span>.handle()),
                 current_node,
                 redraw_status: <span class="self">self</span>.redraw_status,
                 window: <span class="kw-2">&amp;mut *</span><span class="self">self</span>.window,
@@ -1975,6 +2000,12 @@
                 theme_mode,
             }
         })
+    }
+
+    <span class="doccomment">/// Returns true if this widget is enabled.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub const fn </span>enabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.enabled
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
@@ -2198,7 +2229,8 @@
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>WindowHandle {
+<span class="attr">#[derive(Clone)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>WindowHandle {
     kludgine: kludgine::app::WindowHandle&lt;WindowCommand&gt;,
     redraw_status: InvalidationStatus,
 }

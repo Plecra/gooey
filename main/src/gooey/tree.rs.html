@@ -573,6 +573,29 @@
 <a href="#573" id="573">573</a>
 <a href="#574" id="574">574</a>
 <a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::sync::{Arc, Mutex};
 
@@ -581,6 +604,7 @@
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{Point, Rect, Size};
 
+<span class="kw">use </span><span class="kw">crate</span>::context::WindowHandle;
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Styles, ThemePair, VisualOrder};
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::Value;
@@ -619,6 +643,7 @@
             effective_styles,
             theme: <span class="prelude-val">None</span>,
             theme_mode: <span class="prelude-val">None</span>,
+            invalidation: <span class="number">0</span>,
         });
         data.nodes_by_id.insert(id, node_id);
         <span class="kw">if </span>widget.is_default() {
@@ -850,6 +875,25 @@
         data.widget_from_node(id, <span class="self">self</span>)
     }
 
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>id: LotId, context: <span class="kw-2">&amp;</span>WindowHandle) -&gt; bool {
+        <span class="kw">let </span>data = <span class="self">self</span>.data.lock().ignore_poison();
+        <span class="kw">loop </span>{
+            <span class="kw">let </span><span class="prelude-val">Some</span>(node) = data.nodes.get(id) <span class="kw">else </span>{
+                <span class="kw">return </span><span class="bool-val">false</span>;
+            };
+
+            <span class="kw">if </span>!node.widget.enabled(context) {
+                <span class="kw">return </span><span class="bool-val">false</span>;
+            }
+
+            <span class="kw">let </span><span class="prelude-val">Some</span>(parent) = node.parent <span class="kw">else </span>{ <span class="kw">break </span>};
+
+            id = parent;
+        }
+
+        <span class="bool-val">true
+    </span>}
+
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>active_widget(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;LotId&gt; {
         <span class="self">self</span>.data.lock().ignore_poison().active
     }
@@ -1056,6 +1100,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="kw-2">&amp;mut </span><span class="self">self</span>.nodes[id];
         <span class="kw">while </span>node.layout.is_some() {
             node.layout = <span class="prelude-val">None</span>;
+            node.invalidation += <span class="number">1</span>;
             node.last_layout_query = <span class="prelude-val">None</span>;
 
             <span class="kw">let </span>(<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(parent)) = (include_hierarchy, node.parent) <span class="kw">else </span>{
@@ -1127,6 +1172,7 @@
     children: Vec&lt;LotId&gt;,
     parent: <span class="prelude-ty">Option</span>&lt;LotId&gt;,
     layout: <span class="prelude-ty">Option</span>&lt;Rect&lt;Px&gt;&gt;,
+    invalidation: u64,
     last_layout_query: <span class="prelude-ty">Option</span>&lt;CachedLayoutQuery&gt;,
     associated_styles: <span class="prelude-ty">Option</span>&lt;Value&lt;Styles&gt;&gt;,
     effective_styles: Styles,

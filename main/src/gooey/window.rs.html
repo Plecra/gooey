@@ -1159,6 +1159,7 @@
 <a href="#1159" id="1159">1159</a>
 <a href="#1160" id="1160">1160</a>
 <a href="#1161" id="1161">1161</a>
+<a href="#1162" id="1162">1162</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
@@ -2248,7 +2249,8 @@
         <span class="kw">pub </span>transparent: bool,
     }
 
-    <span class="kw">pub enum </span>WindowCommand {
+    <span class="attr">#[derive(Clone)]
+    </span><span class="kw">pub enum </span>WindowCommand {
         Redraw,
         <span class="comment">// RequestClose,
     </span>}
