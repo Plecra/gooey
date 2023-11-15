@@ -23,8 +23,6 @@ increments its own label:</p>
         .into_button()
         <span class="comment">// Set the `on_click` callback to a closure that increments the counter.
         </span>.on_click(count.with_clone(|count| <span class="kw">move </span>|<span class="kw">_</span>| count.set(count.get() + <span class="number">1</span>)))
-        <span class="comment">// Position the button in the center
-        </span>.centered()
         <span class="comment">// Run the application
         </span>.run()
 }</code></pre></div>
