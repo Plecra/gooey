@@ -1,3 +1,3 @@
 (function() {var implementors = {
-"gooey":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.73.0/core/ops/arith/trait.Sub.html\" title=\"trait core::ops::arith::Sub\">Sub</a>&lt;UPx&gt; for <a class=\"enum\" href=\"gooey/enum.ConstraintLimit.html\" title=\"enum gooey::ConstraintLimit\">ConstraintLimit</a>"]]
+"gooey":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.74.0/core/ops/arith/trait.Sub.html\" title=\"trait core::ops::arith::Sub\">Sub</a>&lt;UPx&gt; for <a class=\"enum\" href=\"gooey/enum.ConstraintLimit.html\" title=\"enum gooey::ConstraintLimit\">ConstraintLimit</a>"]]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

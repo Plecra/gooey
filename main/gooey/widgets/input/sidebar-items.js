@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Affinity"],"struct":["CowString","Cursor","Input","MaskedString","SelectionState"],"trait":["InputStorage","InputValue"]};
