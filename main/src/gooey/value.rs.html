@@ -1392,19 +1392,14 @@
 <a href="#1392" id="1392">1392</a>
 <a href="#1393" id="1393">1393</a>
 <a href="#1394" id="1394">1394</a>
-<a href="#1395" id="1395">1395</a>
-<a href="#1396" id="1396">1396</a>
-<a href="#1397" id="1397">1397</a>
-<a href="#1398" id="1398">1398</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::cell::Cell;
 <span class="kw">use </span>std::fmt::{Debug, Display};
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
-<span class="kw">use </span>std::panic::AssertUnwindSafe;
 <span class="kw">use </span>std::str::FromStr;
-<span class="kw">use </span>std::sync::{Arc, Condvar, Mutex, MutexGuard, TryLockError};
+<span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard, TryLockError};
 <span class="kw">use </span>std::task::{Poll, Waker};
 <span class="kw">use </span>std::thread::ThreadId;
 
@@ -1413,7 +1408,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{DynamicTransition, LinearInterpolate};
 <span class="kw">use </span><span class="kw">crate</span>::context::{WidgetContext, WindowHandle};
-<span class="kw">use </span><span class="kw">crate</span>::utils::{IgnorePoison, WithClone};
+<span class="kw">use </span><span class="kw">crate</span>::utils::{IgnorePoison, UnwindsafeCondvar, WithClone};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{WidgetId, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::Switcher;
 
@@ -1438,7 +1433,7 @@
                 widgets: AHashSet::new(),
             }),
             during_callback_state: Mutex::default(),
-            sync: AssertUnwindSafe(Condvar::new()),
+            sync: UnwindsafeCondvar::default(),
         }))
     }
 
@@ -1951,10 +1946,7 @@
 </span><span class="kw">struct </span>DynamicData&lt;T&gt; {
     state: Mutex&lt;State&lt;T&gt;&gt;,
     during_callback_state: Mutex&lt;<span class="prelude-ty">Option</span>&lt;LockState&gt;&gt;,
-
-    <span class="comment">// The AssertUnwindSafe is only needed on Mac. For some reason on
-    // Mac OS, Condvar isn&#39;t RefUnwindSafe.
-    </span>sync: AssertUnwindSafe&lt;Condvar&gt;,
+    sync: UnwindsafeCondvar,
 }
 
 <span class="kw">impl</span>&lt;T&gt; DynamicData&lt;T&gt; {

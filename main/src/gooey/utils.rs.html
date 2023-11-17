@@ -142,11 +142,73 @@
 <a href="#142" id="142">142</a>
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::Deref;
-<span class="kw">use </span>std::sync::{OnceLock, PoisonError};
+<span class="kw">use </span>std::sync::{Condvar, OnceLock, PoisonError};
 
 <span class="kw">use </span>kludgine::app::winit::event::Modifiers;
 <span class="kw">use </span>kludgine::app::winit::keyboard::ModifiersState;
+
+<span class="doccomment">/// This [`Condvar`] is a wrapper that on Mac OS/iOS asserts unwind safety. On
+/// all other platforms, this is a transparent wrapper around `Condvar`. See
+/// &lt;https://github.com/rust-lang/rust/issues/118009&gt; for more information.
+</span><span class="attr">#[derive(Debug, Default)]
+</span><span class="kw">pub struct </span>UnwindsafeCondvar(
+    <span class="attr">#[cfg(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>))] </span>std::panic::AssertUnwindSafe&lt;Condvar&gt;,
+    <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>)))] </span>Condvar,
+);
+
+<span class="kw">impl </span>Deref <span class="kw">for </span>UnwindsafeCondvar {
+    <span class="kw">type </span>Target = Condvar;
+
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0
+    </span>}
+}
+
+<span class="kw">impl </span>UnwindsafeCondvar {
+    <span class="kw">pub const fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="attr">#[cfg(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>))]
+        </span>{
+            <span class="self">Self</span>(AssertUnwindSafe(Condvar::new()))
+        }
+
+        <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>)))]
+        </span>{
+            <span class="self">Self</span>(Condvar::new())
+        }
+    }
+}
 
 <span class="doccomment">/// Invokes the provided macro with a pattern that can be matched using this
 /// `macro_rules!` expression: `$($type:ident $field:tt $var:ident),+`, where `$type` is an

@@ -181,14 +181,14 @@
 <a href="#181" id="181">181</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::sync::atomic::{AtomicUsize, Ordering};
-<span class="kw">use </span>std::sync::{Arc, Condvar, Mutex, MutexGuard};
+<span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard};
 <span class="kw">use </span>std::time::{Duration, Instant};
 
 <span class="kw">use </span>kludgine::app::winit::event::KeyEvent;
 <span class="kw">use </span>kludgine::app::winit::keyboard::Key;
 
 <span class="kw">use </span><span class="kw">crate</span>::context::WidgetContext;
-<span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
+<span class="kw">use </span><span class="kw">crate</span>::utils::{IgnorePoison, UnwindsafeCondvar};
 <span class="kw">use </span><span class="kw">crate</span>::value::Dynamic;
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, HANDLED, IGNORED};
 
@@ -246,7 +246,7 @@
                 input: InputState::default(),
             }),
             period: tick_every,
-            sync: Condvar::new(),
+            sync: UnwindsafeCondvar::new(),
             rendered_frame: AtomicUsize::new(<span class="number">0</span>),
             tick_number: Dynamic::default(),
         });
@@ -298,7 +298,7 @@
 </span><span class="kw">struct </span>TickData {
     state: Mutex&lt;TickState&gt;,
     period: Duration,
-    sync: Condvar,
+    sync: UnwindsafeCondvar,
     rendered_frame: AtomicUsize,
     tick_number: Dynamic&lt;u64&gt;,
 }

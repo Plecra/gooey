@@ -1157,7 +1157,7 @@
 <span class="kw">use </span>std::ops::{ControlFlow, Deref, Div, Mul};
 <span class="kw">use </span>std::panic::{RefUnwindSafe, UnwindSafe};
 <span class="kw">use </span>std::str::FromStr;
-<span class="kw">use </span>std::sync::{Arc, Condvar, Mutex, MutexGuard, OnceLock};
+<span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 <span class="kw">use </span>std::thread;
 <span class="kw">use </span>std::time::{Duration, Instant};
 
@@ -1170,11 +1170,11 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::easings::Linear;
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Component, RequireInvalidation};
-<span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
+<span class="kw">use </span><span class="kw">crate</span>::utils::{IgnorePoison, UnwindsafeCondvar};
 <span class="kw">use </span><span class="kw">crate</span>::value::Dynamic;
 
 <span class="kw">static </span>ANIMATIONS: Mutex&lt;Animating&gt; = Mutex::new(Animating::new());
-<span class="kw">static </span>NEW_ANIMATIONS: Condvar = Condvar::new();
+<span class="kw">static </span>NEW_ANIMATIONS: UnwindsafeCondvar = UnwindsafeCondvar::new();
 
 <span class="kw">fn </span>thread_state() -&gt; MutexGuard&lt;<span class="lifetime">&#39;static</span>, Animating&gt; {
     <span class="kw">static </span>THREAD: OnceLock&lt;()&gt; = OnceLock::new();
