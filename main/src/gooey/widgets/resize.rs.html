@@ -257,10 +257,10 @@
     scale: Fraction,
 ) -&gt; ConstraintLimit {
     <span class="kw">match </span>constraint {
-        ConstraintLimit::Known(size) =&gt; ConstraintLimit::Known(range.clamp(size, scale)),
-        ConstraintLimit::ClippedAfter(clipped_after) =&gt; <span class="kw">match </span>(range.minimum(), range.maximum()) {
-            (<span class="prelude-val">Some</span>(min), <span class="prelude-val">Some</span>(max)) <span class="kw">if </span>min == max =&gt; ConstraintLimit::Known(min.into_upx(scale)),
-            <span class="kw">_ </span>=&gt; ConstraintLimit::ClippedAfter(range.clamp(clipped_after, scale)),
+        ConstraintLimit::Fill(size) =&gt; ConstraintLimit::Fill(range.clamp(size, scale)),
+        ConstraintLimit::SizeToFit(clipped_after) =&gt; <span class="kw">match </span>(range.minimum(), range.maximum()) {
+            (<span class="prelude-val">Some</span>(min), <span class="prelude-val">Some</span>(max)) <span class="kw">if </span>min == max =&gt; ConstraintLimit::Fill(min.into_upx(scale)),
+            <span class="kw">_ </span>=&gt; ConstraintLimit::SizeToFit(range.clamp(clipped_after, scale)),
         },
     }
 }

@@ -1136,7 +1136,7 @@
         // widgets an opportunity to lay themselves out in the full area. This
         // requires one extra layout call, so we avoid persisting layouts during
         // the first loop if this is the case.
-        </span><span class="kw">let </span>needs_final_layout = !<span class="macro">matches!</span>(other_constraint, ConstraintLimit::Known(<span class="kw">_</span>));
+        </span><span class="kw">let </span>needs_final_layout = !<span class="macro">matches!</span>(other_constraint, ConstraintLimit::Fill(<span class="kw">_</span>));
 
         <span class="comment">// Measure the children that fit their content
         </span><span class="self">self</span>.other = UPx(<span class="number">0</span>);
@@ -1145,7 +1145,7 @@
             <span class="kw">let </span>(measured, other) = <span class="self">self</span>.orientation.split_size(measure(
                 index,
                 <span class="self">self</span>.orientation
-                    .make_size(ConstraintLimit::ClippedAfter(remaining), other_constraint),
+                    .make_size(ConstraintLimit::SizeToFit(remaining), other_constraint),
                 !needs_final_layout,
             ));
             <span class="self">self</span>.layouts[index].size = measured;
@@ -1159,7 +1159,7 @@
             <span class="kw">let </span>(<span class="kw">_</span>, other) = <span class="self">self</span>.orientation.split_size(measure(
                 index,
                 <span class="self">self</span>.orientation.make_size(
-                    ConstraintLimit::Known(<span class="self">self</span>.layouts[index].size),
+                    ConstraintLimit::Fill(<span class="self">self</span>.layouts[index].size),
                     other_constraint,
                 ),
                 !needs_final_layout,
@@ -1196,7 +1196,7 @@
                 <span class="kw">let </span>(<span class="kw">_</span>, measured) = <span class="self">self</span>.orientation.split_size(measure(
                     index,
                     <span class="self">self</span>.orientation.make_size(
-                        ConstraintLimit::Known(<span class="self">self</span>.layouts[index].size.into_upx(scale)),
+                        ConstraintLimit::Fill(<span class="self">self</span>.layouts[index].size.into_upx(scale)),
                         other_constraint,
                     ),
                     !needs_final_layout,
@@ -1206,8 +1206,8 @@
         }
 
         <span class="self">self</span>.other = <span class="kw">match </span>other_constraint {
-            ConstraintLimit::Known(max) =&gt; <span class="self">self</span>.other.max(max),
-            ConstraintLimit::ClippedAfter(clip_limit) =&gt; <span class="self">self</span>.other.min(clip_limit),
+            ConstraintLimit::Fill(max) =&gt; <span class="self">self</span>.other.max(max),
+            ConstraintLimit::SizeToFit(clip_limit) =&gt; <span class="self">self</span>.other.min(clip_limit),
         };
 
         <span class="comment">// Finally, compute the offsets of all of the widgets.
@@ -1219,8 +1219,8 @@
                 <span class="self">self</span>.orientation.split_size(measure(
                     index,
                     <span class="self">self</span>.orientation.make_size(
-                        ConstraintLimit::Known(<span class="self">self</span>.layouts[index].size.into_upx(scale)),
-                        ConstraintLimit::Known(<span class="self">self</span>.other),
+                        ConstraintLimit::Fill(<span class="self">self</span>.layouts[index].size.into_upx(scale)),
+                        ConstraintLimit::Fill(<span class="self">self</span>.other),
                     ),
                     <span class="bool-val">true</span>,
                 ));
@@ -1362,8 +1362,8 @@
     </span><span class="kw">fn </span>size_to_fit() {
         assert_measured_children(
             <span class="kw-2">&amp;</span>[Child::new(<span class="number">3</span>, <span class="number">1</span>), Child::new(<span class="number">3</span>, <span class="number">1</span>), Child::new(<span class="number">3</span>, <span class="number">1</span>)],
-            ConstraintLimit::ClippedAfter(UPx(<span class="number">10</span>)),
-            ConstraintLimit::ClippedAfter(UPx(<span class="number">10</span>)),
+            ConstraintLimit::SizeToFit(UPx(<span class="number">10</span>)),
+            ConstraintLimit::SizeToFit(UPx(<span class="number">10</span>)),
             <span class="kw-2">&amp;</span>[UPx(<span class="number">3</span>), UPx(<span class="number">3</span>), UPx(<span class="number">3</span>)],
             UPx(<span class="number">9</span>),
             UPx(<span class="number">1</span>),
@@ -1387,8 +1387,8 @@
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
             ],
-            ConstraintLimit::Known(UPx(<span class="number">10</span>)),
-            ConstraintLimit::ClippedAfter(UPx(<span class="number">10</span>)),
+            ConstraintLimit::Fill(UPx(<span class="number">10</span>)),
+            ConstraintLimit::SizeToFit(UPx(<span class="number">10</span>)),
             <span class="kw-2">&amp;</span>[UPx(<span class="number">4</span>), UPx(<span class="number">3</span>), UPx(<span class="number">3</span>)],
             UPx(<span class="number">10</span>),
             UPx(<span class="number">7</span>), <span class="comment">// 20 / 3 = 6.666, rounded up is 7
@@ -1401,8 +1401,8 @@
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
             ],
-            ConstraintLimit::Known(UPx(<span class="number">11</span>)),
-            ConstraintLimit::ClippedAfter(UPx(<span class="number">11</span>)),
+            ConstraintLimit::Fill(UPx(<span class="number">11</span>)),
+            ConstraintLimit::SizeToFit(UPx(<span class="number">11</span>)),
             <span class="kw-2">&amp;</span>[UPx(<span class="number">5</span>), UPx(<span class="number">3</span>), UPx(<span class="number">3</span>)],
             UPx(<span class="number">11</span>),
             UPx(<span class="number">7</span>), <span class="comment">// 20 / 3 = 6.666, rounded up is 7
@@ -1414,8 +1414,8 @@
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
             ],
-            ConstraintLimit::Known(UPx(<span class="number">12</span>)),
-            ConstraintLimit::ClippedAfter(UPx(<span class="number">12</span>)),
+            ConstraintLimit::Fill(UPx(<span class="number">12</span>)),
+            ConstraintLimit::SizeToFit(UPx(<span class="number">12</span>)),
             <span class="kw-2">&amp;</span>[UPx(<span class="number">6</span>), UPx(<span class="number">3</span>), UPx(<span class="number">3</span>)],
             UPx(<span class="number">12</span>),
             UPx(<span class="number">4</span>), <span class="comment">// 20 / 6 = 3.666, rounded up is 4
@@ -1428,8 +1428,8 @@
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
             ],
-            ConstraintLimit::Known(UPx(<span class="number">13</span>)),
-            ConstraintLimit::ClippedAfter(UPx(<span class="number">13</span>)),
+            ConstraintLimit::Fill(UPx(<span class="number">13</span>)),
+            ConstraintLimit::SizeToFit(UPx(<span class="number">13</span>)),
             <span class="kw-2">&amp;</span>[UPx(<span class="number">6</span>), UPx(<span class="number">3</span>), UPx(<span class="number">4</span>)],
             UPx(<span class="number">13</span>),
             UPx(<span class="number">4</span>), <span class="comment">// 20 / 6 = 3.666, rounded up is 4
@@ -1444,8 +1444,8 @@
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
             ],
-            ConstraintLimit::Known(UPx(<span class="number">15</span>)),
-            ConstraintLimit::ClippedAfter(UPx(<span class="number">15</span>)),
+            ConstraintLimit::Fill(UPx(<span class="number">15</span>)),
+            ConstraintLimit::SizeToFit(UPx(<span class="number">15</span>)),
             <span class="kw-2">&amp;</span>[UPx(<span class="number">7</span>), UPx(<span class="number">4</span>), UPx(<span class="number">4</span>)],
             UPx(<span class="number">15</span>),
             UPx(<span class="number">1</span>),

@@ -106,7 +106,7 @@
 </span><span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{Point, ScreenScale, Size};
 <span class="kw">use </span>kludgine::text::{MeasuredText, Text, TextOrigin};
-<span class="kw">use </span>kludgine::Color;
+<span class="kw">use </span>kludgine::{Color, DrawableExt};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{IntrinsicPadding, TextColor};
@@ -174,7 +174,7 @@
 
         context
             .gfx
-            .draw_measured_text(prepared_text, TextOrigin::Center, center, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
+            .draw_measured_text(prepared_text.translate_by(center), TextOrigin::Center);
     }
 
     <span class="kw">fn </span>layout(

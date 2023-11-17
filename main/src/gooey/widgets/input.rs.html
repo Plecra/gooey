@@ -1260,16 +1260,6 @@
 <a href="#1260" id="1260">1260</a>
 <a href="#1261" id="1261">1261</a>
 <a href="#1262" id="1262">1262</a>
-<a href="#1263" id="1263">1263</a>
-<a href="#1264" id="1264">1264</a>
-<a href="#1265" id="1265">1265</a>
-<a href="#1266" id="1266">1266</a>
-<a href="#1267" id="1267">1267</a>
-<a href="#1268" id="1268">1268</a>
-<a href="#1269" id="1269">1269</a>
-<a href="#1270" id="1270">1270</a>
-<a href="#1271" id="1271">1271</a>
-<a href="#1272" id="1272">1272</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A text input widget.
 
 </span><span class="kw">use </span>std::borrow::{Borrow, BorrowMut, Cow};
@@ -1291,7 +1281,7 @@
 };
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
 <span class="kw">use </span>kludgine::text::{MeasuredText, Text, TextOrigin};
-<span class="kw">use </span>kludgine::Color;
+<span class="kw">use </span>kludgine::{Color, DrawableExt};
 <span class="kw">use </span>unicode_segmentation::UnicodeSegmentation;
 <span class="kw">use </span>zeroize::Zeroizing;
 
@@ -2121,55 +2111,47 @@
                     <span class="comment">// Single line selection
                     </span><span class="kw">let </span>width = end_position.x - start_position.x;
                     context.gfx.draw_shape(
-                        <span class="kw-2">&amp;</span>Shape::filled_rect(
+                        Shape::filled_rect(
                             Rect::new(start_position, Size::new(width, cache.measured.line_height)),
                             highlight,
-                        ),
-                        padding,
-                        <span class="prelude-val">None</span>,
-                        <span class="prelude-val">None</span>,
+                        )
+                        .translate_by(padding),
                     );
                 } <span class="kw">else </span>{
                     <span class="comment">// Draw from start to end of line,
                     </span><span class="kw">let </span>width = size.width.into_signed() - start_position.x;
                     context.gfx.draw_shape(
-                        <span class="kw-2">&amp;</span>Shape::filled_rect(
+                        Shape::filled_rect(
                             Rect::new(start_position, Size::new(width, cache.measured.line_height)),
                             highlight,
-                        ),
-                        padding,
-                        <span class="prelude-val">None</span>,
-                        <span class="prelude-val">None</span>,
+                        )
+                        .translate_by(padding),
                     );
                     <span class="comment">// Fill region between
                     </span><span class="kw">let </span>bottom_of_first_line = start_position.y + cache.measured.line_height;
                     <span class="kw">let </span>distance_between = end_position.y - bottom_of_first_line;
                     <span class="kw">if </span>distance_between &gt; <span class="number">0 </span>{
                         context.gfx.draw_shape(
-                            <span class="kw-2">&amp;</span>Shape::filled_rect(
+                            Shape::filled_rect(
                                 Rect::new(
                                     Point::new(Px(<span class="number">0</span>), bottom_of_first_line),
                                     Size::new(size.width.into_signed(), distance_between),
                                 ),
                                 highlight,
-                            ),
-                            padding,
-                            <span class="prelude-val">None</span>,
-                            <span class="prelude-val">None</span>,
+                            )
+                            .translate_by(padding),
                         );
                     }
                     <span class="comment">// Draw from 0 to end + width
                     </span>context.gfx.draw_shape(
-                        <span class="kw-2">&amp;</span>Shape::filled_rect(
+                        Shape::filled_rect(
                             Rect::new(
                                 Point::new(Px(<span class="number">0</span>), end_position.y),
                                 Size::new(end_position.x + end_width, cache.measured.line_height),
                             ),
                             highlight,
-                        ),
-                        padding,
-                        <span class="prelude-val">None</span>,
-                        <span class="prelude-val">None</span>,
+                        )
+                        .translate_by(padding),
                     );
                 }
             } <span class="kw">else </span>{
@@ -2178,16 +2160,14 @@
                 <span class="kw">if </span>window_focused &amp;&amp; cursor_state.visible {
                     <span class="kw">let </span>cursor_width = Lp::points(<span class="number">2</span>).into_px(context.gfx.scale());
                     context.gfx.draw_shape(
-                        <span class="kw-2">&amp;</span>Shape::filled_rect(
+                        Shape::filled_rect(
                             Rect::new(
                                 Point::new(location.x - cursor_width / <span class="number">2</span>, location.y),
                                 Size::new(cursor_width, cache.measured.line_height),
                             ),
-                            highlight, <span class="comment">// TODO cursor should be a bold color, highlight probably not. This should have its own color.
-                        </span>),
-                        padding,
-                        <span class="prelude-val">None</span>,
-                        <span class="prelude-val">None</span>,
+                            highlight,
+                        )
+                        .translate_by(padding),
                     );
                 }
                 <span class="kw">if </span>window_focused {
@@ -2203,7 +2183,7 @@
 
         context
             .gfx
-            .draw_measured_text(cache.measured, TextOrigin::TopLeft, padding, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
+            .draw_measured_text(cache.measured.translate_by(padding), TextOrigin::TopLeft);
     }
 
     <span class="kw">fn </span>layout(

@@ -287,40 +287,17 @@
 <a href="#287" id="287">287</a>
 <a href="#288" id="288">288</a>
 <a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::{Deref, DerefMut};
 
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{
-    <span class="self">self</span>, Angle, Fraction, IntoSigned, IntoUnsigned, IsZero, Point, Rect, ScreenScale, ScreenUnit,
-    Size,
+    <span class="self">self</span>, Fraction, IntoSigned, IntoUnsigned, IsZero, Point, Rect, ScreenScale, ScreenUnit, Size,
 };
 <span class="kw">use </span>kludgine::render::Renderer;
 <span class="kw">use </span>kludgine::shapes::Shape;
 <span class="kw">use </span>kludgine::text::{MeasuredText, Text, TextOrigin};
 <span class="kw">use </span>kludgine::{
-    cosmic_text, ClipGuard, Color, Kludgine, ShaderScalable, ShapeSource, TextureSource,
+    cosmic_text, ClipGuard, Color, Drawable, Kludgine, ShaderScalable, ShapeSource, TextureSource,
 };
 
 <span class="doccomment">/// A 2d graphics context
@@ -452,28 +429,18 @@
     </span><span class="kw">pub fn </span>fill(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color) {
         <span class="kw">if </span>color.alpha() &gt; <span class="number">0 </span>{
             <span class="kw">let </span>rect = Rect::from(<span class="self">self</span>.region.size);
-            <span class="self">self</span>.draw_shape(
-                <span class="kw-2">&amp;</span>Shape::filled_rect(rect, color),
-                Point::default(),
-                <span class="prelude-val">None</span>,
-                <span class="prelude-val">None</span>,
-            );
+            <span class="self">self</span>.draw_shape(<span class="kw-2">&amp;</span>Shape::filled_rect(rect, color));
         }
     }
 
     <span class="doccomment">/// Draws a shape at the origin, rotating and scaling as needed.
-    </span><span class="kw">pub fn </span>draw_shape&lt;Unit&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        shape: <span class="kw-2">&amp;</span>Shape&lt;Unit, <span class="bool-val">false</span>&gt;,
-        origin: Point&lt;Unit&gt;,
-        rotation_rads: <span class="prelude-ty">Option</span>&lt;Angle&gt;,
-        scale: <span class="prelude-ty">Option</span>&lt;f32&gt;,
-    ) <span class="kw">where
+    </span><span class="kw">pub fn </span>draw_shape&lt;<span class="lifetime">&#39;a</span>, Unit&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, shape: <span class="kw">impl </span>Into&lt;Drawable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Shape&lt;Unit, <span class="bool-val">false</span>&gt;, Unit&gt;&gt;)
+    <span class="kw">where
         </span>Unit: IsZero + ShaderScalable + figures::ScreenUnit + Copy,
     {
-        <span class="kw">let </span>translate = origin + Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
-        <span class="self">self</span>.renderer
-            .draw_shape(shape, translate, rotation_rads, scale);
+        <span class="kw">let </span><span class="kw-2">mut </span>shape = shape.into();
+        shape.translation += Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
+        <span class="self">self</span>.renderer.draw_shape(shape);
     }
 
     <span class="doccomment">/// Draws `texture` at `destination`, scaling as necessary.
@@ -488,20 +455,18 @@
 
     <span class="doccomment">/// Draws a shape that was created with texture coordinates, applying the
     /// provided texture.
-    </span><span class="kw">pub fn </span>draw_textured_shape&lt;Unit&gt;(
+    </span><span class="kw">pub fn </span>draw_textured_shape&lt;<span class="lifetime">&#39;shape</span>, Unit, Shape&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        shape: <span class="kw-2">&amp;</span><span class="kw">impl </span>ShapeSource&lt;Unit, <span class="bool-val">true</span>&gt;,
+        shape: <span class="kw">impl </span>Into&lt;Drawable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;shape </span>Shape, Unit&gt;&gt;,
         texture: <span class="kw-2">&amp;</span><span class="kw">impl </span>TextureSource,
-        origin: Point&lt;Unit&gt;,
-        rotation: <span class="prelude-ty">Option</span>&lt;Angle&gt;,
-        scale: <span class="prelude-ty">Option</span>&lt;f32&gt;,
     ) <span class="kw">where
         </span>Unit: IsZero + ShaderScalable + figures::ScreenUnit + Copy,
         i32: From&lt;&lt;Unit <span class="kw">as </span>IntoSigned&gt;::Signed&gt;,
+        Shape: ShapeSource&lt;Unit, <span class="bool-val">true</span>&gt; + <span class="lifetime">&#39;shape</span>,
     {
-        <span class="kw">let </span>translate = origin + Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
-        <span class="self">self</span>.renderer
-            .draw_textured_shape(shape, texture, translate, rotation, scale);
+        <span class="kw">let </span><span class="kw-2">mut </span>shape = shape.into();
+        shape.translation += Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
+        <span class="self">self</span>.renderer.draw_textured_shape(shape, texture);
     }
 
     <span class="doccomment">/// Measures `text` using the current text settings.
@@ -515,17 +480,13 @@
     }
 
     <span class="doccomment">/// Draws `text` using the current text settings.
-    </span><span class="kw">pub fn </span>draw_text&lt;<span class="lifetime">&#39;a</span>, Unit&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        text: <span class="kw">impl </span>Into&lt;Text&lt;<span class="lifetime">&#39;a</span>, Unit&gt;&gt;,
-        translate: Point&lt;Unit&gt;,
-        rotation: <span class="prelude-ty">Option</span>&lt;Angle&gt;,
-        scale: <span class="prelude-ty">Option</span>&lt;f32&gt;,
-    ) <span class="kw">where
+    </span><span class="kw">pub fn </span>draw_text&lt;<span class="lifetime">&#39;a</span>, Unit&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, text: <span class="kw">impl </span>Into&lt;Drawable&lt;Text&lt;<span class="lifetime">&#39;a</span>, Unit&gt;, Unit&gt;&gt;)
+    <span class="kw">where
         </span>Unit: ScreenUnit,
     {
-        <span class="kw">let </span>translate = translate + Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
-        <span class="self">self</span>.renderer.draw_text(text, translate, rotation, scale);
+        <span class="kw">let </span><span class="kw-2">mut </span>text = text.into();
+        text.translation += Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
+        <span class="self">self</span>.renderer.draw_text(text);
     }
 
     <span class="doccomment">/// Prepares the text layout contained in `buffer` to be rendered.
@@ -535,20 +496,18 @@
     ///
     /// `origin` allows controlling how the text will be drawn relative to the
     /// coordinate provided in [`render()`](kludgine::PreparedGraphic::render).
-    </span><span class="kw">pub fn </span>draw_text_buffer&lt;Unit&gt;(
+    </span><span class="kw">pub fn </span>draw_text_buffer&lt;<span class="lifetime">&#39;a</span>, Unit&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        buffer: <span class="kw-2">&amp;</span>cosmic_text::Buffer,
+        buffer: <span class="kw">impl </span>Into&lt;Drawable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>cosmic_text::Buffer, Unit&gt;&gt;,
         default_color: Color,
         origin: TextOrigin&lt;Px&gt;,
-        translate: Point&lt;Unit&gt;,
-        rotation: <span class="prelude-ty">Option</span>&lt;Angle&gt;,
-        scale: <span class="prelude-ty">Option</span>&lt;f32&gt;,
     ) <span class="kw">where
         </span>Unit: ScreenUnit,
     {
-        <span class="kw">let </span>translate = translate + Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
+        <span class="kw">let </span><span class="kw-2">mut </span>buffer = buffer.into();
+        buffer.translation += Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
         <span class="self">self</span>.renderer
-            .draw_text_buffer(buffer, default_color, origin, translate, rotation, scale);
+            .draw_text_buffer(buffer, default_color, origin);
     }
 
     <span class="doccomment">/// Measures `buffer` and caches the results using `default_color` when
@@ -571,19 +530,16 @@
     ///
     /// `origin` allows controlling how the text will be drawn relative to the
     /// coordinate provided in [`render()`](kludgine::PreparedGraphic::render).
-    </span><span class="kw">pub fn </span>draw_measured_text&lt;Unit&gt;(
+    </span><span class="kw">pub fn </span>draw_measured_text&lt;<span class="lifetime">&#39;a</span>, Unit&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        text: <span class="kw-2">&amp;</span>MeasuredText&lt;Unit&gt;,
+        text: <span class="kw">impl </span>Into&lt;Drawable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>MeasuredText&lt;Unit&gt;, Unit&gt;&gt;,
         origin: TextOrigin&lt;Unit&gt;,
-        translate: Point&lt;Unit&gt;,
-        rotation: <span class="prelude-ty">Option</span>&lt;Angle&gt;,
-        scale: <span class="prelude-ty">Option</span>&lt;f32&gt;,
     ) <span class="kw">where
         </span>Unit: ScreenUnit,
     {
-        <span class="kw">let </span>translate = translate + Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
-        <span class="self">self</span>.renderer
-            .draw_measured_text(text, origin, translate, rotation, scale);
+        <span class="kw">let </span><span class="kw-2">mut </span>text = text.into();
+        text.translation += Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
+        <span class="self">self</span>.renderer.draw_measured_text(text, origin);
     }
 }
 

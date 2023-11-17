@@ -1274,7 +1274,6 @@
 <a href="#1274" id="1274">1274</a>
 <a href="#1275" id="1275">1275</a>
 <a href="#1276" id="1276">1276</a>
-<a href="#1277" id="1277">1277</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -1804,8 +1803,7 @@
         <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
         <span class="kw">let </span>focus_ring =
             Shape::stroked_rect(visible_rect, color, options.into_px(<span class="self">self</span>.gfx.scale()));
-        <span class="self">self</span>.gfx
-            .draw_shape(<span class="kw-2">&amp;</span>focus_ring, Point::default(), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
+        <span class="self">self</span>.gfx.draw_shape(<span class="kw-2">&amp;</span>focus_ring);
     }
 
     <span class="doccomment">/// Renders the default focus ring for this widget.

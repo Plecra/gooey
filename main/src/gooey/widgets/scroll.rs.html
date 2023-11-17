@@ -311,16 +311,6 @@
 <a href="#311" id="311">311</a>
 <a href="#312" id="312">312</a>
 <a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
 </span><span class="kw">use </span>std::time::Duration;
 
@@ -452,33 +442,23 @@
         <span class="kw">let </span>size = context.gfx.region().size;
 
         <span class="kw">if </span><span class="self">self</span>.horizontal_bar.amount_hidden &gt; <span class="number">0 </span>{
-            context.gfx.draw_shape(
-                <span class="kw-2">&amp;</span>Shape::filled_rect(
-                    Rect::new(
-                        Point::new(<span class="self">self</span>.horizontal_bar.offset, size.height - <span class="self">self</span>.bar_width),
-                        Size::new(<span class="self">self</span>.horizontal_bar.size, <span class="self">self</span>.bar_width),
-                    ),
-                    Color::new_f32(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="kw-2">*</span><span class="self">self</span>.scrollbar_opacity.get()),
+            context.gfx.draw_shape(<span class="kw-2">&amp;</span>Shape::filled_rect(
+                Rect::new(
+                    Point::new(<span class="self">self</span>.horizontal_bar.offset, size.height - <span class="self">self</span>.bar_width),
+                    Size::new(<span class="self">self</span>.horizontal_bar.size, <span class="self">self</span>.bar_width),
                 ),
-                Point::default(),
-                <span class="prelude-val">None</span>,
-                <span class="prelude-val">None</span>,
-            );
+                Color::new_f32(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="kw-2">*</span><span class="self">self</span>.scrollbar_opacity.get()),
+            ));
         }
 
         <span class="kw">if </span><span class="self">self</span>.vertical_bar.amount_hidden &gt; <span class="number">0 </span>{
-            context.gfx.draw_shape(
-                <span class="kw-2">&amp;</span>Shape::filled_rect(
-                    Rect::new(
-                        Point::new(size.width - <span class="self">self</span>.bar_width, <span class="self">self</span>.vertical_bar.offset),
-                        Size::new(<span class="self">self</span>.bar_width, <span class="self">self</span>.vertical_bar.size),
-                    ),
-                    Color::new_f32(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="kw-2">*</span><span class="self">self</span>.scrollbar_opacity.get()),
+            context.gfx.draw_shape(<span class="kw-2">&amp;</span>Shape::filled_rect(
+                Rect::new(
+                    Point::new(size.width - <span class="self">self</span>.bar_width, <span class="self">self</span>.vertical_bar.offset),
+                    Size::new(<span class="self">self</span>.bar_width, <span class="self">self</span>.vertical_bar.size),
                 ),
-                Point::default(),
-                <span class="prelude-val">None</span>,
-                <span class="prelude-val">None</span>,
-            );
+                Color::new_f32(<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="kw-2">*</span><span class="self">self</span>.scrollbar_opacity.get()),
+            ));
         }
     }
 
@@ -498,12 +478,12 @@
             Size::new(available_space.width.max(), available_space.height.max()).into_signed();
         <span class="kw">let </span>max_extents = Size::new(
             <span class="kw">if </span><span class="self">self</span>.enabled.x {
-                ConstraintLimit::ClippedAfter((control_size.width).into_unsigned())
+                ConstraintLimit::SizeToFit((control_size.width).into_unsigned())
             } <span class="kw">else </span>{
                 available_space.width
             },
             <span class="kw">if </span><span class="self">self</span>.enabled.y {
-                ConstraintLimit::ClippedAfter((control_size.height).into_unsigned())
+                ConstraintLimit::SizeToFit((control_size.height).into_unsigned())
             } <span class="kw">else </span>{
                 available_space.height
             },
@@ -608,8 +588,8 @@
 <span class="kw">fn </span>constrain_child(constraint: ConstraintLimit, measured: Px) -&gt; UPx {
     <span class="kw">let </span>measured = measured.into_unsigned();
     <span class="kw">match </span>constraint {
-        ConstraintLimit::Known(size) =&gt; size.min(measured),
-        ConstraintLimit::ClippedAfter(<span class="kw">_</span>) =&gt; measured,
+        ConstraintLimit::Fill(size) =&gt; size.min(measured),
+        ConstraintLimit::SizeToFit(<span class="kw">_</span>) =&gt; measured,
     }
 }
 

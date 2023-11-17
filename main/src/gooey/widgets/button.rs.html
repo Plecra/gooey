@@ -565,8 +565,6 @@
 <a href="#565" id="565">565</a>
 <a href="#566" id="566">566</a>
 <a href="#567" id="567">567</a>
-<a href="#568" id="568">568</a>
-<a href="#569" id="569">569</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
@@ -938,9 +936,7 @@
                     color,
                     two_lp_stroke,
                 );
-                context
-                    .gfx
-                    .draw_shape(<span class="kw-2">&amp;</span>focus_ring, Point::default(), <span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
+                context.gfx.draw_shape(<span class="kw-2">&amp;</span>focus_ring);
             } <span class="kw">else if </span>context.is_default() {
                 context.stroke_outline(context.get(<span class="kw-2">&amp;</span>OutlineColor), two_lp_stroke);
             } <span class="kw">else </span>{
