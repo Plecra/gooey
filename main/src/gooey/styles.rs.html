@@ -1912,6 +1912,64 @@
 <a href="#1912" id="1912">1912</a>
 <a href="#1913" id="1913">1913</a>
 <a href="#1914" id="1914">1914</a>
+<a href="#1915" id="1915">1915</a>
+<a href="#1916" id="1916">1916</a>
+<a href="#1917" id="1917">1917</a>
+<a href="#1918" id="1918">1918</a>
+<a href="#1919" id="1919">1919</a>
+<a href="#1920" id="1920">1920</a>
+<a href="#1921" id="1921">1921</a>
+<a href="#1922" id="1922">1922</a>
+<a href="#1923" id="1923">1923</a>
+<a href="#1924" id="1924">1924</a>
+<a href="#1925" id="1925">1925</a>
+<a href="#1926" id="1926">1926</a>
+<a href="#1927" id="1927">1927</a>
+<a href="#1928" id="1928">1928</a>
+<a href="#1929" id="1929">1929</a>
+<a href="#1930" id="1930">1930</a>
+<a href="#1931" id="1931">1931</a>
+<a href="#1932" id="1932">1932</a>
+<a href="#1933" id="1933">1933</a>
+<a href="#1934" id="1934">1934</a>
+<a href="#1935" id="1935">1935</a>
+<a href="#1936" id="1936">1936</a>
+<a href="#1937" id="1937">1937</a>
+<a href="#1938" id="1938">1938</a>
+<a href="#1939" id="1939">1939</a>
+<a href="#1940" id="1940">1940</a>
+<a href="#1941" id="1941">1941</a>
+<a href="#1942" id="1942">1942</a>
+<a href="#1943" id="1943">1943</a>
+<a href="#1944" id="1944">1944</a>
+<a href="#1945" id="1945">1945</a>
+<a href="#1946" id="1946">1946</a>
+<a href="#1947" id="1947">1947</a>
+<a href="#1948" id="1948">1948</a>
+<a href="#1949" id="1949">1949</a>
+<a href="#1950" id="1950">1950</a>
+<a href="#1951" id="1951">1951</a>
+<a href="#1952" id="1952">1952</a>
+<a href="#1953" id="1953">1953</a>
+<a href="#1954" id="1954">1954</a>
+<a href="#1955" id="1955">1955</a>
+<a href="#1956" id="1956">1956</a>
+<a href="#1957" id="1957">1957</a>
+<a href="#1958" id="1958">1958</a>
+<a href="#1959" id="1959">1959</a>
+<a href="#1960" id="1960">1960</a>
+<a href="#1961" id="1961">1961</a>
+<a href="#1962" id="1962">1962</a>
+<a href="#1963" id="1963">1963</a>
+<a href="#1964" id="1964">1964</a>
+<a href="#1965" id="1965">1965</a>
+<a href="#1966" id="1966">1966</a>
+<a href="#1967" id="1967">1967</a>
+<a href="#1968" id="1968">1968</a>
+<a href="#1969" id="1969">1969</a>
+<a href="#1970" id="1970">1970</a>
+<a href="#1971" id="1971">1971</a>
+<a href="#1972" id="1972">1972</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1926,7 +1984,8 @@
 
 <span class="kw">use </span>ahash::AHashMap;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
-<span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, Rect, ScreenScale, Size};
+<span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, IsZero, Rect, ScreenScale, Size};
+<span class="kw">use </span>kludgine::shapes::CornerRadii;
 <span class="kw">use </span>kludgine::Color;
 <span class="kw">use </span>palette::{IntoColor, Okhsl, OklabHue, Srgb};
 
@@ -2125,6 +2184,18 @@
     </span>Custom(CustomComponent),
 }
 
+<span class="kw">impl </span>Component {
+    <span class="doccomment">/// Returns a [`CustomComponent`] created from `component`.
+    ///
+    /// Custom components allow storing nearly any type in the style system.
+    </span><span class="kw">pub fn </span>custom&lt;T&gt;(component: T) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>T: RequireInvalidation + RefUnwindSafe + UnwindSafe + Debug + Send + Sync + <span class="lifetime">&#39;static</span>,
+    {
+        <span class="self">Self</span>::Custom(CustomComponent::new(component))
+    }
+}
+
 <span class="kw">impl </span>From&lt;Color&gt; <span class="kw">for </span>Component {
     <span class="kw">fn </span>from(value: Color) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Color(value)
@@ -2217,6 +2288,42 @@
     </span>}
 }
 
+<span class="kw">impl</span>&lt;Unit&gt; From&lt;CornerRadii&lt;Unit&gt;&gt; <span class="kw">for </span>Component
+<span class="kw">where
+    </span>Dimension: From&lt;Unit&gt;,
+    Unit: Debug + UnwindSafe + RefUnwindSafe + Send + Sync + <span class="lifetime">&#39;static</span>,
+{
+    <span class="kw">fn </span>from(radii: CornerRadii&lt;Unit&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>radii = CornerRadii {
+            top_left: Dimension::from(radii.top_left),
+            top_right: Dimension::from(radii.top_right),
+            bottom_right: Dimension::from(radii.bottom_right),
+            bottom_left: Dimension::from(radii.bottom_left),
+        };
+        Component::custom(radii)
+    }
+}
+
+<span class="kw">impl</span>&lt;Unit&gt; RequireInvalidation <span class="kw">for </span>CornerRadii&lt;Unit&gt; {
+    <span class="kw">fn </span>requires_invalidation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="bool-val">true
+    </span>}
+}
+
+<span class="kw">impl </span>TryFrom&lt;Component&gt; <span class="kw">for </span>CornerRadii&lt;Dimension&gt; {
+    <span class="kw">type </span>Error = Component;
+
+    <span class="kw">fn </span>try_from(value: Component) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+        <span class="kw">match </span>value {
+            Component::Custom(custom) =&gt; custom
+                .downcast()
+                .copied()
+                .ok_or_else(|| Component::Custom(custom)),
+            other =&gt; <span class="prelude-val">Err</span>(other),
+        }
+    }
+}
+
 <span class="doccomment">/// A 1-dimensional measurement that may be automatically calculated.
 </span><span class="attr">#[derive(Debug, Clone, Copy)]
 </span><span class="kw">pub enum </span>FlexibleDimension {
@@ -2284,6 +2391,15 @@
 <span class="kw">impl </span>From&lt;Lp&gt; <span class="kw">for </span>Dimension {
     <span class="kw">fn </span>from(value: Lp) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Lp(value)
+    }
+}
+
+<span class="kw">impl </span>IsZero <span class="kw">for </span>Dimension {
+    <span class="kw">fn </span>is_zero(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="kw">match </span><span class="self">self </span>{
+            Dimension::Px(x) =&gt; x.is_zero(),
+            Dimension::Lp(x) =&gt; x.is_zero(),
+        }
     }
 }
 

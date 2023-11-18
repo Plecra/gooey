@@ -135,9 +135,14 @@
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 
 </span><span class="kw">use </span>kludgine::figures::units::Lp;
+<span class="kw">use </span>kludgine::shapes::CornerRadii;
 <span class="kw">use </span>kludgine::Color;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::easings::{EaseInOutQuadradic, EaseInQuadradic, EaseOutQuadradic};
@@ -270,6 +275,9 @@
         <span class="doccomment">/// A [`Color`] to be used as a background color for widgets that render an
         /// opaque background.
         </span>OpaqueWidgetColor(Color, <span class="string">&quot;opaque_color&quot;</span>, .surface.opaque_widget)
+        <span class="doccomment">/// A set of radius descriptions for how much roundness to apply to the
+        /// shapes of widgets.
+        </span>CornerRadius(CornerRadii&lt;Dimension&gt;, <span class="string">&quot;corner_radius&quot;</span>, CornerRadii::from(Dimension::Lp(Lp::points(<span class="number">100</span>))))
     }
 }
 </code></pre></div></section></main></body></html>

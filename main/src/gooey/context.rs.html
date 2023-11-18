@@ -1274,6 +1274,40 @@
 <a href="#1274" id="1274">1274</a>
 <a href="#1275" id="1275">1275</a>
 <a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
+<a href="#1283" id="1283">1283</a>
+<a href="#1284" id="1284">1284</a>
+<a href="#1285" id="1285">1285</a>
+<a href="#1286" id="1286">1286</a>
+<a href="#1287" id="1287">1287</a>
+<a href="#1288" id="1288">1288</a>
+<a href="#1289" id="1289">1289</a>
+<a href="#1290" id="1290">1290</a>
+<a href="#1291" id="1291">1291</a>
+<a href="#1292" id="1292">1292</a>
+<a href="#1293" id="1293">1293</a>
+<a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
+<a href="#1296" id="1296">1296</a>
+<a href="#1297" id="1297">1297</a>
+<a href="#1298" id="1298">1298</a>
+<a href="#1299" id="1299">1299</a>
+<a href="#1300" id="1300">1300</a>
+<a href="#1301" id="1301">1301</a>
+<a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -1286,12 +1320,12 @@
     DeviceId, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
-<span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Rect, ScreenScale, Size};
+<span class="kw">use </span>kludgine::figures::{IntoSigned, IsZero, Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
 <span class="kw">use </span>kludgine::{Color, Kludgine};
 
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{HighlightColor, LayoutOrder, WidgetBackground};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{CornerRadius, HighlightColor, LayoutOrder, WidgetBackground};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, Styles, Theme, ThemePair};
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
@@ -1795,15 +1829,49 @@
         }
     }
 
+    <span class="doccomment">/// Fills the background of this widget with `color`, honoring the current
+    /// [`CornerRadius`] setting.
+    ///
+    /// If the alpha channel of `color` is 0, this function does nothing.
+    </span><span class="kw">pub fn </span>fill(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color) {
+        <span class="kw">if </span>color.alpha() &gt; <span class="number">0 </span>{
+            <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
+
+            <span class="kw">let </span>radii = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>CornerRadius);
+            <span class="kw">let </span>radii = radii.map(|r| r.into_px(<span class="self">self</span>.gfx.scale()));
+
+            <span class="kw">let </span>focus_ring = <span class="kw">if </span>radii.is_zero() {
+                Shape::filled_rect(visible_rect, color)
+            } <span class="kw">else </span>{
+                Shape::filled_round_rect(visible_rect, radii, color)
+            };
+            <span class="self">self</span>.gfx.draw_shape(<span class="kw-2">&amp;</span>focus_ring);
+        }
+    }
+
     <span class="doccomment">/// Strokes an outline around this widget&#39;s contents.
     </span><span class="kw">pub fn </span>stroke_outline&lt;Unit&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color, options: StrokeOptions&lt;Unit&gt;)
     <span class="kw">where
-        </span>Unit: ScreenScale&lt;Px = Px, Lp = Lp, UPx = UPx&gt;,
+        </span>Unit: ScreenScale&lt;Px = Px, Lp = Lp, UPx = UPx&gt; + IsZero,
     {
-        <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
-        <span class="kw">let </span>focus_ring =
-            Shape::stroked_rect(visible_rect, color, options.into_px(<span class="self">self</span>.gfx.scale()));
-        <span class="self">self</span>.gfx.draw_shape(<span class="kw-2">&amp;</span>focus_ring);
+        <span class="kw">if </span>color.alpha() &gt; <span class="number">0 </span>{
+            <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
+
+            <span class="kw">let </span>radii = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>CornerRadius);
+            <span class="kw">let </span>radii = radii.map(|r| r.into_px(<span class="self">self</span>.gfx.scale()));
+
+            <span class="kw">let </span>focus_ring = <span class="kw">if </span>radii.is_zero() {
+                Shape::stroked_rect(visible_rect, color, options.into_px(<span class="self">self</span>.gfx.scale()))
+            } <span class="kw">else </span>{
+                Shape::stroked_round_rect(
+                    visible_rect,
+                    radii,
+                    color,
+                    options.into_px(<span class="self">self</span>.gfx.scale()),
+                )
+            };
+            <span class="self">self</span>.gfx.draw_shape(<span class="kw-2">&amp;</span>focus_ring);
+        }
     }
 
     <span class="doccomment">/// Renders the default focus ring for this widget.

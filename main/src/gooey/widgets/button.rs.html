@@ -903,7 +903,7 @@
         }
 
         <span class="kw">let </span>style = <span class="self">self</span>.current_style(context);
-        context.gfx.fill(style.background);
+        context.fill(style.background);
 
         <span class="kw">let </span>two_lp_stroke = StrokeOptions::lp_wide(Lp::points(<span class="number">2</span>));
         context.stroke_outline(style.outline, two_lp_stroke);
