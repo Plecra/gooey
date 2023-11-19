@@ -1263,6 +1263,27 @@
 <a href="#1263" id="1263">1263</a>
 <a href="#1264" id="1264">1264</a>
 <a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
+<a href="#1271" id="1271">1271</a>
+<a href="#1272" id="1272">1272</a>
+<a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a>
+<a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
+<a href="#1283" id="1283">1283</a>
+<a href="#1284" id="1284">1284</a>
+<a href="#1285" id="1285">1285</a>
+<a href="#1286" id="1286">1286</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A text input widget.
 
 </span><span class="kw">use </span>std::borrow::{Borrow, BorrowMut, Cow};
@@ -1761,8 +1782,10 @@
         </span><span class="kw">if </span>mask_bytes &gt; <span class="number">0 </span>{
             <span class="self">self</span>.value.map_ref(|value| {
                 <span class="kw">let </span>value = value.as_str();
+                <span class="macro">assert!</span>(cursor.offset &lt;= value.len());
                 cursor.offset = value[..cursor.offset].graphemes(<span class="bool-val">true</span>).count() * mask_bytes;
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(selection) = <span class="kw-2">&amp;mut </span>selection {
+                    <span class="macro">assert!</span>(selection.offset &lt;= value.len());
                     selection.offset =
                         value[..selection.offset].graphemes(<span class="bool-val">true</span>).count() * mask_bytes;
                 }
@@ -1918,17 +1941,36 @@
         location: Point&lt;Px&gt;,
         context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Cursor {
+        <span class="kw">let </span><span class="kw-2">mut </span>cursor = <span class="self">self</span>.cached_cursor_from_point(location, context);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(symbol) = <span class="self">self</span>.mask.graphemes(<span class="bool-val">true</span>).next() {
+            <span class="kw">let </span>grapheme_offset = cursor.offset / symbol.len();
+            cursor.offset = <span class="self">self</span>.value.map_ref(|value| {
+                value
+                    .as_str()
+                    .graphemes(<span class="bool-val">true</span>)
+                    .take(grapheme_offset)
+                    .map(str::len)
+                    .sum::&lt;usize&gt;()
+            });
+        }
+        cursor
+    }
+
+    <span class="kw">fn </span>cached_cursor_from_point(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        location: Point&lt;Px&gt;,
+        context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) -&gt; Cursor {
         <span class="kw">let </span><span class="prelude-val">Some</span>(cache) = <span class="kw-2">&amp;</span><span class="self">self</span>.cache <span class="kw">else </span>{
             <span class="kw">return </span>Cursor::default();
         };
 
-        <span class="kw">let </span>text_length = <span class="self">self</span>.value.map_ref(|value| value.as_str().len());
         <span class="kw">let </span>padding = context
             .get(<span class="kw-2">&amp;</span>IntrinsicPadding)
             .into_px(context.kludgine.scale());
-        <span class="kw">let </span>location = location - padding;
+        <span class="kw">let </span><span class="kw-2">mut </span>location = location - padding;
         <span class="kw">if </span>location.y &lt; <span class="number">0 </span>{
-            <span class="kw">return </span>Cursor::default();
+            location.y = Px::ZERO;
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>closest: <span class="prelude-ty">Option</span>&lt;(Cursor, i32)&gt; = <span class="prelude-val">None</span>;
@@ -1951,7 +1993,7 @@
                 &amp;&amp; relative.y &lt; cache.measured.line_height
             {
                 <span class="kw">return if </span>relative.x &gt; rect.size.width / <span class="number">2 </span>{
-                    <span class="kw">if </span>glyph.info.start + <span class="number">1 </span>&lt; text_length {
+                    <span class="kw">if </span>glyph.info.start + <span class="number">1 </span>&lt; cache.bytes {
                         Cursor {
                             offset: glyph.info.start + <span class="number">1</span>,
                             affinity: Affinity::Before,
@@ -1995,7 +2037,7 @@
             closest
         } <span class="kw">else </span>{
             Cursor {
-                offset: text_length,
+                offset: cache.bytes,
                 affinity: Affinity::After,
             }
         }
