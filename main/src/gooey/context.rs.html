@@ -1307,8 +1307,6 @@
 <a href="#1307" id="1307">1307</a>
 <a href="#1308" id="1308">1308</a>
 <a href="#1309" id="1309">1309</a>
-<a href="#1310" id="1310">1310</a>
-<a href="#1311" id="1311">1311</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -1856,12 +1854,10 @@
         </span>Unit: ScreenScale&lt;Px = Px, Lp = Lp, UPx = UPx&gt; + Zero,
     {
         <span class="kw">if </span>color.alpha() &gt; <span class="number">0 </span>{
-            <span class="kw">let </span><span class="kw-2">mut </span>options = options.colored(color).into_px(<span class="self">self</span>.gfx.scale());
-            options.line_width = options.line_width.round();
-            <span class="kw">let </span>inset = options.line_width / <span class="number">2</span>;
+            <span class="kw">let </span>options = options.colored(color).into_px(<span class="self">self</span>.gfx.scale());
             <span class="kw">let </span>visible_rect = Rect::new(
-                Point::squared(inset),
-                <span class="self">self</span>.gfx.region().size - Point::squared(inset),
+                Point::squared(options.line_width / <span class="number">2</span>),
+                <span class="self">self</span>.gfx.region().size - Point::squared(options.line_width),
             );
 
             <span class="kw">let </span>radii = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>CornerRadius);
