@@ -1284,6 +1284,9 @@
 <a href="#1284" id="1284">1284</a>
 <a href="#1285" id="1285">1285</a>
 <a href="#1286" id="1286">1286</a>
+<a href="#1287" id="1287">1287</a>
+<a href="#1288" id="1288">1288</a>
+<a href="#1289" id="1289">1289</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A text input widget.
 
 </span><span class="kw">use </span>std::borrow::{Borrow, BorrowMut, Cow};
@@ -1971,6 +1974,9 @@
         <span class="kw">let </span><span class="kw-2">mut </span>location = location - padding;
         <span class="kw">if </span>location.y &lt; <span class="number">0 </span>{
             location.y = Px::ZERO;
+        }
+        <span class="kw">if </span>location.x &lt; <span class="number">0 </span>{
+            location.x = Px::ZERO;
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>closest: <span class="prelude-ty">Option</span>&lt;(Cursor, i32)&gt; = <span class="prelude-val">None</span>;
