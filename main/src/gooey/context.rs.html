@@ -1320,7 +1320,7 @@
     DeviceId, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
-<span class="kw">use </span>kludgine::figures::{IntoSigned, IsZero, Point, Rect, ScreenScale, Size};
+<span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Px2D, Rect, ScreenScale, Size, Zero};
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
 <span class="kw">use </span>kludgine::{Color, Kludgine};
 
@@ -1835,7 +1835,7 @@
     /// If the alpha channel of `color` is 0, this function does nothing.
     </span><span class="kw">pub fn </span>fill(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color) {
         <span class="kw">if </span>color.alpha() &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
+            <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - Size::px(<span class="number">1</span>, <span class="number">1</span>));
 
             <span class="kw">let </span>radii = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>CornerRadius);
             <span class="kw">let </span>radii = radii.map(|r| r.into_px(<span class="self">self</span>.gfx.scale()));
@@ -1852,23 +1852,23 @@
     <span class="doccomment">/// Strokes an outline around this widget&#39;s contents.
     </span><span class="kw">pub fn </span>stroke_outline&lt;Unit&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color, options: StrokeOptions&lt;Unit&gt;)
     <span class="kw">where
-        </span>Unit: ScreenScale&lt;Px = Px, Lp = Lp, UPx = UPx&gt; + IsZero,
+        </span>Unit: ScreenScale&lt;Px = Px, Lp = Lp, UPx = UPx&gt; + Zero,
     {
         <span class="kw">if </span>color.alpha() &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>visible_rect = Rect::from(<span class="self">self</span>.gfx.region().size - (Px(<span class="number">1</span>), Px(<span class="number">1</span>)));
+            <span class="kw">let </span>options = options.colored(color).into_px(<span class="self">self</span>.gfx.scale());
+            <span class="kw">let </span>inset = options.line_width;
+            <span class="kw">let </span>visible_rect = Rect::new(
+                Point::squared(inset),
+                <span class="self">self</span>.gfx.region().size - Point::new(inset * <span class="number">2</span>, inset * <span class="number">2</span>),
+            );
 
             <span class="kw">let </span>radii = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>CornerRadius);
             <span class="kw">let </span>radii = radii.map(|r| r.into_px(<span class="self">self</span>.gfx.scale()));
 
             <span class="kw">let </span>focus_ring = <span class="kw">if </span>radii.is_zero() {
-                Shape::stroked_rect(visible_rect, color, options.into_px(<span class="self">self</span>.gfx.scale()))
+                Shape::stroked_rect(visible_rect, options.into_px(<span class="self">self</span>.gfx.scale()))
             } <span class="kw">else </span>{
-                Shape::stroked_round_rect(
-                    visible_rect,
-                    radii,
-                    color,
-                    options.into_px(<span class="self">self</span>.gfx.scale()),
-                )
+                Shape::stroked_round_rect(visible_rect, radii, options)
             };
             <span class="self">self</span>.gfx.draw_shape(<span class="kw-2">&amp;</span>focus_ring);
         }

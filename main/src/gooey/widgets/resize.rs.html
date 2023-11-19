@@ -128,9 +128,6 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, ScreenScale, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
@@ -231,10 +228,7 @@
         <span class="kw">let </span>size = <span class="kw">if let </span>(<span class="prelude-val">Some</span>(width), <span class="prelude-val">Some</span>(height)) =
             (<span class="self">self</span>.width.exact_dimension(), <span class="self">self</span>.height.exact_dimension())
         {
-            Size::new(
-                width.into_upx(context.gfx.scale()),
-                height.into_upx(context.gfx.scale()),
-            )
+            Size::new(width, height).map(|i| i.into_upx(context.gfx.scale()))
         } <span class="kw">else </span>{
             <span class="kw">let </span>available_space = Size::new(
                 override_constraint(available_space.width, <span class="self">self</span>.width, context.gfx.scale()),

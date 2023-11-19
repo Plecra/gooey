@@ -2271,7 +2271,7 @@
 
     <span class="doccomment">/// Returns a new widget that renders `color` behind `self`.
     </span><span class="kw">fn </span>background_color(<span class="self">self</span>, color: <span class="kw">impl </span>IntoValue&lt;Color&gt;) -&gt; Container {
-        <span class="self">self</span>.contain().pad_by(Px(<span class="number">0</span>)).background_color(color)
+        <span class="self">self</span>.contain().pad_by(Px::ZERO).background_color(color)
     }
 
     <span class="doccomment">/// Wraps `self` with the default padding.

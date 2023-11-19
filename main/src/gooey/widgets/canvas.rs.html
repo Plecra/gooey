@@ -90,7 +90,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::{GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::value::Dynamic;
 <span class="kw">use </span><span class="kw">crate</span>::widget::Widget;
-<span class="kw">use </span><span class="kw">crate</span>::Tick;
+<span class="kw">use crate</span>::{ConstraintLimit, Tick};
 
 <span class="doccomment">/// A 2d drawable surface.
 </span><span class="attr">#[must_use]
@@ -138,7 +138,7 @@
         available_space: Size&lt;<span class="kw">crate</span>::ConstraintLimit&gt;,
         _context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        Size::new(available_space.width.max(), available_space.height.max())
+        available_space.map(ConstraintLimit::max)
     }
 }
 

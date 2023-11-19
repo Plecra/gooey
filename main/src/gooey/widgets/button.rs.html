@@ -552,19 +552,6 @@
 <a href="#552" id="552">552</a>
 <a href="#553" id="553">553</a>
 <a href="#554" id="554">554</a>
-<a href="#555" id="555">555</a>
-<a href="#556" id="556">556</a>
-<a href="#557" id="557">557</a>
-<a href="#558" id="558">558</a>
-<a href="#559" id="559">559</a>
-<a href="#560" id="560">560</a>
-<a href="#561" id="561">561</a>
-<a href="#562" id="562">562</a>
-<a href="#563" id="563">563</a>
-<a href="#564" id="564">564</a>
-<a href="#565" id="565">565</a>
-<a href="#566" id="566">566</a>
-<a href="#567" id="567">567</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
@@ -587,6 +574,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{Callback, EventHandling, MakeWidget, Widget, WidgetRef, HANDLED, IGNORED};
+<span class="kw">use </span><span class="kw">crate</span>::FitMeasuredSize;
 
 <span class="doccomment">/// A clickable button.
 </span><span class="attr">#[derive(Debug)]
@@ -929,12 +917,8 @@
                 <span class="kw">let </span>inset = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_px(context.gfx.scale());
 
                 <span class="kw">let </span>focus_ring = Shape::stroked_rect(
-                    Rect::new(
-                        Point::new(inset, inset),
-                        context.gfx.region().size - inset * <span class="number">2</span>,
-                    ),
-                    color,
-                    two_lp_stroke,
+                    Rect::new(Point::squared(inset), context.gfx.region().size - inset * <span class="number">2</span>),
+                    two_lp_stroke.colored(color),
                 );
                 context.gfx.draw_shape(<span class="kw-2">&amp;</span>focus_ring);
             } <span class="kw">else if </span>context.is_default() {
@@ -1019,22 +1003,12 @@
         <span class="kw">let </span>padding = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_upx(context.gfx.scale());
         <span class="kw">let </span>double_padding = padding * <span class="number">2</span>;
         <span class="kw">let </span>mounted = <span class="self">self</span>.content.mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
-        <span class="kw">let </span>available_space = Size::new(
-            available_space.width - double_padding,
-            available_space.height - double_padding,
-        );
+        <span class="kw">let </span>available_space = available_space.map(|space| space - double_padding);
         <span class="kw">let </span>size = context.for_other(<span class="kw-2">&amp;</span>mounted).layout(available_space);
-        <span class="kw">let </span>size = Size::new(
-            available_space
-                .width
-                .fit_measured(size.width, context.gfx.scale()),
-            available_space
-                .height
-                .fit_measured(size.height, context.gfx.scale()),
-        );
+        <span class="kw">let </span>size = available_space.fit_measured(size, context.gfx.scale());
         context.set_child_layout(
             <span class="kw-2">&amp;</span>mounted,
-            Rect::new(Point::new(padding, padding), size).into_signed(),
+            Rect::new(Point::squared(padding), size).into_signed(),
         );
         size + double_padding
     }

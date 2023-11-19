@@ -217,8 +217,6 @@
 <a href="#217" id="217">217</a>
 <a href="#218" id="218">218</a>
 <a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A tri-state, labelable checkbox widget.
 </span><span class="kw">use </span>std::error::Error;
 <span class="kw">use </span>std::fmt::Display;
@@ -383,7 +381,7 @@
         <span class="kw">let </span>label_inset = checkbox_size + padding;
         <span class="kw">let </span>size_with_checkbox = Size::new(size.width + label_inset, size.height).into_unsigned();
         WrappedLayout {
-            child: Rect::new(Point::new(label_inset, Px(<span class="number">0</span>)), size),
+            child: Rect::new(Point::new(label_inset, Px::ZERO), size),
             size: size_with_checkbox,
         }
     }
@@ -391,10 +389,7 @@
     <span class="kw">fn </span>redraw_background(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>checkbox_size = context.get(<span class="kw-2">&amp;</span>LineHeight).into_px(context.gfx.scale());
         <span class="kw">let </span>padding = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_px(context.gfx.scale());
-        <span class="kw">let </span>checkbox_rect = Rect::new(
-            Point::new(padding, padding),
-            Size::new(checkbox_size, checkbox_size),
-        );
+        <span class="kw">let </span>checkbox_rect = Rect::new(Point::squared(padding), Size::squared(checkbox_size));
         <span class="kw">let </span>stroke_options = StrokeOptions::lp_wide(Lp::points(<span class="number">2</span>)).into_px(context.gfx.scale());
         <span class="kw">match </span><span class="self">self</span>.value.get_tracking_refresh(context) {
             state @ (CheckboxState::Checked | CheckboxState::Indeterminant) =&gt; {
@@ -417,7 +412,7 @@
                                 icon_area.origin.y,
                             ))
                             .build()
-                            .stroke(text_color, stroke_options),
+                            .stroke(stroke_options.colored(text_color)),
                     );
                 } <span class="kw">else </span>{
                     context.gfx.draw_shape(
@@ -427,15 +422,16 @@
                                 center.y,
                             ))
                             .build()
-                            .stroke(text_color, stroke_options),
+                            .stroke(stroke_options.colored(text_color)),
                     );
                 }
             }
             CheckboxState::Unchecked =&gt; {
                 <span class="kw">let </span>color = context.get(<span class="kw-2">&amp;</span>OutlineColor);
-                context
-                    .gfx
-                    .draw_shape(<span class="kw-2">&amp;</span>Shape::stroked_rect(checkbox_rect, color, stroke_options));
+                context.gfx.draw_shape(<span class="kw-2">&amp;</span>Shape::stroked_rect(
+                    checkbox_rect,
+                    stroke_options.colored(color),
+                ));
             }
         }
     }

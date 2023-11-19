@@ -165,6 +165,27 @@
 <a href="#165" id="165">165</a>
 <a href="#166" id="166">166</a>
 <a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
 </pre></div><pre class="rust"><code><span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../.crate-docs.md&quot;</span>)]
 #![warn(clippy::pedantic, missing_docs)]
 #![allow(clippy::module_name_repetitions, clippy::missing_errors_doc)]
@@ -192,7 +213,7 @@
 <span class="kw">pub use </span>kludgine;
 <span class="kw">use </span>kludgine::app::winit::error::EventLoopError;
 <span class="kw">use </span>kludgine::figures::units::UPx;
-<span class="kw">use </span>kludgine::figures::{Fraction, ScreenUnit};
+<span class="kw">use </span>kludgine::figures::{Fraction, ScreenUnit, Size};
 <span class="kw">pub use </span>names::Name;
 <span class="kw">pub use </span>utils::{Lazy, WithClone};
 
@@ -232,6 +253,27 @@
             ConstraintLimit::Fill(size) =&gt; size.max(measured),
             ConstraintLimit::SizeToFit(<span class="kw">_</span>) =&gt; measured,
         }
+    }
+}
+
+<span class="doccomment">/// An extension trait for `Size&lt;ConstraintLimit&gt;`.
+</span><span class="kw">pub trait </span>FitMeasuredSize {
+    <span class="doccomment">/// Returns the result of calling [`ConstraintLimit::fit_measured`] for each
+    /// matching component in `self` and `measured`.
+    </span><span class="kw">fn </span>fit_measured&lt;Unit&gt;(<span class="self">self</span>, measured: Size&lt;Unit&gt;, scale: Fraction) -&gt; Size&lt;UPx&gt;
+    <span class="kw">where
+        </span>Unit: ScreenUnit;
+}
+
+<span class="kw">impl </span>FitMeasuredSize <span class="kw">for </span>Size&lt;ConstraintLimit&gt; {
+    <span class="kw">fn </span>fit_measured&lt;Unit&gt;(<span class="self">self</span>, measured: Size&lt;Unit&gt;, scale: Fraction) -&gt; Size&lt;UPx&gt;
+    <span class="kw">where
+        </span>Unit: ScreenUnit,
+    {
+        Size::new(
+            <span class="self">self</span>.width.fit_measured(measured.width, scale),
+            <span class="self">self</span>.height.fit_measured(measured.height, scale),
+        )
     }
 }
 

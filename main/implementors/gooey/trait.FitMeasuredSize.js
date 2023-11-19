@@ -1,3 +1,3 @@
 (function() {var implementors = {
-"gooey":[["impl IsZero for <a class=\"enum\" href=\"gooey/styles/enum.Dimension.html\" title=\"enum gooey::styles::Dimension\">Dimension</a>"]]
+"gooey":[]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

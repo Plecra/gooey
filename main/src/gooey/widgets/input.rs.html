@@ -1260,6 +1260,9 @@
 <a href="#1260" id="1260">1260</a>
 <a href="#1261" id="1261">1261</a>
 <a href="#1262" id="1262">1262</a>
+<a href="#1263" id="1263">1263</a>
+<a href="#1264" id="1264">1264</a>
+<a href="#1265" id="1265">1265</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A text input widget.
 
 </span><span class="kw">use </span>std::borrow::{Borrow, BorrowMut, Cow};
@@ -1784,7 +1787,7 @@
     ) -&gt; (Point&lt;Px&gt;, Px) {
         <span class="kw">if </span>measured.glyphs.is_empty() || (cursor.offset == <span class="number">0 </span>&amp;&amp; cursor.affinity == Affinity::Before)
         {
-            <span class="kw">return </span>(Point::default(), Px(<span class="number">0</span>));
+            <span class="kw">return </span>(Point::default(), Px::ZERO);
         }
 
         <span class="comment">// Space between glyphs isn&#39;t represented in the glyphs. If the cursor rests
@@ -1815,7 +1818,7 @@
             ) {
                 (Ordering::Less | Ordering::Equal, Ordering::Less) =&gt; {
                     <span class="comment">// cosmic text may have grouped multiple graphemes into a single glyph.
-                    </span><span class="kw">let </span><span class="kw-2">mut </span>grapheme_offset = Px(<span class="number">0</span>);
+                    </span><span class="kw">let </span><span class="kw-2">mut </span>grapheme_offset = Px::ZERO;
                     <span class="kw">if </span>glyph.info.start &lt; cursor.offset {
                         <span class="kw">let </span>clustered_bytes = glyph.info.end - glyph.info.start;
                         <span class="kw">if </span>clustered_bytes &gt; <span class="number">1 </span>{
@@ -1829,8 +1832,8 @@
                     <span class="kw">return </span>(
                         Point::new(
                             rect.origin.x + grapheme_offset,
-                            measured.line_height.saturating_mul(Px(
-                                i32::try_from(glyph.info.line).unwrap_or(i32::MAX)
+                            measured.line_height.saturating_mul(Px::new(
+                                i32::try_from(glyph.info.line).unwrap_or(i32::MAX),
                             )),
                         ),
                         rect.size.width,
@@ -1848,9 +1851,9 @@
 
         <span class="kw">if </span>closest_after_index == usize::MAX {
             <span class="kw">let </span>bottom_right = <span class="kw-2">&amp;</span>measured.glyphs[bottom_right_index];
-            <span class="kw">let </span>bottom_y = measured
-                .line_height
-                .saturating_mul(Px(i32::try_from(bottom_right.info.line).unwrap_or(i32::MAX)));
+            <span class="kw">let </span>bottom_y = measured.line_height.saturating_mul(Px::new(
+                i32::try_from(bottom_right.info.line).unwrap_or(i32::MAX),
+            ));
             <span class="comment">// No glyph could be found that started/contained the cursors offset.
             </span><span class="kw">let </span><span class="kw-2">mut </span>bottom_right_cursor = Point::new(
                 bottom_right_rect.origin.x + bottom_right_rect.size.width,
@@ -1871,7 +1874,7 @@
             }
 
             <span class="comment">// The cursor should be placed after the bottom_right glyph
-            </span>(bottom_right_cursor, Px(<span class="number">0</span>))
+            </span>(bottom_right_cursor, Px::ZERO)
         } <span class="kw">else </span>{
             <span class="kw">let </span>before = <span class="kw-2">&amp;</span>measured.glyphs[closest_before_index];
             <span class="kw">let </span>after = <span class="kw-2">&amp;</span>measured.glyphs[closest_after_index];
@@ -1879,7 +1882,7 @@
             <span class="kw">let </span>after_rect = after.rect();
             <span class="kw">let </span>before_y = measured
                 .line_height
-                .saturating_mul(Px(i32::try_from(before.info.line).unwrap_or(i32::MAX)));
+                .saturating_mul(Px::new(i32::try_from(before.info.line).unwrap_or(i32::MAX)));
 
             <span class="kw">if </span>before.info.line == after.info.line {
                 <span class="kw">let </span>before_right = before_rect.origin.x + before_rect.size.width;
@@ -1901,7 +1904,10 @@
                         origin.x += before_rect.size.width;
                         (origin, before_y)
                     }
-                    Affinity::After =&gt; (Point::new(Px(<span class="number">0</span>), before_y + measured.line_height), Px(<span class="number">0</span>)),
+                    Affinity::After =&gt; (
+                        Point::new(Px::ZERO, before_y + measured.line_height),
+                        Px::ZERO,
+                    ),
                 }
             }
         }
@@ -1927,7 +1933,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>closest: <span class="prelude-ty">Option</span>&lt;(Cursor, i32)&gt; = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>current_line = usize::MAX;
-        <span class="kw">let </span><span class="kw-2">mut </span>current_line_y = Px(<span class="number">0</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>current_line_y = Px::ZERO;
         <span class="kw">for </span>glyph <span class="kw">in </span><span class="kw-2">&amp;</span>cache.measured.glyphs {
             <span class="kw">if </span>current_line != glyph.info.line {
                 current_line = glyph.info.line;
@@ -1935,7 +1941,7 @@
                 current_line_y = cache
                     .measured
                     .line_height
-                    .saturating_mul(Px(i32::try_from(current_line).unwrap_or(i32::MAX)));
+                    .saturating_mul(Px::new(i32::try_from(current_line).unwrap_or(i32::MAX)));
             }
             <span class="kw">let </span>rect = glyph.rect();
             <span class="kw">let </span>relative = location - Point::new(rect.origin.x, current_line_y);
@@ -1966,7 +1972,7 @@
 
             <span class="comment">// Make relative be relative to the center of the glyph for a nearest search.
             </span><span class="kw">let </span>relative = relative + rect.size / <span class="number">2</span>;
-            <span class="kw">let </span>xy = (relative.x.<span class="number">0</span>.saturating_mul(relative.y.<span class="number">0</span>)).saturating_abs();
+            <span class="kw">let </span>xy = (relative.x.get().saturating_mul(relative.y.get())).saturating_abs();
             <span class="kw">match </span>closest {
                 <span class="prelude-val">Some</span>((<span class="kw">_</span>, closest_xy)) <span class="kw">if </span>xy &lt; closest_xy =&gt; {
                     closest = <span class="prelude-val">Some</span>((
@@ -2134,7 +2140,7 @@
                         context.gfx.draw_shape(
                             Shape::filled_rect(
                                 Rect::new(
-                                    Point::new(Px(<span class="number">0</span>), bottom_of_first_line),
+                                    Point::new(Px::ZERO, bottom_of_first_line),
                                     Size::new(size.width.into_signed(), distance_between),
                                 ),
                                 highlight,
@@ -2146,7 +2152,7 @@
                     </span>context.gfx.draw_shape(
                         Shape::filled_rect(
                             Rect::new(
-                                Point::new(Px(<span class="number">0</span>), end_position.y),
+                                Point::new(Px::ZERO, end_position.y),
                                 Size::new(end_position.x + end_width, cache.measured.line_height),
                             ),
                             highlight,
@@ -2201,7 +2207,7 @@
 
         <span class="kw">let </span>cache = <span class="self">self</span>.layout_text(<span class="prelude-val">Some</span>(width.into_signed()), <span class="kw-2">&amp;mut </span>context.graphics);
 
-        cache.measured.size.into_unsigned() + Size::new(padding * <span class="number">2</span>, padding * <span class="number">2</span>)
+        cache.measured.size.into_unsigned() + Size::squared(padding * <span class="number">2</span>)
     }
 
     <span class="kw">fn </span>keyboard_input(

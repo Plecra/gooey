@@ -409,9 +409,9 @@
             value: value.into_dynamic(),
             minimum: min.into_value(),
             maximum: max.into_value(),
-            knob_size: UPx(<span class="number">0</span>),
+            knob_size: UPx::ZERO,
             horizontal: <span class="bool-val">true</span>,
-            rendered_size: Px(<span class="number">0</span>),
+            rendered_size: Px::ZERO,
         }
     }
 
@@ -491,7 +491,7 @@
         } <span class="kw">else </span>{
             position.y
         };
-        <span class="kw">let </span>position = position.clamp(Px(<span class="number">0</span>), <span class="self">self</span>.rendered_size);
+        <span class="kw">let </span>position = position.clamp(Px::ZERO, <span class="self">self</span>.rendered_size);
         <span class="kw">let </span>percent = position.into_float() / <span class="self">self</span>.rendered_size.into_float();
         <span class="kw">let </span>min = <span class="self">self</span>.minimum.get();
         <span class="kw">let </span>max = <span class="self">self</span>.maximum.get();

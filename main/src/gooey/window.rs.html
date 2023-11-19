@@ -1184,12 +1184,6 @@
 <a href="#1184" id="1184">1184</a>
 <a href="#1185" id="1185">1185</a>
 <a href="#1186" id="1186">1186</a>
-<a href="#1187" id="1187">1187</a>
-<a href="#1188" id="1188">1188</a>
-<a href="#1189" id="1189">1189</a>
-<a href="#1190" id="1190">1190</a>
-<a href="#1191" id="1191">1191</a>
-<a href="#1192" id="1192">1192</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
@@ -1588,7 +1582,7 @@
                 <span class="kw">let </span>min_width = resize
                     .width
                     .minimum()
-                    .map_or(Px(<span class="number">0</span>), |width| width.into_px(graphics.scale()));
+                    .map_or(Px::ZERO, |width| width.into_px(graphics.scale()));
                 <span class="kw">let </span>max_width = resize
                     .width
                     .maximum()
@@ -1596,7 +1590,7 @@
                 <span class="kw">let </span>min_height = resize
                     .height
                     .minimum()
-                    .map_or(Px(<span class="number">0</span>), |height| height.into_px(graphics.scale()));
+                    .map_or(Px::ZERO, |height| height.into_px(graphics.scale()));
                 <span class="kw">let </span>max_height = resize
                     .height
                     .maximum()
@@ -1758,15 +1752,9 @@
         }
 
         <span class="kw">let </span>actual_size = layout_context.layout(<span class="kw">if </span>is_expanded {
-            Size::new(
-                ConstraintLimit::Fill(window_size.width),
-                ConstraintLimit::Fill(window_size.height),
-            )
+            window_size.map(ConstraintLimit::Fill)
         } <span class="kw">else </span>{
-            Size::new(
-                ConstraintLimit::SizeToFit(window_size.width),
-                ConstraintLimit::SizeToFit(window_size.height),
-            )
+            window_size.map(ConstraintLimit::SizeToFit)
         });
         <span class="kw">let </span>render_size = actual_size.min(window_size);
         <span class="kw">if </span>actual_size != window_size &amp;&amp; !resizable {

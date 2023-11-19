@@ -1967,9 +1967,6 @@
 <a href="#1967" id="1967">1967</a>
 <a href="#1968" id="1968">1968</a>
 <a href="#1969" id="1969">1969</a>
-<a href="#1970" id="1970">1970</a>
-<a href="#1971" id="1971">1971</a>
-<a href="#1972" id="1972">1972</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1984,7 +1981,7 @@
 
 <span class="kw">use </span>ahash::AHashMap;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
-<span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, IsZero, Rect, ScreenScale, Size};
+<span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, IntoUnsigned, Rect, ScreenScale, Size, Zero};
 <span class="kw">use </span>kludgine::shapes::CornerRadii;
 <span class="kw">use </span>kludgine::Color;
 <span class="kw">use </span>palette::{IntoColor, Okhsl, OklabHue, Srgb};
@@ -2371,11 +2368,6 @@
     </span>Lp(Lp),
 }
 
-<span class="kw">impl </span>Dimension {
-    <span class="doccomment">/// A dimension of 0 pixels.
-    </span><span class="kw">pub const </span>ZERO: <span class="self">Self </span>= <span class="self">Self</span>::Px(Px(<span class="number">0</span>));
-}
-
 <span class="kw">impl </span>Default <span class="kw">for </span>Dimension {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::ZERO
@@ -2394,7 +2386,9 @@
     }
 }
 
-<span class="kw">impl </span>IsZero <span class="kw">for </span>Dimension {
+<span class="kw">impl </span>Zero <span class="kw">for </span>Dimension {
+    <span class="kw">const </span>ZERO: <span class="self">Self </span>= Dimension::Px(Px::ZERO);
+
     <span class="kw">fn </span>is_zero(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
             Dimension::Px(x) =&gt; x.is_zero(),

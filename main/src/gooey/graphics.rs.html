@@ -291,7 +291,7 @@
 
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{
-    <span class="self">self</span>, Fraction, IntoSigned, IntoUnsigned, IsZero, Point, Rect, ScreenScale, ScreenUnit, Size,
+    <span class="self">self</span>, Fraction, IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, ScreenUnit, Size, Zero,
 };
 <span class="kw">use </span>kludgine::render::Renderer;
 <span class="kw">use </span>kludgine::shapes::Shape;
@@ -334,12 +334,12 @@
         <span class="kw">let </span>clip_origin = <span class="self">self</span>.renderer.clip_rect().origin.into_signed();
         -Point::new(
             <span class="kw">if </span>clip_origin.x &lt;= <span class="self">self</span>.region.origin.x {
-                Px(<span class="number">0</span>)
+                Px::ZERO
             } <span class="kw">else </span>{
                 clip_origin.x - <span class="self">self</span>.region.origin.x
             },
             <span class="kw">if </span>clip_origin.y &lt;= <span class="self">self</span>.region.origin.y {
-                Px(<span class="number">0</span>)
+                Px::ZERO
             } <span class="kw">else </span>{
                 clip_origin.y - <span class="self">self</span>.region.origin.y
             },
@@ -436,7 +436,7 @@
     <span class="doccomment">/// Draws a shape at the origin, rotating and scaling as needed.
     </span><span class="kw">pub fn </span>draw_shape&lt;<span class="lifetime">&#39;a</span>, Unit&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, shape: <span class="kw">impl </span>Into&lt;Drawable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Shape&lt;Unit, <span class="bool-val">false</span>&gt;, Unit&gt;&gt;)
     <span class="kw">where
-        </span>Unit: IsZero + ShaderScalable + figures::ScreenUnit + Copy,
+        </span>Unit: Zero + ShaderScalable + figures::ScreenUnit + Copy,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>shape = shape.into();
         shape.translation += Point::&lt;Unit&gt;::from_px(<span class="self">self</span>.translation(), <span class="self">self</span>.scale());
@@ -460,7 +460,7 @@
         shape: <span class="kw">impl </span>Into&lt;Drawable&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;shape </span>Shape, Unit&gt;&gt;,
         texture: <span class="kw-2">&amp;</span><span class="kw">impl </span>TextureSource,
     ) <span class="kw">where
-        </span>Unit: IsZero + ShaderScalable + figures::ScreenUnit + Copy,
+        </span>Unit: Zero + ShaderScalable + figures::ScreenUnit + Copy,
         i32: From&lt;&lt;Unit <span class="kw">as </span>IntoSigned&gt;::Signed&gt;,
         Shape: ShapeSource&lt;Unit, <span class="bool-val">true</span>&gt; + <span class="lifetime">&#39;shape</span>,
     {

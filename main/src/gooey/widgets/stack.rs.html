@@ -899,7 +899,7 @@
                     Rect::new(
                         <span class="self">self</span>.layout
                             .orientation
-                            .make_point(layout.offset, UPx(<span class="number">0</span>))
+                            .make_point(layout.offset, UPx::ZERO)
                             .into_signed(),
                         <span class="self">self</span>.layout
                             .orientation
@@ -1040,9 +1040,9 @@
             orientation,
             children: OrderedLots::new(),
             layouts: Vec::new(),
-            other: UPx(<span class="number">0</span>),
+            other: UPx::ZERO,
             total_weights: <span class="number">0</span>,
-            allocated_space: (UPx(<span class="number">0</span>), Lp(<span class="number">0</span>)),
+            allocated_space: (UPx::ZERO, Lp::ZERO),
             fractional: Vec::new(),
             fit_to_content: Vec::new(),
             premeasured: Vec::new(),
@@ -1097,12 +1097,12 @@
         <span class="kw">let </span>layout = <span class="kw">match </span>child {
             StackDimension::FitContent =&gt; {
                 <span class="self">self</span>.fit_to_content.push(id);
-                UPx(<span class="number">0</span>)
+                UPx::ZERO
             }
             StackDimension::Fractional { weight } =&gt; {
                 <span class="self">self</span>.total_weights += u32::from(weight);
                 <span class="self">self</span>.fractional.push((id, weight));
-                UPx(<span class="number">0</span>)
+                UPx::ZERO
             }
             StackDimension::Measured { min, .. } =&gt; {
                 <span class="self">self</span>.premeasured.push(id);
@@ -1116,7 +1116,7 @@
         <span class="self">self</span>.layouts.insert(
             index,
             StackLayout {
-                offset: UPx(<span class="number">0</span>),
+                offset: UPx::ZERO,
                 size: layout,
             },
         );
@@ -1139,7 +1139,7 @@
         </span><span class="kw">let </span>needs_final_layout = !<span class="macro">matches!</span>(other_constraint, ConstraintLimit::Fill(<span class="kw">_</span>));
 
         <span class="comment">// Measure the children that fit their content
-        </span><span class="self">self</span>.other = UPx(<span class="number">0</span>);
+        </span><span class="self">self</span>.other = UPx::ZERO;
         <span class="kw">for </span><span class="kw-2">&amp;</span>id <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.fit_to_content {
             <span class="kw">let </span>index = <span class="self">self</span>.children.index_of_id(id).expect(<span class="string">&quot;child not found&quot;</span>);
             <span class="kw">let </span>(measured, other) = <span class="self">self</span>.orientation.split_size(measure(
@@ -1211,7 +1211,7 @@
         };
 
         <span class="comment">// Finally, compute the offsets of all of the widgets.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>offset = UPx(<span class="number">0</span>);
+        </span><span class="kw">let </span><span class="kw-2">mut </span>offset = UPx::ZERO;
         <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.children.len() {
             <span class="self">self</span>.layouts[index].offset = offset;
             offset += <span class="self">self</span>.layouts[index].size;
@@ -1320,7 +1320,7 @@
                 orientation.make_size(measured, other)
             });
         <span class="macro">assert_eq!</span>(computed_size, expected_size);
-        <span class="kw">let </span><span class="kw-2">mut </span>offset = UPx(<span class="number">0</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>offset = UPx::ZERO;
         <span class="kw">for </span>((index, <span class="kw-2">&amp;</span>child), <span class="kw-2">&amp;</span>expected) <span class="kw">in </span>flex.iter().enumerate().zip(expected) {
             <span class="macro">assert_eq!</span>(
                 child.size,
@@ -1362,11 +1362,11 @@
     </span><span class="kw">fn </span>size_to_fit() {
         assert_measured_children(
             <span class="kw-2">&amp;</span>[Child::new(<span class="number">3</span>, <span class="number">1</span>), Child::new(<span class="number">3</span>, <span class="number">1</span>), Child::new(<span class="number">3</span>, <span class="number">1</span>)],
-            ConstraintLimit::SizeToFit(UPx(<span class="number">10</span>)),
-            ConstraintLimit::SizeToFit(UPx(<span class="number">10</span>)),
-            <span class="kw-2">&amp;</span>[UPx(<span class="number">3</span>), UPx(<span class="number">3</span>), UPx(<span class="number">3</span>)],
-            UPx(<span class="number">9</span>),
-            UPx(<span class="number">1</span>),
+            ConstraintLimit::SizeToFit(UPx::new(<span class="number">10</span>)),
+            ConstraintLimit::SizeToFit(UPx::new(<span class="number">10</span>)),
+            <span class="kw-2">&amp;</span>[UPx::new(<span class="number">3</span>), UPx::new(<span class="number">3</span>), UPx::new(<span class="number">3</span>)],
+            UPx::new(<span class="number">9</span>),
+            UPx::new(<span class="number">1</span>),
         );
     }
 
@@ -1387,11 +1387,11 @@
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
             ],
-            ConstraintLimit::Fill(UPx(<span class="number">10</span>)),
-            ConstraintLimit::SizeToFit(UPx(<span class="number">10</span>)),
-            <span class="kw-2">&amp;</span>[UPx(<span class="number">4</span>), UPx(<span class="number">3</span>), UPx(<span class="number">3</span>)],
-            UPx(<span class="number">10</span>),
-            UPx(<span class="number">7</span>), <span class="comment">// 20 / 3 = 6.666, rounded up is 7
+            ConstraintLimit::Fill(UPx::new(<span class="number">10</span>)),
+            ConstraintLimit::SizeToFit(UPx::new(<span class="number">10</span>)),
+            <span class="kw-2">&amp;</span>[UPx::new(<span class="number">4</span>), UPx::new(<span class="number">3</span>), UPx::new(<span class="number">3</span>)],
+            UPx::new(<span class="number">10</span>),
+            UPx::new(<span class="number">7</span>), <span class="comment">// 20 / 3 = 6.666, rounded up is 7
         </span>);
         <span class="comment">// Same as above, but with an 11px box. This creates a leftover of 3 px
         // (11 % 4), adding 1px to all three children.
@@ -1401,11 +1401,11 @@
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
             ],
-            ConstraintLimit::Fill(UPx(<span class="number">11</span>)),
-            ConstraintLimit::SizeToFit(UPx(<span class="number">11</span>)),
-            <span class="kw-2">&amp;</span>[UPx(<span class="number">5</span>), UPx(<span class="number">3</span>), UPx(<span class="number">3</span>)],
-            UPx(<span class="number">11</span>),
-            UPx(<span class="number">7</span>), <span class="comment">// 20 / 3 = 6.666, rounded up is 7
+            ConstraintLimit::Fill(UPx::new(<span class="number">11</span>)),
+            ConstraintLimit::SizeToFit(UPx::new(<span class="number">11</span>)),
+            <span class="kw-2">&amp;</span>[UPx::new(<span class="number">5</span>), UPx::new(<span class="number">3</span>), UPx::new(<span class="number">3</span>)],
+            UPx::new(<span class="number">11</span>),
+            UPx::new(<span class="number">7</span>), <span class="comment">// 20 / 3 = 6.666, rounded up is 7
         </span>);
         <span class="comment">// 12px box. This creates no leftover.
         </span>assert_measured_children(
@@ -1414,11 +1414,11 @@
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
             ],
-            ConstraintLimit::Fill(UPx(<span class="number">12</span>)),
-            ConstraintLimit::SizeToFit(UPx(<span class="number">12</span>)),
-            <span class="kw-2">&amp;</span>[UPx(<span class="number">6</span>), UPx(<span class="number">3</span>), UPx(<span class="number">3</span>)],
-            UPx(<span class="number">12</span>),
-            UPx(<span class="number">4</span>), <span class="comment">// 20 / 6 = 3.666, rounded up is 4
+            ConstraintLimit::Fill(UPx::new(<span class="number">12</span>)),
+            ConstraintLimit::SizeToFit(UPx::new(<span class="number">12</span>)),
+            <span class="kw-2">&amp;</span>[UPx::new(<span class="number">6</span>), UPx::new(<span class="number">3</span>), UPx::new(<span class="number">3</span>)],
+            UPx::new(<span class="number">12</span>),
+            UPx::new(<span class="number">4</span>), <span class="comment">// 20 / 6 = 3.666, rounded up is 4
         </span>);
         <span class="comment">// 13px box. This creates a leftover of 1 px (13 % 4), adding 1px only
         // to the final child
@@ -1428,11 +1428,11 @@
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
             ],
-            ConstraintLimit::Fill(UPx(<span class="number">13</span>)),
-            ConstraintLimit::SizeToFit(UPx(<span class="number">13</span>)),
-            <span class="kw-2">&amp;</span>[UPx(<span class="number">6</span>), UPx(<span class="number">3</span>), UPx(<span class="number">4</span>)],
-            UPx(<span class="number">13</span>),
-            UPx(<span class="number">4</span>), <span class="comment">// 20 / 6 = 3.666, rounded up is 4
+            ConstraintLimit::Fill(UPx::new(<span class="number">13</span>)),
+            ConstraintLimit::SizeToFit(UPx::new(<span class="number">13</span>)),
+            <span class="kw-2">&amp;</span>[UPx::new(<span class="number">6</span>), UPx::new(<span class="number">3</span>), UPx::new(<span class="number">4</span>)],
+            UPx::new(<span class="number">13</span>),
+            UPx::new(<span class="number">4</span>), <span class="comment">// 20 / 6 = 3.666, rounded up is 4
         </span>);
     }
 
@@ -1440,15 +1440,15 @@
     </span><span class="kw">fn </span>fixed_size() {
         assert_measured_children(
             <span class="kw-2">&amp;</span>[
-                Child::new(<span class="number">3</span>, <span class="number">1</span>).fixed_size(UPx(<span class="number">7</span>)),
+                Child::new(<span class="number">3</span>, <span class="number">1</span>).fixed_size(UPx::new(<span class="number">7</span>)),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
                 Child::new(<span class="number">3</span>, <span class="number">1</span>).weighted(<span class="number">1</span>),
             ],
-            ConstraintLimit::Fill(UPx(<span class="number">15</span>)),
-            ConstraintLimit::SizeToFit(UPx(<span class="number">15</span>)),
-            <span class="kw-2">&amp;</span>[UPx(<span class="number">7</span>), UPx(<span class="number">4</span>), UPx(<span class="number">4</span>)],
-            UPx(<span class="number">15</span>),
-            UPx(<span class="number">1</span>),
+            ConstraintLimit::Fill(UPx::new(<span class="number">15</span>)),
+            ConstraintLimit::SizeToFit(UPx::new(<span class="number">15</span>)),
+            <span class="kw-2">&amp;</span>[UPx::new(<span class="number">7</span>), UPx::new(<span class="number">4</span>), UPx::new(<span class="number">4</span>)],
+            UPx::new(<span class="number">15</span>),
+            UPx::new(<span class="number">1</span>),
         );
     }
 }

@@ -499,7 +499,7 @@
         <span class="kw">let </span>max_scroll_x = <span class="kw">if </span><span class="self">self</span>.enabled.x {
             -<span class="self">self</span>.horizontal_bar.amount_hidden
         } <span class="kw">else </span>{
-            Px(<span class="number">0</span>)
+            Px::ZERO
         };
 
         <span class="self">self</span>.vertical_bar =
@@ -507,7 +507,7 @@
         <span class="kw">let </span>max_scroll_y = <span class="kw">if </span><span class="self">self</span>.enabled.y {
             -<span class="self">self</span>.vertical_bar.amount_hidden
         } <span class="kw">else </span>{
-            Px(<span class="number">0</span>)
+            Px::ZERO
         };
         <span class="kw">let </span>new_max_scroll = Point::new(max_scroll_x, max_scroll_y);
         <span class="kw">if </span>current_max_scroll != new_max_scroll {

@@ -38,7 +38,7 @@ context is attached to.</p>
     &amp;mut self,
     shape: impl <a class="trait" href="https://doc.rust-lang.org/1.74.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;Drawable&lt;&amp;'a Shape&lt;Unit, false&gt;, Unit&gt;&gt;
 )<span class="where fmt-newline">where
-    Unit: IsZero + ShaderScalable + ScreenUnit + <a class="trait" href="https://doc.rust-lang.org/1.74.0/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a>,</span></h4></section></summary><div class="docblock"><p>Draws a shape at the origin, rotating and scaling as needed.</p>
+    Unit: Zero + ShaderScalable + ScreenUnit + <a class="trait" href="https://doc.rust-lang.org/1.74.0/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a>,</span></h4></section></summary><div class="docblock"><p>Draws a shape at the origin, rotating and scaling as needed.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.draw_texture" class="method"><a class="src rightside" href="../src/gooey/graphics.rs.html#158-165">source</a><h4 class="code-header">pub fn <a href="#method.draw_texture" class="fn">draw_texture</a>&lt;Unit&gt;(
     &amp;mut self,
     texture: &amp;impl TextureSource,
@@ -51,7 +51,7 @@ context is attached to.</p>
     shape: impl <a class="trait" href="https://doc.rust-lang.org/1.74.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;Drawable&lt;<a class="primitive" href="https://doc.rust-lang.org/1.74.0/std/primitive.reference.html">&amp;'shape Shape</a>, Unit&gt;&gt;,
     texture: &amp;impl TextureSource
 )<span class="where fmt-newline">where
-    Unit: IsZero + ShaderScalable + ScreenUnit + <a class="trait" href="https://doc.rust-lang.org/1.74.0/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a>,
+    Unit: Zero + ShaderScalable + ScreenUnit + <a class="trait" href="https://doc.rust-lang.org/1.74.0/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a>,
     <a class="primitive" href="https://doc.rust-lang.org/1.74.0/std/primitive.i32.html">i32</a>: <a class="trait" href="https://doc.rust-lang.org/1.74.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;&lt;Unit as IntoSigned&gt;::Signed&gt;,
     Shape: ShapeSource&lt;Unit, true&gt; + 'shape,</span></h4></section></summary><div class="docblock"><p>Draws a shape that was created with texture coordinates, applying the
 provided texture.</p>
