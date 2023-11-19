@@ -1856,10 +1856,10 @@
     {
         <span class="kw">if </span>color.alpha() &gt; <span class="number">0 </span>{
             <span class="kw">let </span>options = options.colored(color).into_px(<span class="self">self</span>.gfx.scale());
-            <span class="kw">let </span>inset = options.line_width;
+            <span class="kw">let </span>inset = options.line_width / <span class="number">2</span>;
             <span class="kw">let </span>visible_rect = Rect::new(
                 Point::squared(inset),
-                <span class="self">self</span>.gfx.region().size - Point::new(inset * <span class="number">2</span>, inset * <span class="number">2</span>),
+                <span class="self">self</span>.gfx.region().size - Point::squared(inset),
             );
 
             <span class="kw">let </span>radii = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>CornerRadius);
