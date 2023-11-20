@@ -1239,8 +1239,6 @@
 <a href="#1239" id="1239">1239</a>
 <a href="#1240" id="1240">1240</a>
 <a href="#1241" id="1241">1241</a>
-<a href="#1242" id="1242">1242</a>
-<a href="#1243" id="1243">1243</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
@@ -1258,7 +1256,7 @@
 <span class="kw">use </span>kludgine::app::winit::event::{
     DeviceId, ElementState, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
-<span class="kw">use </span>kludgine::app::winit::keyboard::Key;
+<span class="kw">use </span>kludgine::app::winit::keyboard::{Key, NamedKey};
 <span class="kw">use </span>kludgine::app::winit::window;
 <span class="kw">use </span>kludgine::app::WindowBehavior <span class="kw">as _</span>;
 <span class="kw">use </span>kludgine::cosmic_text::FamilyOwned;
@@ -1348,7 +1346,7 @@
 }
 
 <span class="doccomment">/// The attributes of a Gooey window.
-</span><span class="kw">pub type </span>WindowAttributes = kludgine::app::WindowAttributes&lt;WindowCommand&gt;;
+</span><span class="kw">pub type </span>WindowAttributes = kludgine::app::WindowAttributes;
 
 <span class="doccomment">/// A Gooey window that is not yet running.
 </span><span class="attr">#[must_use]
@@ -1924,9 +1922,7 @@
         !<span class="self">self</span>.should_close
     }
 
-    <span class="kw">fn </span>initial_window_attributes(
-        context: <span class="kw-2">&amp;</span><span class="self">Self</span>::Context,
-    ) -&gt; kludgine::app::WindowAttributes&lt;WindowCommand&gt; {
+    <span class="kw">fn </span>initial_window_attributes(context: <span class="kw-2">&amp;</span><span class="self">Self</span>::Context) -&gt; kludgine::app::WindowAttributes {
         <span class="kw">let </span><span class="kw-2">mut </span>attrs = context
             .settings
             .borrow_mut()
@@ -2043,7 +2039,7 @@
                         window.set_needs_redraw();
                     }
                 }
-                Key::Tab <span class="kw">if </span>!window.modifiers().possible_shortcut() =&gt; {
+                Key::Named(NamedKey::Tab) <span class="kw">if </span>!window.modifiers().possible_shortcut() =&gt; {
                     <span class="kw">if </span>input.state.is_pressed() {
                         <span class="kw">let </span>reverse = window.modifiers().state().shift_key();
 
@@ -2071,7 +2067,7 @@
                         }
                     }
                 }
-                Key::Enter =&gt; {
+                Key::Named(NamedKey::Enter) =&gt; {
                     <span class="self">self</span>.keyboard_activate_widget(
                         input.state.is_pressed(),
                         <span class="self">self</span>.root.tree.default_widget(),
@@ -2079,7 +2075,7 @@
                         kludgine,
                     );
                 }
-                Key::Escape =&gt; {
+                Key::Named(NamedKey::Escape) =&gt; {
                     <span class="self">self</span>.keyboard_activate_widget(
                         input.state.is_pressed(),
                         <span class="self">self</span>.root.tree.escape_widget(),

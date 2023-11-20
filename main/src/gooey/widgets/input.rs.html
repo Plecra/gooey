@@ -1300,7 +1300,7 @@
 
 <span class="kw">use </span>intentional::Cast;
 <span class="kw">use </span>kludgine::app::winit::event::{ElementState, Ime, KeyEvent};
-<span class="kw">use </span>kludgine::app::winit::keyboard::Key;
+<span class="kw">use </span>kludgine::app::winit::keyboard::{Key, NamedKey};
 <span class="kw">use </span>kludgine::app::winit::window::ImePurpose;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{
@@ -1644,18 +1644,18 @@
 
     <span class="kw">fn </span>handle_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>, input: KeyEvent, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; EventHandling {
         <span class="kw">match </span>(input.state, input.logical_key, input.text.as_deref()) {
-            (ElementState::Pressed,  key @ (Key::Backspace | Key::Delete), <span class="kw">_</span>) =&gt; {
+            (ElementState::Pressed,  Key::Named(key @ (NamedKey::Backspace| NamedKey::Delete)), <span class="kw">_</span>) =&gt; {
                 <span class="kw">match </span>key {
-                    Key::Backspace =&gt; <span class="self">self</span>.delete(),
-                    Key::Delete =&gt; <span class="self">self</span>.forward_delete(),
+                    NamedKey::Backspace =&gt; <span class="self">self</span>.delete(),
+                    NamedKey::Delete =&gt; <span class="self">self</span>.forward_delete(),
                     <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;previously matched&quot;</span>),
                 }
 
                 HANDLED
             }
-            (ElementState::Pressed, key @ (Key::ArrowLeft | Key::ArrowDown | Key::ArrowUp | Key::ArrowRight), <span class="kw">_</span>) =&gt; {
+            (ElementState::Pressed, Key::Named(key @ (NamedKey::ArrowLeft | NamedKey::ArrowDown | NamedKey::ArrowUp | NamedKey::ArrowRight)), <span class="kw">_</span>) =&gt; {
                 <span class="kw">let </span>modifiers = context.modifiers();
-                <span class="kw">let </span>affinity = <span class="kw">if </span><span class="macro">matches!</span>(key, Key::ArrowLeft  | Key::ArrowUp) {
+                <span class="kw">let </span>affinity = <span class="kw">if </span><span class="macro">matches!</span>(key, NamedKey::ArrowLeft  | NamedKey::ArrowUp) {
                     Affinity::Before
                 } <span class="kw">else </span>{
                     Affinity::After
@@ -1672,8 +1672,8 @@
 
                 <span class="kw">match </span>key {
                     <span class="comment">// Key::ArrowLeft | Key::ArrowRight if modifiers.primary() =&gt; self.move_cursor(affinity, CursorNavigationMode::LineExtent),
-                    </span>Key::ArrowLeft | Key::ArrowRight <span class="kw">if </span>modifiers.word_select() =&gt; <span class="self">self</span>.move_cursor(affinity, CursorNavigationMode::Word),
-                    Key::ArrowLeft | Key::ArrowRight =&gt; <span class="self">self</span>.move_cursor(affinity, CursorNavigationMode::Grapheme),
+                    </span>NamedKey::ArrowLeft | NamedKey::ArrowRight <span class="kw">if </span>modifiers.word_select() =&gt; <span class="self">self</span>.move_cursor(affinity, CursorNavigationMode::Word),
+                    NamedKey::ArrowLeft | NamedKey::ArrowRight =&gt; <span class="self">self</span>.move_cursor(affinity, CursorNavigationMode::Grapheme),
                     <span class="comment">// Key::ArrowDown | Key::ArrowUp =&gt; self.move_cursor(affinity, CursorNavigationMode::Line),
                     </span><span class="kw">_ </span>=&gt; <span class="macro">tracing::warn!</span>(<span class="string">&quot;unhandled key: {key:?}&quot;</span>),
                 }
