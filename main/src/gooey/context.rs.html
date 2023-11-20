@@ -1307,6 +1307,30 @@
 <a href="#1307" id="1307">1307</a>
 <a href="#1308" id="1308">1308</a>
 <a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
+<a href="#1311" id="1311">1311</a>
+<a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
+<a href="#1318" id="1318">1318</a>
+<a href="#1319" id="1319">1319</a>
+<a href="#1320" id="1320">1320</a>
+<a href="#1321" id="1321">1321</a>
+<a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
+<a href="#1331" id="1331">1331</a>
+<a href="#1332" id="1332">1332</a>
+<a href="#1333" id="1333">1333</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -1324,7 +1348,10 @@
 <span class="kw">use </span>kludgine::{Color, Kludgine};
 
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{CornerRadius, HighlightColor, LayoutOrder, WidgetBackground};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{
+    CornerRadius, FontFamily, FontStyle, FontWeight, HighlightColor, LayoutOrder, TextSize,
+    WidgetBackground,
+};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, Styles, Theme, ThemePair};
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
@@ -1883,7 +1910,26 @@
         <span class="self">self</span>.stroke_outline::&lt;Lp&gt;(color, StrokeOptions::lp_wide(Lp::points(<span class="number">2</span>)));
     }
 
-    <span class="doccomment">/// Invokes [`Widget::redraw()`](crate::widget::Widget::redraw) on this
+    <span class="doccomment">/// Applies the current style settings for font family, text size, font
+    /// style, and font weight.
+    </span><span class="kw">pub fn </span>apply_current_font_settings(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.gfx
+            .set_available_font_family(<span class="kw-2">&amp;</span><span class="self">self</span>.widget.get(<span class="kw-2">&amp;</span>FontFamily));
+        <span class="self">self</span>.gfx.set_font_size(<span class="self">self</span>.widget.get(<span class="kw-2">&amp;</span>TextSize));
+        <span class="self">self</span>.gfx.set_font_style(<span class="self">self</span>.widget.get(<span class="kw-2">&amp;</span>FontStyle));
+        <span class="self">self</span>.gfx.set_font_weight(<span class="self">self</span>.widget.get(<span class="kw-2">&amp;</span>FontWeight));
+    }
+
+    <span class="comment">// /// Applies the current style settings for font family, text size, font
+    // /// style, and font weight.
+    // pub fn apply_current_font_settings_to&lt;&#39;a&gt;(&amp;self, attrs: Attrs&lt;&#39;a&gt;) -&gt; Attrs&lt;&#39;a&gt; {
+    //     attrs.set_available_font_family(&amp;self.widget.get(&amp;FontFamily));
+    //     attrs.set_font_size(self.widget.get(&amp;TextSize));
+    //     attrs.set_font_style(self.widget.get(&amp;FontStyle));
+    //     attrs.set_font_weight(self.widget.get(&amp;FontWeight));
+    // }
+
+    </span><span class="doccomment">/// Invokes [`Widget::redraw()`](crate::widget::Widget::redraw) on this
     /// context&#39;s widget.
     ///
     /// # Panics
@@ -1898,6 +1944,8 @@
 
         <span class="kw">let </span>background = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>WidgetBackground);
         <span class="self">self</span>.gfx.fill(background);
+
+        <span class="self">self</span>.apply_current_font_settings();
 
         <span class="self">self</span>.current_node
             .tree

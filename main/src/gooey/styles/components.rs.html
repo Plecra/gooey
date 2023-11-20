@@ -139,15 +139,23 @@
 <a href="#139" id="139">139</a>
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 
-</span><span class="kw">use </span>kludgine::figures::units::Lp;
+</span><span class="kw">use </span>kludgine::cosmic_text::{FamilyOwned, Style, Weight};
+<span class="kw">use </span>kludgine::figures::units::Lp;
 <span class="kw">use </span>kludgine::shapes::CornerRadii;
 <span class="kw">use </span>kludgine::Color;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::easings::{EaseInOutQuadradic, EaseInQuadradic, EaseOutQuadradic};
 <span class="kw">use </span><span class="kw">crate</span>::animation::EasingFunction;
-<span class="kw">use </span><span class="kw">crate</span>::styles::{Dimension, FocusableWidgets, VisualOrder};
+<span class="kw">use </span><span class="kw">crate</span>::styles::{Dimension, FocusableWidgets, FontFamilyList, VisualOrder};
 
 <span class="doccomment">/// Defines a set of style components for Gooey.
 ///
@@ -245,7 +253,7 @@
         <span class="doccomment">/// Intrinsic, uniform padding for a widget.
         ///
         /// This component is opt-in and does not automatically work for all widgets.
-        </span>IntrinsicPadding(Dimension, <span class="string">&quot;padding&quot;</span>, Dimension::Lp(Lp::points(<span class="number">5</span>)))
+        </span>IntrinsicPadding(Dimension, <span class="string">&quot;padding&quot;</span>, Dimension::Lp(Lp::points(<span class="number">6</span>)))
         <span class="doccomment">/// The [`EasingFunction`] to apply to animations that have no inherent
         /// directionality.
         </span>Easing(EasingFunction, <span class="string">&quot;Easing&quot;</span>, EasingFunction::from(EaseInOutQuadradic))
@@ -277,7 +285,13 @@
         </span>OpaqueWidgetColor(Color, <span class="string">&quot;opaque_color&quot;</span>, .surface.opaque_widget)
         <span class="doccomment">/// A set of radius descriptions for how much roundness to apply to the
         /// shapes of widgets.
-        </span>CornerRadius(CornerRadii&lt;Dimension&gt;, <span class="string">&quot;corner_radius&quot;</span>, CornerRadii::from(Dimension::Lp(Lp::points(<span class="number">7</span>))))
+        </span>CornerRadius(CornerRadii&lt;Dimension&gt;, <span class="string">&quot;corner_radius&quot;</span>, CornerRadii::from(Dimension::Lp(Lp::points(<span class="number">10</span>))))
+        <span class="doccomment">/// The font family to render text using.
+        </span>FontFamily(FontFamilyList, <span class="string">&quot;font_family&quot;</span>, FontFamilyList::from(FamilyOwned::SansSerif))
+        <span class="doccomment">/// The font (boldness) weight to apply to text rendering.
+        </span>FontWeight(Weight, <span class="string">&quot;font_weight&quot;</span>, Weight::NORMAL)
+        <span class="doccomment">/// The font style to apply to text rendering.
+        </span>FontStyle(Style, <span class="string">&quot;font_style&quot;</span>, Style::Normal)
     }
 }
 </code></pre></div></section></main></body></html>

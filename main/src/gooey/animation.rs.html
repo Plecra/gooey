@@ -1111,6 +1111,28 @@
 <a href="#1111" id="1111">1111</a>
 <a href="#1112" id="1112">1112</a>
 <a href="#1113" id="1113">1113</a>
+<a href="#1114" id="1114">1114</a>
+<a href="#1115" id="1115">1115</a>
+<a href="#1116" id="1116">1116</a>
+<a href="#1117" id="1117">1117</a>
+<a href="#1118" id="1118">1118</a>
+<a href="#1119" id="1119">1119</a>
+<a href="#1120" id="1120">1120</a>
+<a href="#1121" id="1121">1121</a>
+<a href="#1122" id="1122">1122</a>
+<a href="#1123" id="1123">1123</a>
+<a href="#1124" id="1124">1124</a>
+<a href="#1125" id="1125">1125</a>
+<a href="#1126" id="1126">1126</a>
+<a href="#1127" id="1127">1127</a>
+<a href="#1128" id="1128">1128</a>
+<a href="#1129" id="1129">1129</a>
+<a href="#1130" id="1130">1130</a>
+<a href="#1131" id="1131">1131</a>
+<a href="#1132" id="1132">1132</a>
+<a href="#1133" id="1133">1133</a>
+<a href="#1134" id="1134">1134</a>
+<a href="#1135" id="1135">1135</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating animations.
 //!
 //! Animations in Gooey are performed by transitioning a [`Dynamic`]&#39;s contained
@@ -1154,7 +1176,7 @@
 
 <span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Debug, Display};
-<span class="kw">use </span>std::ops::{ControlFlow, Deref, Div, Mul};
+<span class="kw">use </span>std::ops::{ControlFlow, Deref, Div, Mul, Sub};
 <span class="kw">use </span>std::panic::{RefUnwindSafe, UnwindSafe};
 <span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard, OnceLock};
@@ -1165,7 +1187,8 @@
 <span class="kw">use </span>derive_more::From;
 <span class="kw">use </span>intentional::Cast;
 <span class="kw">use </span>kempt::Set;
-<span class="kw">use </span>kludgine::figures::Ranged;
+<span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
+<span class="kw">use </span>kludgine::figures::{Ranged, UnscaledUnit};
 <span class="kw">use </span>kludgine::Color;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::easings::Linear;
@@ -1846,6 +1869,27 @@
     }
 }
 
+<span class="macro">macro_rules! </span>impl_unscaled_lerp {
+    (<span class="macro-nonterminal">$wrapper</span>:ident) =&gt; {
+        <span class="kw">impl </span>LinearInterpolate <span class="kw">for </span><span class="macro-nonterminal">$wrapper </span>{
+            <span class="kw">fn </span>lerp(<span class="kw-2">&amp;</span><span class="self">self</span>, target: <span class="kw-2">&amp;</span><span class="self">Self</span>, percent: f32) -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>::from_unscaled(<span class="self">self</span>.into_unscaled().lerp(<span class="kw-2">&amp;</span>target.into_unscaled(), percent))
+            }
+        }
+
+        <span class="kw">impl </span>PercentBetween <span class="kw">for </span><span class="macro-nonterminal">$wrapper </span>{
+            <span class="kw">fn </span>percent_between(<span class="kw-2">&amp;</span><span class="self">self</span>, min: <span class="kw-2">&amp;</span><span class="self">Self</span>, max: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ZeroToOne {
+                <span class="self">self</span>.into_unscaled()
+                    .percent_between(<span class="kw-2">&amp;</span>min.into_unscaled(), <span class="kw-2">&amp;</span>max.into_unscaled())
+            }
+        }
+    };
+}
+
+<span class="macro">impl_unscaled_lerp!</span>(Px);
+<span class="macro">impl_unscaled_lerp!</span>(Lp);
+<span class="macro">impl_unscaled_lerp!</span>(UPx);
+
 <span class="attr">#[test]
 </span><span class="kw">fn </span>integer_lerps() {
     <span class="attr">#[track_caller]
@@ -1928,7 +1972,7 @@
 }
 
 <span class="macro">macro_rules! </span>impl_percent_between {
-    (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ident</span>, <span class="macro-nonterminal">$float</span>:ident) =&gt; {
+    (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ident</span>, <span class="macro-nonterminal">$float</span>:ident, <span class="macro-nonterminal">$sub</span>:ident) =&gt; {
         <span class="kw">impl </span>PercentBetween <span class="kw">for </span><span class="macro-nonterminal">$</span><span class="kw">type </span>{
             <span class="kw">fn </span><span class="macro-nonterminal">percent_between</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, min: <span class="kw-2">&amp;</span><span class="self">Self</span>, max: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ZeroToOne {
                 <span class="macro">assert!</span>(min &lt;= max, <span class="string">&quot;percent_between requires min &lt;= max&quot;</span>);
@@ -1937,27 +1981,27 @@
                     <span class="string">&quot;self must satisfy min &lt;= self &lt;= max&quot;
                 </span>);
 
-                <span class="kw">let </span>range = <span class="kw-2">*</span>max - <span class="kw-2">*</span>min;
-                ZeroToOne::from((<span class="kw-2">*</span><span class="self">self </span>- <span class="kw-2">*</span>min) <span class="kw">as </span><span class="macro-nonterminal">$float </span>/ range <span class="kw">as </span><span class="macro-nonterminal">$float</span>)
+                <span class="kw">let </span>range = max.<span class="macro-nonterminal">$sub</span>(<span class="kw-2">*</span>min);
+                ZeroToOne::from(<span class="self">self</span>.<span class="macro-nonterminal">$sub</span>(<span class="kw-2">*</span>min) <span class="kw">as </span><span class="macro-nonterminal">$float </span>/ range <span class="kw">as </span><span class="macro-nonterminal">$float</span>)
             }
         }
     };
 }
 
-<span class="macro">impl_percent_between!</span>(u8, f32);
-<span class="macro">impl_percent_between!</span>(u16, f32);
-<span class="macro">impl_percent_between!</span>(u32, f32);
-<span class="macro">impl_percent_between!</span>(u64, f32);
-<span class="macro">impl_percent_between!</span>(u128, f64);
-<span class="macro">impl_percent_between!</span>(usize, f64);
-<span class="macro">impl_percent_between!</span>(i8, f32);
-<span class="macro">impl_percent_between!</span>(i16, f32);
-<span class="macro">impl_percent_between!</span>(i32, f32);
-<span class="macro">impl_percent_between!</span>(i64, f32);
-<span class="macro">impl_percent_between!</span>(i128, f64);
-<span class="macro">impl_percent_between!</span>(isize, f64);
-<span class="macro">impl_percent_between!</span>(f32, f32);
-<span class="macro">impl_percent_between!</span>(f64, f64);
+<span class="macro">impl_percent_between!</span>(u8, f32, saturating_sub);
+<span class="macro">impl_percent_between!</span>(u16, f32, saturating_sub);
+<span class="macro">impl_percent_between!</span>(u32, f32, saturating_sub);
+<span class="macro">impl_percent_between!</span>(u64, f32, saturating_sub);
+<span class="macro">impl_percent_between!</span>(u128, f64, saturating_sub);
+<span class="macro">impl_percent_between!</span>(usize, f64, saturating_sub);
+<span class="macro">impl_percent_between!</span>(i8, f32, saturating_sub);
+<span class="macro">impl_percent_between!</span>(i16, f32, saturating_sub);
+<span class="macro">impl_percent_between!</span>(i32, f32, saturating_sub);
+<span class="macro">impl_percent_between!</span>(i64, f32, saturating_sub);
+<span class="macro">impl_percent_between!</span>(i128, f64, saturating_sub);
+<span class="macro">impl_percent_between!</span>(isize, f64, saturating_sub);
+<span class="macro">impl_percent_between!</span>(f32, f32, sub);
+<span class="macro">impl_percent_between!</span>(f64, f64, sub);
 
 <span class="kw">impl </span>PercentBetween <span class="kw">for </span>Color {
     <span class="kw">fn </span>percent_between(<span class="kw-2">&amp;</span><span class="self">self</span>, min: <span class="kw-2">&amp;</span><span class="self">Self</span>, max: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ZeroToOne {

@@ -98,18 +98,15 @@
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A read-only text widget.
 
 </span><span class="kw">use </span>kludgine::figures::units::{Px, UPx};
-<span class="kw">use </span>kludgine::figures::{Point, ScreenScale, Size};
+<span class="kw">use </span>kludgine::figures::{Point, Size};
 <span class="kw">use </span>kludgine::text::{MeasuredText, Text, TextOrigin};
 <span class="kw">use </span>kludgine::{Color, DrawableExt};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{GraphicsContext, LayoutContext};
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{IntrinsicPadding, TextColor};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::TextColor;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, Generation, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, Widget, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
@@ -182,14 +179,11 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="kw">let </span>padding = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_upx(context.gfx.scale());
         <span class="kw">let </span>color = context.get(<span class="kw-2">&amp;</span>TextColor);
         <span class="kw">let </span>width = available_space.width.max().try_into().unwrap_or(Px::MAX);
         <span class="kw">let </span>prepared = <span class="self">self</span>.prepared_text(context, color, width);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>size = prepared.size.try_cast().unwrap_or_default();
-        size += padding * <span class="number">2</span>;
-        size
+        prepared.size.try_cast().unwrap_or_default()
     }
 }
 

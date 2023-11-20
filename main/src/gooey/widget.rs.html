@@ -1510,6 +1510,11 @@
 <a href="#1510" id="1510">1510</a>
 <a href="#1511" id="1511">1511</a>
 <a href="#1512" id="1512">1512</a>
+<a href="#1513" id="1513">1513</a>
+<a href="#1514" id="1514">1514</a>
+<a href="#1515" id="1515">1515</a>
+<a href="#1516" id="1516">1516</a>
+<a href="#1517" id="1517">1517</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1532,8 +1537,8 @@
     AsEventContext, EventContext, GraphicsContext, LayoutContext, WidgetContext, WindowHandle,
 };
 <span class="kw">use </span><span class="kw">crate</span>::styles::{
-    ContainerLevel, Dimension, DimensionRange, Edges, IntoComponentValue, NamedComponent, Styles,
-    ThemePair, VisualOrder,
+    ComponentDefinition, ContainerLevel, Dimension, DimensionRange, Edges, IntoComponentValue,
+    Styles, ThemePair, VisualOrder,
 };
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
@@ -2080,10 +2085,15 @@
     }
 
     <span class="doccomment">/// Associates a style component with `self`.
-    </span><span class="kw">fn </span>with(<span class="self">self</span>, name: <span class="kw-2">&amp;</span><span class="kw">impl </span>NamedComponent, component: <span class="kw">impl </span>IntoComponentValue) -&gt; Style {
-        <span class="kw">let </span><span class="kw-2">mut </span>styles = Styles::new();
-        styles.insert(name, component);
-        Style::new(styles, <span class="self">self</span>)
+    </span><span class="kw">fn </span>with&lt;C: ComponentDefinition&gt;(
+        <span class="self">self</span>,
+        name: <span class="kw-2">&amp;</span>C,
+        component: <span class="kw">impl </span>IntoValue&lt;C::ComponentType&gt;,
+    ) -&gt; Style
+    <span class="kw">where
+        </span>Value&lt;C::ComponentType&gt;: IntoComponentValue,
+    {
+        Style::new(Styles::new().with(name, component), <span class="self">self</span>)
     }
 
     <span class="doccomment">/// Sets the widget that should be focused next.
