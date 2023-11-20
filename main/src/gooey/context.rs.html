@@ -1331,6 +1331,7 @@
 <a href="#1331" id="1331">1331</a>
 <a href="#1332" id="1332">1332</a>
 <a href="#1333" id="1333">1333</a>
+<a href="#1334" id="1334">1334</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -1343,7 +1344,7 @@
     DeviceId, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
-<span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Px2D, Rect, ScreenScale, Size, Zero};
+<span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Px2D, Rect, Round, ScreenScale, Size, Zero};
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
 <span class="kw">use </span>kludgine::{Color, Kludgine};
 
@@ -1943,7 +1944,7 @@
         </span>);
 
         <span class="kw">let </span>background = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>WidgetBackground);
-        <span class="self">self</span>.gfx.fill(background);
+        <span class="self">self</span>.fill(background);
 
         <span class="self">self</span>.apply_current_font_settings();
 
@@ -2040,7 +2041,8 @@
             .clone()
             .lock()
             .as_widget()
-            .layout(available_space, <span class="self">self</span>);
+            .layout(available_space, <span class="self">self</span>)
+            .map(Round::ceil);
         <span class="kw">if </span><span class="self">self</span>.persist_layout {
             <span class="self">self</span>.graphics
                 .current_node

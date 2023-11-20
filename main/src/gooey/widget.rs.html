@@ -1515,6 +1515,9 @@
 <a href="#1515" id="1515">1515</a>
 <a href="#1516" id="1516">1516</a>
 <a href="#1517" id="1517">1517</a>
+<a href="#1518" id="1518">1518</a>
+<a href="#1519" id="1519">1519</a>
+<a href="#1520" id="1520">1520</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1559,11 +1562,14 @@
 
     <span class="doccomment">/// Layout this widget and returns the ideal size based on its contents and
     /// the `available_space`.
+    </span><span class="attr">#[allow(unused_variables)]
     </span><span class="kw">fn </span>layout(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
-    ) -&gt; Size&lt;UPx&gt;;
+    ) -&gt; Size&lt;UPx&gt; {
+        available_space.map(ConstraintLimit::min)
+    }
 
     <span class="doccomment">/// Return true if this widget should expand to fill the window when it is
     /// the root widget.
@@ -1767,7 +1773,7 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; WrappedLayout {
-        <span class="kw">let </span>adjusted_space = <span class="self">self</span>.adjust_child_constraint(available_space, context);
+        <span class="kw">let </span>adjusted_space = <span class="self">self</span>.adjust_child_constraints(available_space, context);
         <span class="kw">let </span>child = <span class="self">self</span>.child_mut().mounted(<span class="kw-2">&amp;mut </span>context.as_event_context());
         <span class="kw">let </span>size = context
             .for_other(<span class="kw-2">&amp;</span>child)
@@ -1780,7 +1786,7 @@
     <span class="doccomment">/// Returns the adjusted contraints to use when laying out the child.
     </span><span class="attr">#[allow(unused_variables)]
     #[must_use]
-    </span><span class="kw">fn </span>adjust_child_constraint(
+    </span><span class="kw">fn </span>adjust_child_constraints(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
@@ -1947,7 +1953,7 @@
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>background_color = <span class="self">self</span>.background_color(context);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(color) = background_color {
-            context.gfx.fill(color);
+            context.fill(color);
         }
 
         <span class="self">self</span>.redraw_background(context);

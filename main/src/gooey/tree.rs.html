@@ -733,8 +733,8 @@
 
         <span class="kw">let </span>node = <span class="kw-2">&amp;mut </span>data.nodes[parent];
         <span class="kw">if let </span><span class="prelude-val">Some</span>(cached_layout) = <span class="kw-2">&amp;</span>node.last_layout_query {
-            <span class="kw">if </span>constraints.width.max() &lt; cached_layout.constraints.width.max()
-                &amp;&amp; constraints.height.max() &lt; cached_layout.constraints.height.max()
+            <span class="kw">if </span>constraints.width.max() &lt;= cached_layout.constraints.width.max()
+                &amp;&amp; constraints.height.max() &lt;= cached_layout.constraints.height.max()
             {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(cached_layout.size);
             }

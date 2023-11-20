@@ -140,7 +140,7 @@
                 <span class="kw">if </span><span class="kw-2">*</span>prepared_generation == check_generation
                     &amp;&amp; <span class="kw-2">*</span>prepared_color == color
                     &amp;&amp; (<span class="kw-2">*</span>prepared_width == width
-                        || (<span class="kw-2">*</span>prepared_width &lt; width
+                        || ((<span class="kw-2">*</span>prepared_width &lt; width || prepared.size.width &lt;= width)
                             &amp;&amp; prepared.line_height == prepared.size.height)) =&gt; {}
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">let </span>measured = <span class="self">self</span>.text.map(|text| {
