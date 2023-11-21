@@ -798,6 +798,103 @@
 <a href="#798" id="798">798</a>
 <a href="#799" id="799">799</a>
 <a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
+<a href="#819" id="819">819</a>
+<a href="#820" id="820">820</a>
+<a href="#821" id="821">821</a>
+<a href="#822" id="822">822</a>
+<a href="#823" id="823">823</a>
+<a href="#824" id="824">824</a>
+<a href="#825" id="825">825</a>
+<a href="#826" id="826">826</a>
+<a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
+<a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
+<a href="#887" id="887">887</a>
+<a href="#888" id="888">888</a>
+<a href="#889" id="889">889</a>
+<a href="#890" id="890">890</a>
+<a href="#891" id="891">891</a>
+<a href="#892" id="892">892</a>
+<a href="#893" id="893">893</a>
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that allows a user to &quot;slide&quot; between values.
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
@@ -846,6 +943,8 @@
     ///
     /// This defaults to `0.05`/5%.
     </span><span class="kw">pub </span>step: Value&lt;ZeroToOne&gt;,
+    knob_visible: bool,
+    interactive: bool,
     knob_size: UPx,
     horizontal: bool,
     rendered_size: Px,
@@ -888,6 +987,8 @@
             value: value.into_dynamic(),
             minimum: min.into_value(),
             maximum: max.into_value(),
+            knob_visible: <span class="bool-val">true</span>,
+            interactive: <span class="bool-val">true</span>,
             step: Value::Constant(ZeroToOne::new(<span class="number">0.05</span>)),
             knob_size: UPx::ZERO,
             horizontal: <span class="bool-val">true</span>,
@@ -926,15 +1027,32 @@
         <span class="self">self
     </span>}
 
+    <span class="doccomment">/// Updates this slider to not show knobs and returns self.
+    ///
+    /// This also prevents the slider from being focused.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>knobless(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.knob_visible = <span class="bool-val">false</span>;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Updates this slider to ignore all user input and returns self.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>non_interactive(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.interactive = <span class="bool-val">false</span>;
+        <span class="self">self
+    </span>}
+
     <span class="kw">fn </span>draw_track(<span class="kw-2">&amp;mut </span><span class="self">self</span>, spec: <span class="kw-2">&amp;</span>TrackSpec, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">if </span><span class="self">self</span>.horizontal {
             <span class="self">self</span>.rendered_size = spec.size.width;
         } <span class="kw">else </span>{
             <span class="self">self</span>.rendered_size = spec.size.height;
         }
-        <span class="kw">let </span>half_focus_ring = (Lp::points(<span class="number">2</span>).into_px(context.gfx.scale()) / <span class="number">2</span>).ceil();
+        <span class="kw">let </span>half_focus_ring =
+            spec.if_knobbed(|| (Lp::points(<span class="number">2</span>).into_px(context.gfx.scale()) / <span class="number">2</span>).ceil());
         <span class="kw">let </span>focus_ring = half_focus_ring * <span class="number">2</span>;
-        <span class="kw">let </span>track_length = <span class="self">self</span>.rendered_size - spec.knob_size - focus_ring;
+        <span class="kw">let </span>track_length = <span class="self">self</span>.rendered_size - spec.if_knobbed(|| spec.knob_size - focus_ring);
         <span class="kw">let </span>(start, end) = <span class="kw">if let </span><span class="prelude-val">Some</span>(end) = spec.end {
             (track_length * spec.start, track_length * end)
         } <span class="kw">else </span>{
@@ -943,15 +1061,13 @@
         <span class="kw">let </span>inset = Point::squared(half_focus_ring);
 
         <span class="kw">let </span>half_track = spec.track_size / <span class="number">2</span>;
+        <span class="kw">let </span>start_inset = (spec.half_knob - half_track).max(Px::ZERO);
         <span class="comment">// Draw the track
         </span><span class="kw">if </span>start &gt; <span class="number">0 </span>{
             context.gfx.draw_shape(
                 Shape::filled_round_rect(
                     Rect::new(
-                        flipped(
-                            !<span class="self">self</span>.horizontal,
-                            Point::new(spec.half_knob - half_track, spec.half_knob - half_track),
-                        ),
+                        flipped(!<span class="self">self</span>.horizontal, Point::new(start_inset, start_inset)),
                         flipped(!<span class="self">self</span>.horizontal, Size::new(start, spec.track_size)),
                     ),
                     half_track,
@@ -966,11 +1082,14 @@
                     Rect::new(
                         flipped(
                             !<span class="self">self</span>.horizontal,
-                            Point::new(end + spec.half_knob, spec.half_knob - half_track),
+                            Point::new(end + spec.if_knobbed(|| spec.half_knob), start_inset),
                         ),
                         flipped(
                             !<span class="self">self</span>.horizontal,
-                            Size::new(track_length - end + half_track, spec.track_size),
+                            Size::new(
+                                track_length - end + spec.if_knobbed(|| half_track),
+                                spec.track_size,
+                            ),
                         ),
                     ),
                     half_track,
@@ -987,13 +1106,16 @@
                         flipped(
                             !<span class="self">self</span>.horizontal,
                             Point::new(
-                                start + spec.half_knob - half_track,
-                                spec.half_knob - half_track,
+                                start + spec.if_knobbed(|| spec.half_knob - half_track),
+                                start_inset,
                             ),
                         ),
                         flipped(
                             !<span class="self">self</span>.horizontal,
-                            Size::new(end - start + spec.track_size, spec.track_size),
+                            Size::new(
+                                end - start + spec.if_knobbed(|| spec.track_size),
+                                spec.track_size,
+                            ),
                         ),
                     ),
                     half_track,
@@ -1004,34 +1126,73 @@
         }
 
         <span class="comment">// Draw the knob
-        </span><span class="kw">let </span>focused = context.focused();
-        <span class="kw">let </span>this_knob_role = <span class="kw">if </span>spec.end.is_some() {
-            Knob::End
-        } <span class="kw">else </span>{
-            Knob::Start
-        };
-        <span class="self">self</span>.draw_knob(
-            flipped(
-                !<span class="self">self</span>.horizontal,
-                Point::new(end + spec.half_knob, spec.half_knob) + inset,
-            ),
-            focused &amp;&amp; <span class="self">self</span>.focused_knob == <span class="prelude-val">Some</span>(this_knob_role),
-            focus_ring,
-            spec,
-            context,
-        );
-
-        <span class="kw">if </span>spec.end.is_some() {
-            <span class="self">self</span>.draw_knob(
+        </span><span class="kw">if </span>spec.knob_size &gt; <span class="number">0 </span>{
+            <span class="kw">let </span>focus = context.focused().then_some(<span class="self">self</span>.focused_knob).flatten();
+            <span class="self">self</span>.draw_knobs(
                 flipped(
                     !<span class="self">self</span>.horizontal,
-                    Point::new(start + spec.half_knob, spec.half_knob) + inset,
+                    Point::new(end + spec.half_knob, spec.half_knob) + inset,
                 ),
-                focused &amp;&amp; <span class="macro">matches!</span>(<span class="self">self</span>.focused_knob, <span class="prelude-val">Some</span>(Knob::Start)),
+                spec.end.map(|<span class="kw">_</span>| {
+                    flipped(
+                        !<span class="self">self</span>.horizontal,
+                        Point::new(start + spec.half_knob, spec.half_knob) + inset,
+                    )
+                }),
+                focus,
                 focus_ring,
                 spec,
                 context,
             );
+            <span class="comment">// let this_knob_role = if spec.end.is_some() {
+            //     Knob::End
+            // } else {
+            //     Knob::Start
+            // };
+            // self.draw_knob(
+            //     flipped(
+            //         !self.horizontal,
+            //         Point::new(end + spec.half_knob, spec.half_knob) + inset,
+            //     ),
+            //     focused &amp;&amp; self.focused_knob == Some(this_knob_role),
+            //     focus_ring,
+            //     spec,
+            //     context,
+            // );
+
+            // if spec.end.is_some() {
+            //     self.draw_knob(
+            //         flipped(
+            //             !self.horizontal,
+            //             Point::new(start + spec.half_knob, spec.half_knob) + inset,
+            //         ),
+            //         focused &amp;&amp; matches!(self.focused_knob, Some(Knob::Start)),
+            //         focus_ring,
+            //         spec,
+            //         context,
+            //     );
+            // }
+        </span>}
+    }
+
+    <span class="kw">fn </span>draw_knobs(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        end_knob: Point&lt;Px&gt;,
+        start_knob: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;,
+        focus: <span class="prelude-ty">Option</span>&lt;Knob&gt;,
+        focus_ring_width: Px,
+        spec: <span class="kw-2">&amp;</span>TrackSpec,
+        context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) {
+        <span class="kw">let </span>(a, a_is_focused, b) = <span class="kw">match </span>(start_knob, focus) {
+            (<span class="prelude-val">Some</span>(start_knob), <span class="prelude-val">Some</span>(Knob::Start)) =&gt; (end_knob, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>((start_knob, <span class="bool-val">true</span>))),
+            (<span class="prelude-val">Some</span>(start_knob), focus) =&gt; (start_knob, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>((end_knob, focus.is_some()))),
+            (<span class="prelude-val">None</span>, focus) =&gt; (end_knob, focus.is_some(), <span class="prelude-val">None</span>),
+        };
+
+        <span class="self">self</span>.draw_knob(a, a_is_focused, focus_ring_width, spec, context);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>((b, b_is_focused)) = b {
+            <span class="self">self</span>.draw_knob(b, b_is_focused, focus_ring_width, spec, context);
         }
     }
 
@@ -1091,20 +1252,16 @@
                 <span class="kw">let </span>end_percent = end.percent_between(<span class="kw-2">&amp;</span>min, <span class="kw-2">&amp;</span>max);
                 <span class="kw">let </span>knob_width_as_percent =
                     <span class="self">self</span>.knob_size.into_float() / <span class="number">2. </span>/ track_width.into_float();
-                <span class="kw">if </span>percent - <span class="kw-2">*</span>start_percent &lt;= knob_width_as_percent
-                    &amp;&amp; <span class="macro">matches!</span>(previous_focus, <span class="prelude-val">Some</span>(Knob::Start))
-                {
+                <span class="kw">let </span>start_delta = percent - <span class="kw-2">*</span>start_percent;
+                <span class="kw">let </span>end_delta = <span class="kw-2">*</span>end_percent - percent;
+                <span class="kw">let </span>on_overlapping_knobs =
+                    end_delta &lt;= knob_width_as_percent &amp;&amp; start_delta &lt;= knob_width_as_percent;
+                <span class="kw">if let </span>(<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(previous)) = (on_overlapping_knobs, previous_focus) {
+                    previous
+                } <span class="kw">else if </span>start_delta &lt; end_delta {
                     Knob::Start
-                } <span class="kw">else if </span><span class="kw-2">*</span>end_percent - percent &lt;= knob_width_as_percent
-                    &amp;&amp; <span class="macro">matches!</span>(previous_focus, <span class="prelude-val">Some</span>(Knob::End))
-                {
-                    Knob::End
-                } <span class="kw">else if </span>value &lt;= start {
-                    Knob::Start
-                } <span class="kw">else if </span><span class="kw-2">&amp;</span>value &gt;= end {
-                    Knob::End
                 } <span class="kw">else </span>{
-                    Knob::Start
+                    Knob::End
                 }
             };
             <span class="kw">match </span>knob {
@@ -1190,10 +1347,10 @@
         <span class="kw">let </span>inactive_track_color = context.get(<span class="kw-2">&amp;</span>InactiveTrackColor);
         <span class="kw">let </span>knob_color = context.get(<span class="kw-2">&amp;</span>KnobColor);
         <span class="kw">let </span>knob_size = <span class="self">self</span>.knob_size.into_signed();
-        <span class="kw">let </span>track_size = context
-            .get(<span class="kw-2">&amp;</span>TrackSize)
-            .into_px(context.gfx.scale())
-            .min(knob_size);
+        <span class="kw">let </span><span class="kw-2">mut </span>track_size = context.get(<span class="kw-2">&amp;</span>TrackSize).into_px(context.gfx.scale());
+        <span class="kw">if </span>knob_size &gt; <span class="number">0 </span>{
+            track_size = track_size.min(knob_size);
+        }
 
         <span class="kw">let </span>half_knob = knob_size / <span class="number">2</span>;
 
@@ -1260,12 +1417,24 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="self">self</span>.knob_size = context.get(<span class="kw-2">&amp;</span>KnobSize).into_upx(context.gfx.scale());
+        <span class="self">self</span>.knob_size = <span class="kw">if </span><span class="self">self</span>.knob_visible {
+            context.get(<span class="kw-2">&amp;</span>KnobSize).into_upx(context.gfx.scale())
+        } <span class="kw">else </span>{
+            UPx::ZERO
+        };
         <span class="kw">let </span>minimum_size = context
             .get(<span class="kw-2">&amp;</span>MinimumSliderSize)
             .into_upx(context.gfx.scale());
-        <span class="kw">let </span>focus_ring_width = (Lp::points(<span class="number">2</span>).into_upx(context.gfx.scale()) / <span class="number">2</span>).ceil() * <span class="number">2</span>;
-        <span class="kw">let </span>focused_knob_size = <span class="self">self</span>.knob_size + focus_ring_width;
+        <span class="kw">let </span>focus_ring_width = <span class="kw">if </span><span class="self">self</span>.knob_visible {
+            (Lp::points(<span class="number">2</span>).into_upx(context.gfx.scale()) / <span class="number">2</span>).ceil() * <span class="number">2
+        </span>} <span class="kw">else </span>{
+            UPx::ZERO
+        };
+        <span class="kw">let </span>static_side = <span class="kw">if </span><span class="self">self</span>.knob_visible {
+            <span class="self">self</span>.knob_size + focus_ring_width
+        } <span class="kw">else </span>{
+            context.get(<span class="kw-2">&amp;</span>TrackSize).into_upx(context.gfx.scale())
+        };
 
         <span class="kw">match </span>(available_space.width, available_space.height) {
             (ConstraintLimit::Fill(width), ConstraintLimit::Fill(height)) =&gt; {
@@ -1273,17 +1442,17 @@
                 // up with a horizontal slider.
                 </span><span class="kw">if </span>width &lt; height {
                     <span class="comment">// Vertical slider
-                    </span>Size::new(focused_knob_size, height.max(minimum_size))
+                    </span>Size::new(static_side, height.max(minimum_size))
                 } <span class="kw">else </span>{
                     <span class="comment">// Horizontal slider
-                    </span>Size::new(width.max(minimum_size), focused_knob_size)
+                    </span>Size::new(width.max(minimum_size), static_side)
                 }
             }
             (ConstraintLimit::Fill(width), ConstraintLimit::SizeToFit(<span class="kw">_</span>)) =&gt; {
-                Size::new(width.max(minimum_size), focused_knob_size)
+                Size::new(width.max(minimum_size), static_side)
             }
             (ConstraintLimit::SizeToFit(<span class="kw">_</span>), ConstraintLimit::Fill(height)) =&gt; {
-                Size::new(focused_knob_size, height.max(minimum_size))
+                Size::new(static_side, height.max(minimum_size))
             }
             (ConstraintLimit::SizeToFit(width), ConstraintLimit::SizeToFit(<span class="kw">_</span>)) =&gt; {
                 <span class="comment">// When we have no limit on our, we still want to be draggable.
@@ -1293,17 +1462,17 @@
                 // user of the slider, a horizontal slider is expected. So, we
                 // set the minimum measurement based on a horizontal
                 // orientation.
-                </span>Size::new(width.min(minimum_size), focused_knob_size)
+                </span>Size::new(width.min(minimum_size), static_side)
             }
         }
     }
 
     <span class="kw">fn </span>hit_test(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _location: Point&lt;Px&gt;, _context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
-        <span class="bool-val">true
-    </span>}
+        <span class="self">self</span>.interactive
+    }
 
     <span class="kw">fn </span>accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
-        context.get(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
+        <span class="self">self</span>.interactive &amp;&amp; <span class="self">self</span>.knob_visible &amp;&amp; context.get(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
     }
 
     <span class="kw">fn </span>focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
@@ -1356,6 +1525,10 @@
         _button: MouseButton,
         context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; EventHandling {
+        <span class="kw">let </span><span class="bool-val">true </span>= <span class="self">self</span>.interactive <span class="kw">else </span>{
+            <span class="kw">return </span>IGNORED;
+        };
+
         <span class="kw">let </span>previous_focus = <span class="kw">match </span>(<span class="self">self</span>.previous_focus.take(), <span class="self">self</span>.focused_knob.take()) {
             (<span class="prelude-val">None </span>| <span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="prelude-val">Some</span>(focus)) | (<span class="prelude-val">Some</span>(focus), <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Some</span>(focus),
             (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">None</span>,
@@ -1393,6 +1566,10 @@
         _is_synthetic: bool,
         _context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; EventHandling {
+        <span class="kw">let </span><span class="bool-val">true </span>= <span class="self">self</span>.interactive <span class="kw">else </span>{
+            <span class="kw">return </span>IGNORED;
+        };
+
         <span class="kw">let </span>forwards = <span class="kw">match </span>input.logical_key {
             Key::Named(NamedKey::ArrowLeft | NamedKey::ArrowUp) =&gt; <span class="bool-val">false</span>,
             Key::Named(NamedKey::ArrowRight | NamedKey::ArrowDown) =&gt; <span class="bool-val">true</span>,
@@ -1414,6 +1591,10 @@
         _phase: TouchPhase,
         _context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; EventHandling {
+        <span class="kw">let </span><span class="bool-val">true </span>= <span class="self">self</span>.interactive <span class="kw">else </span>{
+            <span class="kw">return </span>IGNORED;
+        };
+
         <span class="kw">let </span>factor: f32 = <span class="kw">match </span>delta {
             MouseScrollDelta::LineDelta(<span class="kw">_</span>, y) =&gt; y,
             MouseScrollDelta::PixelDelta(pt) =&gt; pt.y.cast(),
@@ -1443,6 +1624,19 @@
     knob_color: Color,
     track_color: Color,
     inactive_track_color: Color,
+}
+
+<span class="kw">impl </span>TrackSpec {
+    <span class="kw">fn </span>if_knobbed&lt;R&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, knobbed: <span class="kw">impl </span>FnOnce() -&gt; R) -&gt; R
+    <span class="kw">where
+        </span>R: Default,
+    {
+        <span class="kw">if </span><span class="self">self</span>.knob_size &gt; <span class="number">0 </span>{
+            knobbed()
+        } <span class="kw">else </span>{
+            R::default()
+        }
+    }
 }
 
 <span class="kw">fn </span>flipped&lt;T, Unit&gt;(flip: bool, value: T) -&gt; T
