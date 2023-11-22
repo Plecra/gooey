@@ -728,18 +728,29 @@
 <a href="#728" id="728">728</a>
 <a href="#729" id="729">729</a>
 <a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines a collection of [`Children`] widgets into one.
 </span><span class="comment">// TODO on scale change, all `Lp` children need to resize
 
 </span><span class="kw">use </span>std::ops::{Bound, Deref};
 
 <span class="kw">use </span>alot::{LotId, OrderedLots};
+<span class="kw">use </span>intentional::Cast;
 <span class="kw">use </span>kludgine::figures::units::{Lp, UPx};
 <span class="kw">use </span>kludgine::figures::{
     Fraction, IntoSigned, IntoUnsigned, Point, Rect, Round, ScreenScale, Size,
 };
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::IntrinsicPadding;
 <span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Generation, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{Children, ManagedWidget, Widget, WidgetRef};
@@ -887,6 +898,7 @@
 
         <span class="kw">let </span>content_size = <span class="self">self</span>.layout.update(
             available_space,
+            context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_upx(context.gfx.scale()),
             context.gfx.scale(),
             |child_index, constraints, persist| {
                 <span class="kw">let </span><span class="kw-2">mut </span>context = context.for_other(<span class="kw-2">&amp;</span><span class="self">self</span>.synced_children[child_index]);
@@ -1130,13 +1142,15 @@
     <span class="kw">pub fn </span>update(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         available: Size&lt;ConstraintLimit&gt;,
+        gutter: UPx,
         scale: Fraction,
         <span class="kw-2">mut </span>measure: <span class="kw">impl </span>FnMut(usize, Size&lt;ConstraintLimit&gt;, bool) -&gt; Size&lt;UPx&gt;,
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>(space_constraint, other_constraint) = <span class="self">self</span>.orientation.split_size(available);
         <span class="kw">let </span>available_space = space_constraint.max();
+        <span class="kw">let </span>gutter_space = gutter.saturating_mul(UPx::new((<span class="self">self</span>.children.len() - <span class="number">1</span>).cast::&lt;u32&gt;()));
         <span class="kw">let </span>allocated_space =
-            <span class="self">self</span>.allocated_space.<span class="number">0 </span>+ <span class="self">self</span>.allocated_space.<span class="number">1</span>.into_upx(scale).ceil();
+            <span class="self">self</span>.allocated_space.<span class="number">0 </span>+ <span class="self">self</span>.allocated_space.<span class="number">1</span>.into_upx(scale).ceil() + gutter_space;
         <span class="kw">let </span><span class="kw-2">mut </span>remaining = available_space.saturating_sub(allocated_space);
         <span class="comment">// If our `other_constraint` is not known, we will need to give child
         // widgets an opportunity to lay themselves out in the full area. This
@@ -1220,7 +1234,7 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>offset = UPx::ZERO;
         <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.children.len() {
             <span class="self">self</span>.layouts[index].offset = offset;
-            offset += <span class="self">self</span>.layouts[index].size;
+            offset += <span class="self">self</span>.layouts[index].size + gutter;
             <span class="kw">if </span>needs_final_layout {
                 <span class="self">self</span>.orientation.split_size(measure(
                     index,
@@ -1306,8 +1320,11 @@
             flex.push(child.dimension, Fraction::ONE);
         }
 
-        <span class="kw">let </span>computed_size =
-            flex.update(available, Fraction::ONE, |index, constraints, _persist| {
+        <span class="kw">let </span>computed_size = flex.update(
+            available,
+            UPx::ZERO,
+            Fraction::ONE,
+            |index, constraints, _persist| {
                 <span class="kw">let </span>(measured_constraint, _other_constraint) = orientation.split_size(constraints);
                 <span class="kw">let </span>child = <span class="kw-2">&amp;</span>children[index];
                 <span class="kw">let </span>maximum_measured = measured_constraint.max();
@@ -1324,7 +1341,8 @@
                         <span class="kw">_ </span>=&gt; (child.size, child.other),
                     };
                 orientation.make_size(measured, other)
-            });
+            },
+        );
         <span class="macro">assert_eq!</span>(computed_size, expected_size);
         <span class="kw">let </span><span class="kw-2">mut </span>offset = UPx::ZERO;
         <span class="kw">for </span>((index, <span class="kw-2">&amp;</span>child), <span class="kw-2">&amp;</span>expected) <span class="kw">in </span>flex.iter().enumerate().zip(expected) {
