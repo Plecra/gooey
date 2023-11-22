@@ -1589,6 +1589,23 @@
 <a href="#1589" id="1589">1589</a>
 <a href="#1590" id="1590">1590</a>
 <a href="#1591" id="1591">1591</a>
+<a href="#1592" id="1592">1592</a>
+<a href="#1593" id="1593">1593</a>
+<a href="#1594" id="1594">1594</a>
+<a href="#1595" id="1595">1595</a>
+<a href="#1596" id="1596">1596</a>
+<a href="#1597" id="1597">1597</a>
+<a href="#1598" id="1598">1598</a>
+<a href="#1599" id="1599">1599</a>
+<a href="#1600" id="1600">1600</a>
+<a href="#1601" id="1601">1601</a>
+<a href="#1602" id="1602">1602</a>
+<a href="#1603" id="1603">1603</a>
+<a href="#1604" id="1604">1604</a>
+<a href="#1605" id="1605">1605</a>
+<a href="#1606" id="1606">1606</a>
+<a href="#1607" id="1607">1607</a>
+<a href="#1608" id="1608">1608</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1603,6 +1620,7 @@
 <span class="kw">use </span>kludgine::app::winit::event::{
     DeviceId, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
+<span class="kw">use </span>kludgine::app::winit::window::CursorIcon;
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoSigned, IntoUnsigned, Point, Rect, Size};
 <span class="kw">use </span>kludgine::Color;
@@ -1659,7 +1677,13 @@
 
     <span class="doccomment">/// The widget is currently has a cursor hovering it at `location`.
     </span><span class="attr">#[allow(unused_variables)]
-    </span><span class="kw">fn </span>hover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {}
+    </span><span class="kw">fn </span>hover(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        location: Point&lt;Px&gt;,
+        context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;CursorIcon&gt; {
+        <span class="prelude-val">None
+    </span>}
 
     <span class="doccomment">/// The widget is no longer being hovered.
     </span><span class="attr">#[allow(unused_variables)]
@@ -1924,7 +1948,13 @@
 
     <span class="doccomment">/// The widget is currently has a cursor hovering it at `location`.
     </span><span class="attr">#[allow(unused_variables)]
-    </span><span class="kw">fn </span>hover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {}
+    </span><span class="kw">fn </span>hover(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        location: Point&lt;Px&gt;,
+        context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;CursorIcon&gt; {
+        <span class="prelude-val">None
+    </span>}
 
     <span class="doccomment">/// The widget is no longer being hovered.
     </span><span class="attr">#[allow(unused_variables)]
@@ -2091,8 +2121,12 @@
         T::hit_test(<span class="self">self</span>, location, context)
     }
 
-    <span class="kw">fn </span>hover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        T::hover(<span class="self">self</span>, location, context);
+    <span class="kw">fn </span>hover(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        location: Point&lt;Px&gt;,
+        context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;CursorIcon&gt; {
+        T::hover(<span class="self">self</span>, location, context)
     }
 
     <span class="kw">fn </span>unhover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {

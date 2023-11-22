@@ -311,11 +311,19 @@
 <a href="#311" id="311">311</a>
 <a href="#312" id="312">312</a>
 <a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
 </span><span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>intentional::Cast;
 <span class="kw">use </span>kludgine::app::winit::event::{DeviceId, MouseScrollDelta, TouchPhase};
+<span class="kw">use </span>kludgine::app::winit::window::CursorIcon;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{
     FloatConversion, IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size,
@@ -420,9 +428,15 @@
         <span class="bool-val">true
     </span>}
 
-    <span class="kw">fn </span>hover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
+    <span class="kw">fn </span>hover(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        _location: Point&lt;Px&gt;,
+        context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;CursorIcon&gt; {
         <span class="self">self</span>.show_scrollbars(context);
-    }
+
+        <span class="prelude-val">None
+    </span>}
 
     <span class="kw">fn </span>unhover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="self">self</span>.scrollbar_opacity_animation = <span class="self">self

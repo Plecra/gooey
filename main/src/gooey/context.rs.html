@@ -1390,6 +1390,10 @@
 <a href="#1390" id="1390">1390</a>
 <a href="#1391" id="1391">1391</a>
 <a href="#1392" id="1392">1392</a>
+<a href="#1393" id="1393">1393</a>
+<a href="#1394" id="1394">1394</a>
+<a href="#1395" id="1395">1395</a>
+<a href="#1396" id="1396">1396</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
@@ -1400,6 +1404,7 @@
 <span class="kw">use </span>kludgine::app::winit::event::{
     DeviceId, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
+<span class="kw">use </span>kludgine::app::winit::window::CursorIcon;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Px2D, Rect, Round, ScreenScale, Size, Zero};
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
@@ -1555,10 +1560,17 @@
             <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>unhovered);
             unhovered.lock().as_widget().unhover(<span class="kw-2">&amp;mut </span>context);
         }
-        <span class="kw">for </span>hover <span class="kw">in </span>changes.hovered {
+
+        <span class="kw">let </span><span class="kw-2">mut </span>cursor = <span class="prelude-val">None</span>;
+        <span class="kw">for </span>hover <span class="kw">in </span>changes.hovered.into_iter().rev() {
             <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>hover);
-            hover.lock().as_widget().hover(location, <span class="kw-2">&amp;mut </span>context);
+            <span class="kw">let </span>widget_cursor = hover.lock().as_widget().hover(location, <span class="kw-2">&amp;mut </span>context);
+
+            <span class="kw">if </span>cursor.is_none() {
+                cursor = widget_cursor;
+            }
         }
+        <span class="self">self</span>.winit().set_cursor_icon(cursor.unwrap_or_default());
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>clear_hover(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
@@ -1569,6 +1581,8 @@
             <span class="kw">let </span><span class="kw-2">mut </span>old_hover_context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>old_hover);
             old_hover.lock().as_widget().unhover(<span class="kw-2">&amp;mut </span>old_hover_context);
         }
+
+        <span class="self">self</span>.winit().set_cursor_icon(CursorIcon::Default);
     }
 
     <span class="kw">fn </span>apply_pending_activation(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
@@ -1619,14 +1633,10 @@
     <span class="kw">fn </span>apply_pending_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">let </span><span class="kw-2">mut </span>focus_changes = <span class="number">0</span>;
         <span class="kw">while </span>focus_changes &lt; <span class="self">Self</span>::MAX_PENDING_CHANGE_CYCLES {
-            <span class="kw">let </span>focus = <span class="kw">match </span><span class="self">self
+            <span class="kw">let </span>focus = <span class="self">self
                 </span>.pending_state
                 .focus
-                .and_then(|w| <span class="self">self</span>.current_node.tree.widget(w))
-            {
-                <span class="prelude-val">Some</span>(focus) =&gt; <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>focus).enabled().then_some(focus),
-                <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
-            };
+                .and_then(|w| <span class="self">self</span>.current_node.tree.widget(w));
             <span class="kw">if </span><span class="self">self</span>.current_node.tree.focused_widget() == focus.as_ref().map(|w| w.node_id) {
                 <span class="kw">break</span>;
             }
@@ -1634,8 +1644,7 @@
 
             <span class="self">self</span>.pending_state.focus = focus.and_then(|<span class="kw-2">mut </span>focus| <span class="kw">loop </span>{
                 <span class="kw">let </span><span class="kw-2">mut </span>focus_context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>focus);
-                <span class="kw">let </span>accept_focus = focus_context.enabled()
-                    &amp;&amp; focus.lock().as_widget().accept_focus(<span class="kw-2">&amp;mut </span>focus_context);
+                <span class="kw">let </span>accept_focus = focus.lock().as_widget().accept_focus(<span class="kw-2">&amp;mut </span>focus_context);
                 drop(focus_context);
 
                 <span class="kw">if </span>accept_focus {
@@ -1794,8 +1803,7 @@
             }
 
             <span class="kw">let </span><span class="kw-2">mut </span>child_context = <span class="self">self</span>.for_other(<span class="kw-2">&amp;</span>child);
-            <span class="kw">let </span>accept_focus = child_context.enabled()
-                &amp;&amp; child.lock().as_widget().accept_focus(<span class="kw-2">&amp;mut </span>child_context);
+            <span class="kw">let </span>accept_focus = child.lock().as_widget().accept_focus(<span class="kw-2">&amp;mut </span>child_context);
             drop(child_context);
             <span class="kw">if </span>accept_focus {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(child.id());

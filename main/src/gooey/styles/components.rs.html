@@ -147,6 +147,8 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 
 </span><span class="kw">use </span>kludgine::cosmic_text::{FamilyOwned, Style, Weight};
@@ -278,6 +280,8 @@
         </span>WidgetBackground(Color, <span class="string">&quot;widget_backgrond_color&quot;</span>, Color::CLEAR_WHITE)
         <span class="doccomment">/// A [`Color`] to be used to accent a widget.
         </span>WidgetAccentColor(Color, <span class="string">&quot;widget_accent_color&quot;</span>, .primary.color)
+        <span class="doccomment">/// A [`Color`] to be used to accent a disabled widget.
+        </span>DisabledWidgetAccentColor(Color, <span class="string">&quot;disabled_widget_accent_color&quot;</span>, .primary.color_dim)
         <span class="doccomment">/// A [`Color`] to be used as an outline color.
         </span>OutlineColor(Color, <span class="string">&quot;outline_color&quot;</span>, .surface.outline)
         <span class="doccomment">/// A [`Color`] to be used as an outline color.

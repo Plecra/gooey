@@ -857,6 +857,51 @@
 <a href="#857" id="857">857</a>
 <a href="#858" id="858">858</a>
 <a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
+<a href="#887" id="887">887</a>
+<a href="#888" id="888">888</a>
+<a href="#889" id="889">889</a>
+<a href="#890" id="890">890</a>
+<a href="#891" id="891">891</a>
+<a href="#892" id="892">892</a>
+<a href="#893" id="893">893</a>
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that allows a user to &quot;slide&quot; between values.
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
@@ -866,6 +911,7 @@
 <span class="kw">use </span>intentional::{Assert, Cast <span class="kw">as _</span>};
 <span class="kw">use </span>kludgine::app::winit::event::{DeviceId, MouseButton, MouseScrollDelta, TouchPhase};
 <span class="kw">use </span>kludgine::app::winit::keyboard::{Key, NamedKey};
+<span class="kw">use </span>kludgine::app::winit::window::CursorIcon;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{
     FloatConversion, IntoSigned, Point, Ranged, Rect, Round, ScreenScale, Size,
@@ -876,7 +922,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::animation::{LinearInterpolate, PercentBetween, ZeroToOne};
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
-    AutoFocusableControls, OpaqueWidgetColor, OutlineColor, WidgetAccentColor,
+    AutoFocusableControls, DisabledWidgetAccentColor, OpaqueWidgetColor, OutlineColor,
+    WidgetAccentColor,
 };
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Dimension, HorizontalOrder, VerticalOrder, VisualOrder};
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoDynamic, IntoValue, Value};
@@ -1279,9 +1326,19 @@
     </span>T: SliderValue,
 {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="kw">let </span>track_color = context.get(<span class="kw-2">&amp;</span>TrackColor);
-        <span class="kw">let </span>inactive_track_color = context.get(<span class="kw-2">&amp;</span>InactiveTrackColor);
-        <span class="kw">let </span>knob_color = context.get(<span class="kw-2">&amp;</span>KnobColor);
+        <span class="kw">let </span>(track_color, inactive_track_color, knob_color) = <span class="kw">if </span>context.enabled() {
+            (
+                context.get(<span class="kw-2">&amp;</span>TrackColor),
+                context.get(<span class="kw-2">&amp;</span>InactiveTrackColor),
+                context.get(<span class="kw-2">&amp;</span>KnobColor),
+            )
+        } <span class="kw">else </span>{
+            (
+                context.get(<span class="kw-2">&amp;</span>DisabledTrackColor),
+                context.get(<span class="kw-2">&amp;</span>DisabledInactiveTrackColor),
+                context.get(<span class="kw-2">&amp;</span>DisabledKnobColor),
+            )
+        };
         <span class="kw">let </span>knob_size = <span class="self">self</span>.knob_size.into_signed();
         <span class="kw">let </span><span class="kw-2">mut </span>track_size = context.get(<span class="kw-2">&amp;</span>TrackSize).into_px(context.gfx.scale());
         <span class="kw">if </span>knob_size &gt; <span class="number">0 </span>{
@@ -1407,8 +1464,29 @@
         <span class="self">self</span>.interactive
     }
 
+    <span class="kw">fn </span>hover(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        _location: Point&lt;Px&gt;,
+        context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;CursorIcon&gt; {
+        (<span class="self">self</span>.interactive &amp;&amp; <span class="self">self</span>.knob_visible).then_some({
+            <span class="kw">if </span>context.enabled() {
+                <span class="kw">if </span><span class="self">self</span>.mouse_buttons_down &gt; <span class="number">0 </span>{
+                    CursorIcon::Grabbing
+                } <span class="kw">else </span>{
+                    CursorIcon::Grab
+                }
+            } <span class="kw">else </span>{
+                CursorIcon::NotAllowed
+            }
+        })
+    }
+
     <span class="kw">fn </span>accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
-        <span class="self">self</span>.interactive &amp;&amp; <span class="self">self</span>.knob_visible &amp;&amp; context.get(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
+        context.enabled()
+            &amp;&amp; <span class="self">self</span>.interactive
+            &amp;&amp; <span class="self">self</span>.knob_visible
+            &amp;&amp; context.get(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
     }
 
     <span class="kw">fn </span>focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
@@ -1465,13 +1543,15 @@
             <span class="kw">return </span>IGNORED;
         };
 
-        <span class="kw">let </span>previous_focus = <span class="kw">match </span>(<span class="self">self</span>.previous_focus.take(), <span class="self">self</span>.focused_knob.take()) {
-            (<span class="prelude-val">None </span>| <span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="prelude-val">Some</span>(focus)) | (<span class="prelude-val">Some</span>(focus), <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Some</span>(focus),
-            (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">None</span>,
-        };
-        <span class="self">self</span>.update_from_click(location, previous_focus);
+        <span class="kw">if </span>context.enabled() {
+            <span class="kw">let </span>previous_focus = <span class="kw">match </span>(<span class="self">self</span>.previous_focus.take(), <span class="self">self</span>.focused_knob.take()) {
+                (<span class="prelude-val">None </span>| <span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="prelude-val">Some</span>(focus)) | (<span class="prelude-val">Some</span>(focus), <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Some</span>(focus),
+                (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">None</span>,
+            };
+            <span class="self">self</span>.update_from_click(location, previous_focus);
+            context.focus();
+        }
         <span class="self">self</span>.mouse_buttons_down += <span class="number">1</span>;
-        context.focus();
         HANDLED
     }
 
@@ -1480,9 +1560,11 @@
         location: Point&lt;Px&gt;,
         _device_id: DeviceId,
         _button: MouseButton,
-        _context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) {
-        <span class="self">self</span>.update_from_click(location, <span class="prelude-val">None</span>);
+        <span class="kw">if </span>context.enabled() {
+            <span class="self">self</span>.update_from_click(location, <span class="prelude-val">None</span>);
+        }
     }
 
     <span class="kw">fn </span>mouse_up(
@@ -1525,24 +1607,26 @@
         _device_id: DeviceId,
         delta: MouseScrollDelta,
         _phase: TouchPhase,
-        _context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+        context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; EventHandling {
         <span class="kw">let </span><span class="bool-val">true </span>= <span class="self">self</span>.interactive <span class="kw">else </span>{
             <span class="kw">return </span>IGNORED;
         };
 
-        <span class="kw">let </span>factor: f32 = <span class="kw">match </span>delta {
-            MouseScrollDelta::LineDelta(<span class="kw">_</span>, y) =&gt; y,
-            MouseScrollDelta::PixelDelta(pt) =&gt; pt.y.cast(),
-        };
+        <span class="kw">if </span>context.enabled() {
+            <span class="kw">let </span>factor: f32 = <span class="kw">match </span>delta {
+                MouseScrollDelta::LineDelta(<span class="kw">_</span>, y) =&gt; y,
+                MouseScrollDelta::PixelDelta(pt) =&gt; pt.y.cast(),
+            };
 
-        <span class="kw">let </span>(forwards, factor) = <span class="kw">if </span>factor.is_sign_negative() {
-            (<span class="bool-val">false</span>, -factor)
-        } <span class="kw">else </span>{
-            (<span class="bool-val">true</span>, factor)
-        };
+            <span class="kw">let </span>(forwards, factor) = <span class="kw">if </span>factor.is_sign_negative() {
+                (<span class="bool-val">false</span>, -factor)
+            } <span class="kw">else </span>{
+                (<span class="bool-val">true</span>, factor)
+            };
 
-        <span class="self">self</span>.step(forwards, factor);
+            <span class="self">self</span>.step(forwards, factor);
+        }
 
         <span class="comment">// @ecton: Unlike scroll alreas cascasing, I feel like scrolling while
         // using a mouse wheel as an input is annoying.
@@ -1585,10 +1669,16 @@
         </span>MinimumSliderSize(Dimension, <span class="string">&quot;minimum_size&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>KnobSize) * <span class="number">2</span>)
         <span class="doccomment">/// The color of the draggable portion of the knob.
         </span>KnobColor(Color, <span class="string">&quot;knob_color&quot;</span>, @WidgetAccentColor)
+        <span class="doccomment">/// The color of the draggable portion of the knob.
+        </span>DisabledKnobColor(Color, <span class="string">&quot;disabled_knob_color&quot;</span>, @DisabledWidgetAccentColor)
         <span class="doccomment">/// The color of the track that the knob rests on.
         </span>TrackColor(Color,<span class="string">&quot;track_color&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>KnobColor))
-        <span class="doccomment">/// The color of the track that the knob rests on.
+        <span class="doccomment">/// The color of the track that the knob rests on when the widget is disabled.
+        </span>DisabledTrackColor(Color,<span class="string">&quot;track_color&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>DisabledKnobColor))
+        <span class="doccomment">/// The color of the track that the knob rests.
         </span>InactiveTrackColor(Color, <span class="string">&quot;inactive_track_color&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>OpaqueWidgetColor))
+        <span class="doccomment">/// The color of the track that the knob rests.
+        </span>DisabledInactiveTrackColor(Color, <span class="string">&quot;disabled_inactive_track_color&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>OpaqueWidgetColor))
     }
 }
 

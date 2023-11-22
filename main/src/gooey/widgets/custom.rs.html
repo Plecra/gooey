@@ -838,12 +838,20 @@
 <a href="#838" id="838">838</a>
 <a href="#839" id="839">839</a>
 <a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
 
 <span class="kw">use </span>kludgine::app::winit::event::{
     DeviceId, Ime, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase,
 };
+<span class="kw">use </span>kludgine::app::winit::window::CursorIcon;
 <span class="kw">use </span>kludgine::figures::units::Px;
 <span class="kw">use </span>kludgine::figures::{Point, Size};
 <span class="kw">use </span>kludgine::Color;
@@ -876,7 +884,7 @@
     adjust_child: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>AdjustChildConstraintsFunc&gt;&gt;,
     position_child: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>PositionChildFunc&gt;&gt;,
     hit_test: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>OneParamEventFunc&lt;Point&lt;Px&gt;, bool&gt;&gt;&gt;,
-    hover: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>OneParamEventFunc&lt;Point&lt;Px&gt;&gt;&gt;&gt;,
+    hover: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>OneParamEventFunc&lt;Point&lt;Px&gt;, <span class="prelude-ty">Option</span>&lt;CursorIcon&gt;&gt;&gt;&gt;,
     mouse_down:
         <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>ThreeParamEventFunc&lt;Point&lt;Px&gt;, DeviceId, MouseButton, EventHandling&gt;&gt;&gt;,
     mouse_drag: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>ThreeParamEventFunc&lt;Point&lt;Px&gt;, DeviceId, MouseButton&gt;&gt;&gt;,
@@ -1206,7 +1214,10 @@
         </span>Hover: Send
             + UnwindSafe
             + <span class="lifetime">&#39;static
-            </span>+ <span class="kw">for</span>&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; FnMut(Point&lt;Px&gt;, <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt;),
+            </span>+ <span class="kw">for</span>&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; FnMut(
+                Point&lt;Px&gt;,
+                <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt;,
+            ) -&gt; <span class="prelude-ty">Option</span>&lt;CursorIcon&gt;,
     {
         <span class="self">self</span>.hover = <span class="prelude-val">Some</span>(Box::new(hover));
         <span class="self">self
@@ -1403,10 +1414,13 @@
         </span>}
     }
 
-    <span class="kw">fn </span>hover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(hover) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.hover {
-            hover.invoke(location, context);
-        }
+    <span class="kw">fn </span>hover(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        location: Point&lt;Px&gt;,
+        context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;CursorIcon&gt; {
+        <span class="kw">let </span>hover = <span class="self">self</span>.hover.as_mut()<span class="question-mark">?</span>;
+        hover.invoke(location, context)
     }
 
     <span class="kw">fn </span>unhover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {

@@ -552,11 +552,23 @@
 <a href="#552" id="552">552</a>
 <a href="#553" id="553">553</a>
 <a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>kludgine::app::winit::event::{DeviceId, ElementState, KeyEvent, MouseButton};
+<span class="kw">use </span>kludgine::app::winit::window::CursorIcon;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoSigned, Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
@@ -937,7 +949,7 @@
     </span>}
 
     <span class="kw">fn </span>accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
-        context.get(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
+        context.enabled() &amp;&amp; context.get(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
     }
 
     <span class="kw">fn </span>mouse_down(
@@ -1046,8 +1058,18 @@
         <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
     }
 
-    <span class="kw">fn </span>hover(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
+    <span class="kw">fn </span>hover(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        _location: Point&lt;Px&gt;,
+        context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;CursorIcon&gt; {
         <span class="self">self</span>.update_colors(context, <span class="bool-val">false</span>);
+
+        <span class="kw">if </span>context.enabled() {
+            <span class="prelude-val">Some</span>(CursorIcon::Pointer)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(CursorIcon::NotAllowed)
+        }
     }
 
     <span class="kw">fn </span>focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {

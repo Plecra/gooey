@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["InactiveTrackColor","KnobColor","KnobSize","MinimumSliderSize","Slider","TrackColor","TrackSize"],"trait":["Slidable","SliderValue"]};
+window.SIDEBAR_ITEMS = {"struct":["DisabledInactiveTrackColor","DisabledKnobColor","DisabledTrackColor","InactiveTrackColor","KnobColor","KnobSize","MinimumSliderSize","Slider","TrackColor","TrackSize"],"trait":["Slidable","SliderValue"]};
