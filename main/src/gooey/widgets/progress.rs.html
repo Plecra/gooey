@@ -240,7 +240,7 @@
 
 <span class="kw">use </span>kludgine::figures::Ranged;
 
-<span class="kw">use </span><span class="kw">crate</span>::animation::easings::EaseInOutQuadradic;
+<span class="kw">use </span><span class="kw">crate</span>::animation::easings::{EaseInOutQuadradic, EaseOutQuadradic};
 <span class="kw">use </span><span class="kw">crate</span>::animation::{
     AnimationHandle, AnimationTarget, IntoAnimate, PercentBetween, Spawn, ZeroToOne,
 };
@@ -325,25 +325,25 @@
                     )
                         .immediately()
                         .and_then(
-                            end.transition_to(ZeroToOne::new(<span class="number">0.66</span>))
+                            end.transition_to(ZeroToOne::new(<span class="number">0.75</span>))
                                 .over(Duration::from_millis(<span class="number">500</span>))
-                                .with_easing(EaseInOutQuadradic),
+                                .with_easing(EaseOutQuadradic),
                         )
                         .and_then(
                             start
-                                .transition_to(ZeroToOne::new(<span class="number">0.33</span>))
+                                .transition_to(ZeroToOne::new(<span class="number">0.25</span>))
                                 .over(Duration::from_millis(<span class="number">500</span>))
-                                .with_easing(EaseInOutQuadradic),
+                                .with_easing(EaseOutQuadradic),
                         )
                         .and_then(
                             end.transition_to(ZeroToOne::ONE)
-                                .over(Duration::from_millis(<span class="number">500</span>))
-                                .with_easing(EaseInOutQuadradic),
+                                .over(Duration::from_millis(<span class="number">250</span>))
+                                .with_easing(EaseOutQuadradic),
                         )
                         .and_then(
                             start
                                 .transition_to(ZeroToOne::ONE)
-                                .over(Duration::from_millis(<span class="number">500</span>))
+                                .over(Duration::from_millis(<span class="number">250</span>))
                                 .with_easing(EaseInOutQuadradic),
                         )
                         .cycle()
