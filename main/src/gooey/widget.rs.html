@@ -1571,6 +1571,25 @@
 <a href="#1571" id="1571">1571</a>
 <a href="#1572" id="1572">1572</a>
 <a href="#1573" id="1573">1573</a>
+<a href="#1574" id="1574">1574</a>
+<a href="#1575" id="1575">1575</a>
+<a href="#1576" id="1576">1576</a>
+<a href="#1577" id="1577">1577</a>
+<a href="#1578" id="1578">1578</a>
+<a href="#1579" id="1579">1579</a>
+<a href="#1580" id="1580">1580</a>
+<a href="#1581" id="1581">1581</a>
+<a href="#1582" id="1582">1582</a>
+<a href="#1583" id="1583">1583</a>
+<a href="#1584" id="1584">1584</a>
+<a href="#1585" id="1585">1585</a>
+<a href="#1586" id="1586">1586</a>
+<a href="#1587" id="1587">1587</a>
+<a href="#1588" id="1588">1588</a>
+<a href="#1589" id="1589">1589</a>
+<a href="#1590" id="1590">1590</a>
+<a href="#1591" id="1591">1591</a>
+<a href="#1592" id="1592">1592</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1598,9 +1617,11 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
-<span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
+<span class="kw">use </span><span class="kw">crate</span>::value::{IntoDynamic, IntoValue, Value};
+<span class="kw">use </span><span class="kw">crate</span>::widgets::checkbox::{Checkable, CheckboxState};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{
-    Align, Button, Container, Expand, Resize, Scroll, Stack, Style, Themed, ThemedMode,
+    Align, Button, Checkbox, Container, Expand, Resize, Scroll, Space, Stack, Style, Themed,
+    ThemedMode,
 };
 <span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, ThemeMode, Window, WindowBehavior};
 <span class="kw">use crate</span>::{ConstraintLimit, Run};
@@ -2316,9 +2337,14 @@
         Resize::from_height(height, <span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Returns this string as a clickable button.
+    <span class="doccomment">/// Returns this widget as the contents of a clickable button.
     </span><span class="kw">fn </span>into_button(<span class="self">self</span>) -&gt; Button {
         Button::new(<span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Returns this widget as the label of a Checkbox.
+    </span><span class="kw">fn </span>into_checkbox(<span class="self">self</span>, value: <span class="kw">impl </span>IntoDynamic&lt;CheckboxState&gt;) -&gt; Checkbox {
+        value.into_checkbox(<span class="self">self</span>)
     }
 
     <span class="doccomment">/// Aligns `self` to the center vertically and horizontally.
@@ -2446,6 +2472,18 @@
     <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
         <span class="self">self
     </span>}
+}
+
+<span class="kw">impl </span>MakeWidget <span class="kw">for </span>Color {
+    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
+        Space::colored(<span class="self">self</span>).make_widget()
+    }
+}
+
+<span class="kw">impl </span>MakeWidget <span class="kw">for </span>() {
+    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
+        Space::clear().make_widget()
+    }
 }
 
 <span class="doccomment">/// A type that represents whether an event has been handled or ignored.

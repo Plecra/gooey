@@ -323,7 +323,7 @@
                         start.transition_to(ZeroToOne::ZERO),
                         end.transition_to(ZeroToOne::ZERO),
                     )
-                        .over(Duration::ZERO)
+                        .immediately()
                         .and_then(
                             end.transition_to(ZeroToOne::new(<span class="number">0.66</span>))
                                 .over(Duration::from_millis(<span class="number">500</span>))
