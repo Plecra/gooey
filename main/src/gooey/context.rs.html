@@ -1364,6 +1364,14 @@
 <a href="#1364" id="1364">1364</a>
 <a href="#1365" id="1365">1365</a>
 <a href="#1366" id="1366">1366</a>
+<a href="#1367" id="1367">1367</a>
+<a href="#1368" id="1368">1368</a>
+<a href="#1369" id="1369">1369</a>
+<a href="#1370" id="1370">1370</a>
+<a href="#1371" id="1371">1371</a>
+<a href="#1372" id="1372">1372</a>
+<a href="#1373" id="1373">1373</a>
+<a href="#1374" id="1374">1374</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::hash::Hash;
@@ -1408,6 +1416,8 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; EventContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; {
+    <span class="kw">const </span>MAX_PENDING_CHANGE_CYCLES: u8 = <span class="number">100</span>;
+
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
         widget: WidgetContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt;,
         kludgine: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>Kludgine,
@@ -1544,17 +1554,9 @@
         }
     }
 
-    <span class="attr">#[allow(clippy::too_many_lines)] </span><span class="comment">// TODO
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>apply_pending_state(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="kw">const </span>MAX_ITERS: u8 = <span class="number">100</span>;
-        <span class="comment">// These two blocks apply active/focus in a loop to pick up the event
-        // where during the process of calling deactivate/blur or activate/focus
-        // the active/focus widget is changed again. This can lead to infinite
-        // loops, which is a programmer error. However, rather than block
-        // forever, we log a message that this is happening and break.
-
-        </span><span class="kw">let </span><span class="kw-2">mut </span>activation_changes = <span class="number">0</span>;
-        <span class="kw">while </span>activation_changes &lt; MAX_ITERS {
+    <span class="kw">fn </span>apply_pending_activation(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">let </span><span class="kw-2">mut </span>activation_changes = <span class="number">0</span>;
+        <span class="kw">while </span>activation_changes &lt; <span class="self">Self</span>::MAX_PENDING_CHANGE_CYCLES {
             <span class="kw">let </span>active = <span class="self">self
                 </span>.pending_state
                 .active
@@ -1590,14 +1592,16 @@
             }
         }
 
-        <span class="kw">if </span>activation_changes == MAX_ITERS {
+        <span class="kw">if </span>activation_changes == <span class="self">Self</span>::MAX_PENDING_CHANGE_CYCLES {
             <span class="macro">tracing::error!</span>(
                 <span class="string">&quot;activation change force stopped after {activation_changes} sequential changes&quot;
             </span>);
         }
+    }
 
+    <span class="kw">fn </span>apply_pending_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">let </span><span class="kw-2">mut </span>focus_changes = <span class="number">0</span>;
-        <span class="kw">while </span>focus_changes &lt; MAX_ITERS {
+        <span class="kw">while </span>focus_changes &lt; <span class="self">Self</span>::MAX_PENDING_CHANGE_CYCLES {
             <span class="kw">let </span>focus = <span class="kw">match </span><span class="self">self
                 </span>.pending_state
                 .focus
@@ -1659,9 +1663,21 @@
             }
         }
 
-        <span class="kw">if </span>focus_changes == MAX_ITERS {
+        <span class="kw">if </span>focus_changes == <span class="self">Self</span>::MAX_PENDING_CHANGE_CYCLES {
             <span class="macro">tracing::error!</span>(<span class="string">&quot;focus change force stopped after {focus_changes} sequential changes&quot;</span>);
         }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>apply_pending_state(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="comment">// These two blocks apply active/focus in a loop to pick up the event
+        // where during the process of calling deactivate/blur or activate/focus
+        // the active/focus widget is changed again. This can lead to infinite
+        // loops, which is a programmer error. However, rather than block
+        // forever, we log a message that this is happening and break.
+
+        </span><span class="self">self</span>.apply_pending_activation();
+
+        <span class="self">self</span>.apply_pending_focus();
 
         <span class="comment">// Check that our hover widget still exists. If not, we should try to find a new one.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(hover) = <span class="self">self</span>.current_node.tree.hovered_widget() {
