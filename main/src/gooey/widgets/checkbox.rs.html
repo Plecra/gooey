@@ -217,6 +217,11 @@
 <a href="#217" id="217">217</a>
 <a href="#218" id="218">218</a>
 <a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A tri-state, labelable checkbox widget.
 </span><span class="kw">use </span>std::error::Error;
 <span class="kw">use </span>std::fmt::Display;
@@ -378,10 +383,15 @@
     ) -&gt; WrappedLayout {
         <span class="kw">let </span>checkbox_size = context.get(<span class="kw-2">&amp;</span>LineHeight).into_px(context.gfx.scale()); <span class="comment">// TODO create a component?
         </span><span class="kw">let </span>padding = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_px(context.gfx.scale());
-        <span class="kw">let </span>label_inset = checkbox_size + padding;
-        <span class="kw">let </span>size_with_checkbox = Size::new(size.width + label_inset, size.height).into_unsigned();
+        <span class="kw">let </span>label_inset = checkbox_size + padding * <span class="number">2</span>;
+        <span class="kw">let </span>effective_height = size.height.max(label_inset);
+        <span class="kw">let </span>size_with_checkbox =
+            Size::new(size.width + label_inset + padding, effective_height).into_unsigned();
         WrappedLayout {
-            child: Rect::new(Point::new(label_inset, Px::ZERO), size),
+            child: Rect::new(
+                Point::new(label_inset, Px::ZERO),
+                Size::new(size.width, effective_height),
+            ),
             size: size_with_checkbox,
         }
     }

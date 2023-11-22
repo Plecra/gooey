@@ -857,44 +857,6 @@
 <a href="#857" id="857">857</a>
 <a href="#858" id="858">858</a>
 <a href="#859" id="859">859</a>
-<a href="#860" id="860">860</a>
-<a href="#861" id="861">861</a>
-<a href="#862" id="862">862</a>
-<a href="#863" id="863">863</a>
-<a href="#864" id="864">864</a>
-<a href="#865" id="865">865</a>
-<a href="#866" id="866">866</a>
-<a href="#867" id="867">867</a>
-<a href="#868" id="868">868</a>
-<a href="#869" id="869">869</a>
-<a href="#870" id="870">870</a>
-<a href="#871" id="871">871</a>
-<a href="#872" id="872">872</a>
-<a href="#873" id="873">873</a>
-<a href="#874" id="874">874</a>
-<a href="#875" id="875">875</a>
-<a href="#876" id="876">876</a>
-<a href="#877" id="877">877</a>
-<a href="#878" id="878">878</a>
-<a href="#879" id="879">879</a>
-<a href="#880" id="880">880</a>
-<a href="#881" id="881">881</a>
-<a href="#882" id="882">882</a>
-<a href="#883" id="883">883</a>
-<a href="#884" id="884">884</a>
-<a href="#885" id="885">885</a>
-<a href="#886" id="886">886</a>
-<a href="#887" id="887">887</a>
-<a href="#888" id="888">888</a>
-<a href="#889" id="889">889</a>
-<a href="#890" id="890">890</a>
-<a href="#891" id="891">891</a>
-<a href="#892" id="892">892</a>
-<a href="#893" id="893">893</a>
-<a href="#894" id="894">894</a>
-<a href="#895" id="895">895</a>
-<a href="#896" id="896">896</a>
-<a href="#897" id="897">897</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that allows a user to &quot;slide&quot; between values.
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
@@ -906,8 +868,7 @@
 <span class="kw">use </span>kludgine::app::winit::keyboard::{Key, NamedKey};
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{
-    FloatConversion, FromComponents, IntoComponents, IntoSigned, Point, Ranged, Rect, Round,
-    ScreenScale, Size,
+    FloatConversion, IntoSigned, Point, Ranged, Rect, Round, ScreenScale, Size,
 };
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
 <span class="kw">use </span>kludgine::{Color, DrawableExt, Origin};
@@ -1052,7 +1013,7 @@
         <span class="kw">let </span>half_focus_ring =
             spec.if_knobbed(|| (Lp::points(<span class="number">2</span>).into_px(context.gfx.scale()) / <span class="number">2</span>).ceil());
         <span class="kw">let </span>focus_ring = half_focus_ring * <span class="number">2</span>;
-        <span class="kw">let </span>track_length = <span class="self">self</span>.rendered_size - spec.if_knobbed(|| spec.knob_size - focus_ring);
+        <span class="kw">let </span>track_length = <span class="self">self</span>.rendered_size - spec.if_knobbed(|| spec.knob_size + focus_ring);
         <span class="kw">let </span>(start, end) = <span class="kw">if let </span><span class="prelude-val">Some</span>(end) = spec.end {
             (track_length * spec.start, track_length * end)
         } <span class="kw">else </span>{
@@ -1066,10 +1027,10 @@
         </span><span class="kw">if </span>start &gt; <span class="number">0 </span>{
             context.gfx.draw_shape(
                 Shape::filled_round_rect(
-                    Rect::new(
-                        flipped(!<span class="self">self</span>.horizontal, Point::new(start_inset, start_inset)),
-                        flipped(!<span class="self">self</span>.horizontal, Size::new(start, spec.track_size)),
-                    ),
+                    <span class="self">self</span>.orient_rectangle(Rect::new(
+                        Point::new(start_inset, start_inset),
+                        Size::new(start, spec.track_size),
+                    )),
                     half_track,
                     spec.inactive_track_color,
                 )
@@ -1079,19 +1040,13 @@
         <span class="kw">if </span>end &lt; track_length {
             context.gfx.draw_shape(
                 Shape::filled_round_rect(
-                    Rect::new(
-                        flipped(
-                            !<span class="self">self</span>.horizontal,
-                            Point::new(end + spec.if_knobbed(|| spec.half_knob), start_inset),
+                    <span class="self">self</span>.orient_rectangle(Rect::new(
+                        Point::new(end + spec.if_knobbed(|| spec.half_knob), start_inset),
+                        Size::new(
+                            track_length - end + spec.if_knobbed(|| half_track),
+                            spec.track_size,
                         ),
-                        flipped(
-                            !<span class="self">self</span>.horizontal,
-                            Size::new(
-                                track_length - end + spec.if_knobbed(|| half_track),
-                                spec.track_size,
-                            ),
-                        ),
-                    ),
+                    )),
                     half_track,
                     spec.inactive_track_color,
                 )
@@ -1102,22 +1057,16 @@
         <span class="kw">if </span>start != end {
             context.gfx.draw_shape(
                 Shape::filled_round_rect(
-                    Rect::new(
-                        flipped(
-                            !<span class="self">self</span>.horizontal,
-                            Point::new(
-                                start + spec.if_knobbed(|| spec.half_knob - half_track),
-                                start_inset,
-                            ),
+                    <span class="self">self</span>.orient_rectangle(Rect::new(
+                        Point::new(
+                            start + spec.if_knobbed(|| spec.half_knob - half_track),
+                            start_inset,
                         ),
-                        flipped(
-                            !<span class="self">self</span>.horizontal,
-                            Size::new(
-                                end - start + spec.if_knobbed(|| spec.track_size),
-                                spec.track_size,
-                            ),
+                        Size::new(
+                            end - start + spec.if_knobbed(|| spec.track_size),
+                            spec.track_size,
                         ),
-                    ),
+                    )),
                     half_track,
                     spec.track_color,
                 )
@@ -1128,14 +1077,10 @@
         <span class="comment">// Draw the knob
         </span><span class="kw">if </span>spec.knob_size &gt; <span class="number">0 </span>{
             <span class="kw">let </span>focus = context.focused().then_some(<span class="self">self</span>.focused_knob).flatten();
-            <span class="self">self</span>.draw_knobs(
-                flipped(
-                    !<span class="self">self</span>.horizontal,
-                    Point::new(end + spec.half_knob, spec.half_knob) + inset,
-                ),
+            <span class="self">Self</span>::draw_knobs(
+                <span class="self">self</span>.flip_pt_if_vertical(Point::new(end + spec.half_knob, spec.half_knob) + inset),
                 spec.end.map(|<span class="kw">_</span>| {
-                    flipped(
-                        !<span class="self">self</span>.horizontal,
+                    <span class="self">self</span>.flip_pt_if_vertical(
                         Point::new(start + spec.half_knob, spec.half_knob) + inset,
                     )
                 }),
@@ -1144,39 +1089,10 @@
                 spec,
                 context,
             );
-            <span class="comment">// let this_knob_role = if spec.end.is_some() {
-            //     Knob::End
-            // } else {
-            //     Knob::Start
-            // };
-            // self.draw_knob(
-            //     flipped(
-            //         !self.horizontal,
-            //         Point::new(end + spec.half_knob, spec.half_knob) + inset,
-            //     ),
-            //     focused &amp;&amp; self.focused_knob == Some(this_knob_role),
-            //     focus_ring,
-            //     spec,
-            //     context,
-            // );
-
-            // if spec.end.is_some() {
-            //     self.draw_knob(
-            //         flipped(
-            //             !self.horizontal,
-            //             Point::new(start + spec.half_knob, spec.half_knob) + inset,
-            //         ),
-            //         focused &amp;&amp; matches!(self.focused_knob, Some(Knob::Start)),
-            //         focus_ring,
-            //         spec,
-            //         context,
-            //     );
-            // }
-        </span>}
+        }
     }
 
     <span class="kw">fn </span>draw_knobs(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         end_knob: Point&lt;Px&gt;,
         start_knob: <span class="prelude-ty">Option</span>&lt;Point&lt;Px&gt;&gt;,
         focus: <span class="prelude-ty">Option</span>&lt;Knob&gt;,
@@ -1190,14 +1106,13 @@
             (<span class="prelude-val">None</span>, focus) =&gt; (end_knob, focus.is_some(), <span class="prelude-val">None</span>),
         };
 
-        <span class="self">self</span>.draw_knob(a, a_is_focused, focus_ring_width, spec, context);
+        <span class="self">Self</span>::draw_knob(a, a_is_focused, focus_ring_width, spec, context);
         <span class="kw">if let </span><span class="prelude-val">Some</span>((b, b_is_focused)) = b {
-            <span class="self">self</span>.draw_knob(b, b_is_focused, focus_ring_width, spec, context);
+            <span class="self">Self</span>::draw_knob(b, b_is_focused, focus_ring_width, spec, context);
         }
     }
 
     <span class="kw">fn </span>draw_knob(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         knob_center: Point&lt;Px&gt;,
         is_focused: bool,
         focus_ring_width: Px,
@@ -1206,7 +1121,7 @@
     ) {
         context.gfx.draw_shape(
             Shape::filled_circle(spec.half_knob, spec.knob_color, Origin::Center)
-                .translate_by(flipped(!<span class="self">self</span>.horizontal, knob_center)),
+                .translate_by(knob_center),
         );
 
         <span class="kw">if </span>is_focused {
@@ -1233,7 +1148,7 @@
         <span class="kw">let </span>position = <span class="kw">if </span><span class="self">self</span>.horizontal {
             position.x - knob_size / <span class="number">2
         </span>} <span class="kw">else </span>{
-            position.y - knob_size / <span class="number">2
+            <span class="self">self</span>.rendered_size - position.y - knob_size / <span class="number">2
         </span>};
         <span class="kw">let </span>track_width = <span class="self">self</span>.rendered_size - knob_size;
         <span class="kw">let </span>position = position.clamp(Px::ZERO, track_width);
@@ -1334,6 +1249,27 @@
                 (Knob::End, <span class="prelude-val">Some</span>(start)) =&gt; (start, <span class="prelude-val">Some</span>(new_value)),
             };
             <span class="self">self</span>.value.update(T::from_parts(start, end));
+        }
+    }
+
+    <span class="kw">fn </span>orient_rectangle(<span class="kw-2">&amp;</span><span class="self">self</span>, rect: Rect&lt;Px&gt;) -&gt; Rect&lt;Px&gt; {
+        <span class="kw">if </span><span class="self">self</span>.horizontal {
+            rect
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>(tl, br) = rect.extents();
+
+            Rect::from_extents(
+                Point::new(tl.y, <span class="self">self</span>.rendered_size - tl.x),
+                Point::new(br.y, <span class="self">self</span>.rendered_size - br.x),
+            )
+        }
+    }
+
+    <span class="kw">fn </span>flip_pt_if_vertical(<span class="kw-2">&amp;</span><span class="self">self</span>, pt: Point&lt;Px&gt;) -&gt; Point&lt;Px&gt; {
+        <span class="kw">if </span><span class="self">self</span>.horizontal {
+            pt
+        } <span class="kw">else </span>{
+            Point::new(pt.y, <span class="self">self</span>.rendered_size - pt.x)
         }
     }
 }
@@ -1636,18 +1572,6 @@
         } <span class="kw">else </span>{
             R::default()
         }
-    }
-}
-
-<span class="kw">fn </span>flipped&lt;T, Unit&gt;(flip: bool, value: T) -&gt; T
-<span class="kw">where
-    </span>T: IntoComponents&lt;Unit&gt; + FromComponents&lt;Unit&gt;,
-{
-    <span class="kw">if </span>flip {
-        <span class="kw">let </span>(a, b) = value.into_components();
-        T::from_components((b, a))
-    } <span class="kw">else </span>{
-        value
     }
 }
 

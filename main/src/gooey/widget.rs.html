@@ -1562,6 +1562,15 @@
 <a href="#1562" id="1562">1562</a>
 <a href="#1563" id="1563">1563</a>
 <a href="#1564" id="1564">1564</a>
+<a href="#1565" id="1565">1565</a>
+<a href="#1566" id="1566">1566</a>
+<a href="#1567" id="1567">1567</a>
+<a href="#1568" id="1568">1568</a>
+<a href="#1569" id="1569">1569</a>
+<a href="#1570" id="1570">1570</a>
+<a href="#1571" id="1571">1571</a>
+<a href="#1572" id="1572">1572</a>
+<a href="#1573" id="1573">1573</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -2270,6 +2279,15 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">fn </span>expand_vertically(<span class="self">self</span>) -&gt; Expand {
         Expand::horizontal(<span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Resizes `self` to `size`.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">fn </span>size&lt;T&gt;(<span class="self">self</span>, size: Size&lt;T&gt;) -&gt; Resize
+    <span class="kw">where
+        </span>T: Into&lt;DimensionRange&gt;,
+    {
+        Resize::to(size, <span class="self">self</span>)
     }
 
     <span class="doccomment">/// Resizes `self` to `width`.
