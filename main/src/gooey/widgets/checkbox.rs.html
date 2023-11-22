@@ -248,12 +248,19 @@
 <a href="#248" id="248">248</a>
 <a href="#249" id="249">249</a>
 <a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A tri-state, labelable checkbox widget.
 </span><span class="kw">use </span>std::error::Error;
 <span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::ops::Not;
 
-<span class="kw">use </span>kludgine::figures::units::Lp;
+<span class="kw">use </span>kludgine::figures::units::{Lp, Px};
 <span class="kw">use </span>kludgine::figures::{Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::shapes::{PathBuilder, Shape, StrokeOptions};
 
@@ -302,7 +309,7 @@
 
 <span class="kw">impl </span>MakeWidget <span class="kw">for </span>Checkbox {
     <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
-        CheckboxLabel {
+        CheckboxOrnament {
             value: <span class="self">self</span>.state.create_reader(),
         }
         .and(<span class="self">self</span>.label)
@@ -419,11 +426,11 @@
 <span class="kw">impl </span>Error <span class="kw">for </span>CheckboxToBoolError {}
 
 <span class="attr">#[derive(Debug)]
-</span><span class="kw">struct </span>CheckboxLabel {
+</span><span class="kw">struct </span>CheckboxOrnament {
     value: DynamicReader&lt;CheckboxState&gt;,
 }
 
-<span class="kw">impl </span>Widget <span class="kw">for </span>CheckboxLabel {
+<span class="kw">impl </span>Widget <span class="kw">for </span>CheckboxOrnament {
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>checkbox_size = context
             .gfx
@@ -432,7 +439,14 @@
             .width
             .min(context.gfx.region().size.height);
 
-        <span class="kw">let </span>checkbox_rect = Rect::from(Size::squared(checkbox_size));
+        <span class="kw">let </span>checkbox_rect = Rect::new(
+            Point::new(
+                Px::ZERO,
+                (context.gfx.region().size.height - checkbox_size) / <span class="number">2</span>,
+            ),
+            Size::squared(checkbox_size),
+        );
+
         <span class="kw">let </span>stroke_options = StrokeOptions::lp_wide(Lp::points(<span class="number">2</span>)).into_px(context.gfx.scale());
         <span class="kw">match </span><span class="self">self</span>.value.get_tracking_refresh(context) {
             state @ (CheckboxState::Checked | CheckboxState::Indeterminant) =&gt; {
