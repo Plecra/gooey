@@ -1415,6 +1415,42 @@
 <a href="#1415" id="1415">1415</a>
 <a href="#1416" id="1416">1416</a>
 <a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
+<a href="#1419" id="1419">1419</a>
+<a href="#1420" id="1420">1420</a>
+<a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
+<a href="#1424" id="1424">1424</a>
+<a href="#1425" id="1425">1425</a>
+<a href="#1426" id="1426">1426</a>
+<a href="#1427" id="1427">1427</a>
+<a href="#1428" id="1428">1428</a>
+<a href="#1429" id="1429">1429</a>
+<a href="#1430" id="1430">1430</a>
+<a href="#1431" id="1431">1431</a>
+<a href="#1432" id="1432">1432</a>
+<a href="#1433" id="1433">1433</a>
+<a href="#1434" id="1434">1434</a>
+<a href="#1435" id="1435">1435</a>
+<a href="#1436" id="1436">1436</a>
+<a href="#1437" id="1437">1437</a>
+<a href="#1438" id="1438">1438</a>
+<a href="#1439" id="1439">1439</a>
+<a href="#1440" id="1440">1440</a>
+<a href="#1441" id="1441">1441</a>
+<a href="#1442" id="1442">1442</a>
+<a href="#1443" id="1443">1443</a>
+<a href="#1444" id="1444">1444</a>
+<a href="#1445" id="1445">1445</a>
+<a href="#1446" id="1446">1446</a>
+<a href="#1447" id="1447">1447</a>
+<a href="#1448" id="1448">1448</a>
+<a href="#1449" id="1449">1449</a>
+<a href="#1450" id="1450">1450</a>
+<a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
+<a href="#1453" id="1453">1453</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::cell::Cell;
@@ -1430,10 +1466,11 @@
 <span class="kw">use </span>intentional::Assert;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{DynamicTransition, LinearInterpolate};
-<span class="kw">use </span><span class="kw">crate</span>::context::{WidgetContext, WindowHandle};
+<span class="kw">use </span><span class="kw">crate</span>::context::sealed::WindowHandle;
+<span class="kw">use </span><span class="kw">crate</span>::context::{<span class="self">self</span>, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::utils::{IgnorePoison, UnwindsafeCondvar, WithClone};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{WidgetId, WidgetInstance};
-<span class="kw">use </span><span class="kw">crate</span>::widgets::Switcher;
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetId, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widgets::{Radio, Switcher};
 
 <span class="doccomment">/// An instance of a value that provides APIs to observe and react to its
 /// contents.
@@ -1891,6 +1928,21 @@
             new_value,
         }
     }
+
+    <span class="doccomment">/// Returns a new [`Radio`] that updates this dynamic to `widget_value` when
+    /// pressed. `label` is drawn next to the checkbox and is also clickable to
+    /// select the radio.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>new_radio(<span class="kw-2">&amp;</span><span class="self">self</span>, widget_value: T, label: <span class="kw">impl </span>MakeWidget) -&gt; Radio&lt;T&gt;
+    <span class="kw">where
+        </span><span class="self">Self</span>: Clone,
+        <span class="comment">// Technically this trait bound isn&#39;t necessary, but it prevents trying
+        // to call into_radio on unsupported types. The MakeWidget/Widget
+        // implementations require these bounds (and more).
+        </span>T: Clone + Eq,
+    {
+        Radio::new(widget_value, <span class="self">self</span>.clone(), label)
+    }
 }
 
 <span class="kw">impl </span>Dynamic&lt;WidgetInstance&gt; {
@@ -1899,6 +1951,16 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>switcher(<span class="self">self</span>) -&gt; Switcher {
         Switcher::new(<span class="self">self</span>)
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; context::sealed::Trackable <span class="kw">for </span>Dynamic&lt;T&gt; {
+    <span class="kw">fn </span>redraw_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, handle: WindowHandle) {
+        <span class="self">self</span>.redraw_when_changed(handle);
+    }
+
+    <span class="kw">fn </span>invalidate_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, handle: WindowHandle, id: WidgetId) {
+        <span class="self">self</span>.invalidate_when_changed(handle, id);
     }
 }
 
@@ -2333,6 +2395,16 @@
     /// Returns true if a newly updated value was discovered.
     </span><span class="kw">pub fn </span>wait_until_updated(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; BlockUntilUpdatedFuture&lt;<span class="lifetime">&#39;_</span>, T&gt; {
         BlockUntilUpdatedFuture(<span class="self">self</span>)
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; context::sealed::Trackable <span class="kw">for </span>DynamicReader&lt;T&gt; {
+    <span class="kw">fn </span>redraw_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, handle: WindowHandle) {
+        <span class="self">self</span>.source.redraw_when_changed(handle);
+    }
+
+    <span class="kw">fn </span>invalidate_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, handle: WindowHandle, id: WidgetId) {
+        <span class="self">self</span>.source.invalidate_when_changed(handle, id);
     }
 }
 

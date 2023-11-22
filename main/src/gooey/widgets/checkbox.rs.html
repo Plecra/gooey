@@ -248,34 +248,19 @@
 <a href="#248" id="248">248</a>
 <a href="#249" id="249">249</a>
 <a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A tri-state, labelable checkbox widget.
 </span><span class="kw">use </span>std::error::Error;
 <span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::ops::Not;
 
-<span class="kw">use </span>kludgine::figures::units::{Lp, Px};
-<span class="kw">use </span>kludgine::figures::{IntoUnsigned, Point, Rect, ScreenScale, Size};
+<span class="kw">use </span>kludgine::figures::units::Lp;
+<span class="kw">use </span>kludgine::figures::{Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::shapes::{PathBuilder, Shape, StrokeOptions};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{GraphicsContext, LayoutContext};
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{
-    IntrinsicPadding, LineHeight, OutlineColor, TextColor, WidgetAccentColor,
-};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{LineHeight, OutlineColor, TextColor, WidgetAccentColor};
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, DynamicReader, IntoDynamic, IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetInstance, WidgetRef, WrappedLayout, WrapperWidget};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, Widget, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::button::ButtonKind;
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -319,8 +304,9 @@
     <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
         CheckboxLabel {
             value: <span class="self">self</span>.state.create_reader(),
-            label: WidgetRef::new(<span class="self">self</span>.label),
         }
+        .and(<span class="self">self</span>.label)
+        .into_columns()
         .into_button()
         .on_click(<span class="kw">move </span>|()| {
             <span class="kw">let </span><span class="kw-2">mut </span>value = <span class="self">self</span>.state.lock();
@@ -435,39 +421,18 @@
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">struct </span>CheckboxLabel {
     value: DynamicReader&lt;CheckboxState&gt;,
-    label: WidgetRef,
 }
 
-<span class="kw">impl </span>WrapperWidget <span class="kw">for </span>CheckboxLabel {
-    <span class="kw">fn </span>child_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.label
-    }
+<span class="kw">impl </span>Widget <span class="kw">for </span>CheckboxLabel {
+    <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
+        <span class="kw">let </span>checkbox_size = context
+            .gfx
+            .region()
+            .size
+            .width
+            .min(context.gfx.region().size.height);
 
-    <span class="kw">fn </span>position_child(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        size: Size&lt;Px&gt;,
-        _available_space: Size&lt;ConstraintLimit&gt;,
-        context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
-    ) -&gt; WrappedLayout {
-        <span class="kw">let </span>checkbox_size = context.get(<span class="kw-2">&amp;</span>LineHeight).into_px(context.gfx.scale()); <span class="comment">// TODO create a component?
-        </span><span class="kw">let </span>padding = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_px(context.gfx.scale());
-        <span class="kw">let </span>label_inset = checkbox_size + padding * <span class="number">2</span>;
-        <span class="kw">let </span>effective_height = size.height.max(label_inset);
-        <span class="kw">let </span>size_with_checkbox =
-            Size::new(size.width + label_inset + padding, effective_height).into_unsigned();
-        WrappedLayout {
-            child: Rect::new(
-                Point::new(label_inset, Px::ZERO),
-                Size::new(size.width, effective_height),
-            ),
-            size: size_with_checkbox,
-        }
-    }
-
-    <span class="kw">fn </span>redraw_background(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
-        <span class="kw">let </span>checkbox_size = context.get(<span class="kw-2">&amp;</span>LineHeight).into_px(context.gfx.scale());
-        <span class="kw">let </span>padding = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_px(context.gfx.scale());
-        <span class="kw">let </span>checkbox_rect = Rect::new(Point::squared(padding), Size::squared(checkbox_size));
+        <span class="kw">let </span>checkbox_rect = Rect::from(Size::squared(checkbox_size));
         <span class="kw">let </span>stroke_options = StrokeOptions::lp_wide(Lp::points(<span class="number">2</span>)).into_px(context.gfx.scale());
         <span class="kw">match </span><span class="self">self</span>.value.get_tracking_refresh(context) {
             state @ (CheckboxState::Checked | CheckboxState::Indeterminant) =&gt; {
@@ -512,6 +477,15 @@
                 ));
             }
         }
+    }
+
+    <span class="kw">fn </span>layout(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        _available_space: Size&lt;ConstraintLimit&gt;,
+        context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    ) -&gt; Size&lt;kludgine::figures::units::UPx&gt; {
+        <span class="kw">let </span>checkbox_size = context.get(<span class="kw-2">&amp;</span>LineHeight).into_upx(context.gfx.scale()); <span class="comment">// TODO create a component?
+        </span>Size::squared(checkbox_size)
     }
 }
 

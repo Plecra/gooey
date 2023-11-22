@@ -1372,9 +1372,26 @@
 <a href="#1372" id="1372">1372</a>
 <a href="#1373" id="1373">1373</a>
 <a href="#1374" id="1374">1374</a>
+<a href="#1375" id="1375">1375</a>
+<a href="#1376" id="1376">1376</a>
+<a href="#1377" id="1377">1377</a>
+<a href="#1378" id="1378">1378</a>
+<a href="#1379" id="1379">1379</a>
+<a href="#1380" id="1380">1380</a>
+<a href="#1381" id="1381">1381</a>
+<a href="#1382" id="1382">1382</a>
+<a href="#1383" id="1383">1383</a>
+<a href="#1384" id="1384">1384</a>
+<a href="#1385" id="1385">1385</a>
+<a href="#1386" id="1386">1386</a>
+<a href="#1387" id="1387">1387</a>
+<a href="#1388" id="1388">1388</a>
+<a href="#1389" id="1389">1389</a>
+<a href="#1390" id="1390">1390</a>
+<a href="#1391" id="1391">1391</a>
+<a href="#1392" id="1392">1392</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
-<span class="kw">use </span>std::hash::Hash;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
 <span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard};
@@ -1388,6 +1405,7 @@
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
 <span class="kw">use </span>kludgine::{Color, Kludgine};
 
+<span class="kw">use </span><span class="kw">crate</span>::context::sealed::WindowHandle;
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
     CornerRadius, FontFamily, FontStyle, FontWeight, HighlightColor, LayoutOrder, TextSize,
@@ -1395,9 +1413,8 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, Styles, Theme, ThemePair};
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
-<span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
+<span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, WidgetId, WidgetInstance, WidgetRef};
-<span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
 <span class="kw">use </span><span class="kw">crate</span>::window::{CursorState, RunningWindow, ThemeMode};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -2314,12 +2331,12 @@
     }
 
     <span class="doccomment">/// Ensures that this widget will be redrawn when `value` has been updated.
-    </span><span class="kw">pub fn </span>redraw_when_changed&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>Dynamic&lt;T&gt;) {
+    </span><span class="kw">pub fn </span>redraw_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span><span class="kw">impl </span>Trackable) {
         value.redraw_when_changed(<span class="self">self</span>.handle());
     }
 
     <span class="doccomment">/// Ensures that this widget will be redrawn when `value` has been updated.
-    </span><span class="kw">pub fn </span>invalidate_when_changed&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>Dynamic&lt;T&gt;) {
+    </span><span class="kw">pub fn </span>invalidate_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span><span class="kw">impl </span>Trackable) {
         value.invalidate_when_changed(<span class="self">self</span>.handle(), <span class="self">self</span>.current_node.id());
     }
 
@@ -2540,43 +2557,6 @@
     }
 }
 
-<span class="attr">#[derive(Clone)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>WindowHandle {
-    kludgine: kludgine::app::WindowHandle&lt;WindowCommand&gt;,
-    redraw_status: InvalidationStatus,
-}
-
-<span class="kw">impl </span>Eq <span class="kw">for </span>WindowHandle {}
-
-<span class="kw">impl </span>PartialEq <span class="kw">for </span>WindowHandle {
-    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
-        Arc::ptr_eq(
-            <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status.invalidated,
-            <span class="kw-2">&amp;</span>other.redraw_status.invalidated,
-        )
-    }
-}
-
-<span class="kw">impl </span>Hash <span class="kw">for </span>WindowHandle {
-    <span class="kw">fn </span>hash&lt;H: std::hash::Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
-        Arc::as_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status.invalidated).hash(state);
-    }
-}
-
-<span class="kw">impl </span>WindowHandle {
-    <span class="kw">pub fn </span>redraw(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="kw">if </span><span class="self">self</span>.redraw_status.should_send_refresh() {
-            <span class="kw">let </span>_result = <span class="self">self</span>.kludgine.send(WindowCommand::Redraw);
-        }
-    }
-
-    <span class="kw">pub fn </span>invalidate(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: WidgetId) {
-        <span class="kw">if </span><span class="self">self</span>.redraw_status.invalidate(widget) {
-            <span class="self">self</span>.redraw();
-        }
-    }
-}
-
 <span class="kw">impl dyn </span>AsEventContext&lt;<span class="lifetime">&#39;_</span>&gt; {}
 
 <span class="kw">impl </span>Drop <span class="kw">for </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
@@ -2743,6 +2723,62 @@
         <span class="self">Self </span>{
             theme_mode: ThemeMode::default().inverse(),
             enabled: <span class="bool-val">false</span>,
+        }
+    }
+}
+
+<span class="doccomment">/// A type that can be tracked to refresh or invalidate widgets.
+</span><span class="kw">pub trait </span>Trackable: sealed::Trackable {}
+
+<span class="kw">impl</span>&lt;T&gt; Trackable <span class="kw">for </span>T <span class="kw">where </span>T: sealed::Trackable {}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>sealed {
+    <span class="kw">use </span>std::hash::{Hash, Hasher};
+    <span class="kw">use </span>std::sync::Arc;
+
+    <span class="kw">use </span><span class="kw">crate</span>::context::InvalidationStatus;
+    <span class="kw">use </span><span class="kw">crate</span>::widget::WidgetId;
+    <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
+
+    <span class="kw">pub trait </span>Trackable {
+        <span class="kw">fn </span>redraw_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, handle: WindowHandle);
+        <span class="kw">fn </span>invalidate_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>, handle: WindowHandle, id: WidgetId);
+    }
+
+    <span class="attr">#[derive(Clone)]
+    </span><span class="kw">pub struct </span>WindowHandle {
+        <span class="kw">pub</span>(<span class="kw">crate</span>) kludgine: kludgine::app::WindowHandle&lt;WindowCommand&gt;,
+        <span class="kw">pub</span>(<span class="kw">crate</span>) redraw_status: InvalidationStatus,
+    }
+
+    <span class="kw">impl </span>Eq <span class="kw">for </span>WindowHandle {}
+
+    <span class="kw">impl </span>PartialEq <span class="kw">for </span>WindowHandle {
+        <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+            Arc::ptr_eq(
+                <span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status.invalidated,
+                <span class="kw-2">&amp;</span>other.redraw_status.invalidated,
+            )
+        }
+    }
+
+    <span class="kw">impl </span>Hash <span class="kw">for </span>WindowHandle {
+        <span class="kw">fn </span>hash&lt;H: Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
+            Arc::as_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>.redraw_status.invalidated).hash(state);
+        }
+    }
+
+    <span class="kw">impl </span>WindowHandle {
+        <span class="kw">pub fn </span>redraw(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+            <span class="kw">if </span><span class="self">self</span>.redraw_status.should_send_refresh() {
+                <span class="kw">let </span>_result = <span class="self">self</span>.kludgine.send(WindowCommand::Redraw);
+            }
+        }
+
+        <span class="kw">pub fn </span>invalidate(<span class="kw-2">&amp;</span><span class="self">self</span>, widget: WidgetId) {
+            <span class="kw">if </span><span class="self">self</span>.redraw_status.invalidate(widget) {
+                <span class="self">self</span>.redraw();
+            }
         }
     }
 }
