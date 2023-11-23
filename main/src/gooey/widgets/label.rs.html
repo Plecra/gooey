@@ -98,6 +98,7 @@
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A read-only text widget.
 
 </span><span class="kw">use </span>kludgine::figures::units::{Px, UPx};
@@ -143,6 +144,7 @@
                         || ((<span class="kw-2">*</span>prepared_width &lt; width || prepared.size.width &lt;= width)
                             &amp;&amp; prepared.line_height == prepared.size.height)) =&gt; {}
             <span class="kw">_ </span>=&gt; {
+                context.apply_current_font_settings();
                 <span class="kw">let </span>measured = <span class="self">self</span>.text.map(|text| {
                     context
                         .gfx

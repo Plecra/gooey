@@ -2125,6 +2125,34 @@
 <a href="#2125" id="2125">2125</a>
 <a href="#2126" id="2126">2126</a>
 <a href="#2127" id="2127">2127</a>
+<a href="#2128" id="2128">2128</a>
+<a href="#2129" id="2129">2129</a>
+<a href="#2130" id="2130">2130</a>
+<a href="#2131" id="2131">2131</a>
+<a href="#2132" id="2132">2132</a>
+<a href="#2133" id="2133">2133</a>
+<a href="#2134" id="2134">2134</a>
+<a href="#2135" id="2135">2135</a>
+<a href="#2136" id="2136">2136</a>
+<a href="#2137" id="2137">2137</a>
+<a href="#2138" id="2138">2138</a>
+<a href="#2139" id="2139">2139</a>
+<a href="#2140" id="2140">2140</a>
+<a href="#2141" id="2141">2141</a>
+<a href="#2142" id="2142">2142</a>
+<a href="#2143" id="2143">2143</a>
+<a href="#2144" id="2144">2144</a>
+<a href="#2145" id="2145">2145</a>
+<a href="#2146" id="2146">2146</a>
+<a href="#2147" id="2147">2147</a>
+<a href="#2148" id="2148">2148</a>
+<a href="#2149" id="2149">2149</a>
+<a href="#2150" id="2150">2150</a>
+<a href="#2151" id="2151">2151</a>
+<a href="#2152" id="2152">2152</a>
+<a href="#2153" id="2153">2153</a>
+<a href="#2154" id="2154">2154</a>
+<a href="#2155" id="2155">2155</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -2264,7 +2292,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; IntoComponentValue <span class="kw">for </span>Value&lt;T&gt;
 <span class="kw">where
-    </span>T: Clone,
+    </span>T: Clone + Send + <span class="lifetime">&#39;static</span>,
     Component: From&lt;T&gt;,
 {
     <span class="kw">fn </span>into_component_value(<span class="self">self</span>) -&gt; Value&lt;Component&gt; {
@@ -2274,7 +2302,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; IntoComponentValue <span class="kw">for </span>Dynamic&lt;T&gt;
 <span class="kw">where
-    </span>T: Clone,
+    </span>T: Clone + Send + <span class="lifetime">&#39;static</span>,
     Component: From&lt;T&gt;,
 {
     <span class="kw">fn </span>into_component_value(<span class="self">self</span>) -&gt; Value&lt;Component&gt; {
@@ -2328,7 +2356,7 @@
 // }
 
 </span><span class="doccomment">/// A value of a style component.
-</span><span class="attr">#[derive(Debug, Clone)]
+</span><span class="attr">#[derive(Debug, Clone, PartialEq)]
 </span><span class="kw">pub enum </span>Component {
     <span class="doccomment">/// A color.
     </span>Color(Color),
@@ -2908,6 +2936,12 @@
     }
 }
 
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>CustomComponent {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        Arc::ptr_eq(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span>other.<span class="number">0</span>)
+    }
+}
+
 <span class="kw">impl </span>RequireInvalidation <span class="kw">for </span>CustomComponent {
     <span class="kw">fn </span>requires_invalidation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.<span class="number">0</span>.requires_invalidation()
@@ -3226,8 +3260,20 @@
     }
 }
 
+<span class="kw">impl </span>IntoValue&lt;Dimension&gt; <span class="kw">for </span>Px {
+    <span class="kw">fn </span>into_value(<span class="self">self</span>) -&gt; Value&lt;Dimension&gt; {
+        Dimension::from(<span class="self">self</span>).into_value()
+    }
+}
+
+<span class="kw">impl </span>IntoValue&lt;Dimension&gt; <span class="kw">for </span>Lp {
+    <span class="kw">fn </span>into_value(<span class="self">self</span>) -&gt; Value&lt;Dimension&gt; {
+        Dimension::from(<span class="self">self</span>).into_value()
+    }
+}
+
 <span class="doccomment">/// A set of light and dark [`Theme`]s.
-</span><span class="attr">#[derive(Clone, Debug)]
+</span><span class="attr">#[derive(Clone, Debug, PartialEq)]
 </span><span class="kw">pub struct </span>ThemePair {
     <span class="doccomment">/// The theme to use when the user interface is in light mode.
     </span><span class="kw">pub </span>light: Theme,
@@ -4099,6 +4145,16 @@
             </span>.saturation()
             .unwrap_or_else(|| saturation_if_not_provided.into());
         ColorSource::new(<span class="self">self</span>.hue(), saturation)
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ProtoColor <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ColorSource {
+    <span class="kw">fn </span>hue(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; OklabHue {
+        <span class="self">self</span>.hue
+    }
+
+    <span class="kw">fn </span>saturation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ZeroToOne&gt; {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.saturation)
     }
 }
 

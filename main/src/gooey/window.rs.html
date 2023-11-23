@@ -1414,7 +1414,7 @@
     /// of `false`.
     </span><span class="kw">pub fn </span>focused(<span class="kw-2">mut </span><span class="self">self</span>, focused: <span class="kw">impl </span>IntoDynamic&lt;bool&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>focused = focused.into_dynamic();
-        focused.update(<span class="bool-val">false</span>);
+        focused.set(<span class="bool-val">false</span>);
         <span class="self">self</span>.focused = <span class="prelude-val">Some</span>(focused);
         <span class="self">self
     </span>}
@@ -1429,7 +1429,7 @@
     /// `occluded` will be initialized with an initial state of `false`.
     </span><span class="kw">pub fn </span>occluded(<span class="kw-2">mut </span><span class="self">self</span>, occluded: <span class="kw">impl </span>IntoDynamic&lt;bool&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>occluded = occluded.into_dynamic();
-        occluded.update(<span class="bool-val">false</span>);
+        occluded.set(<span class="bool-val">false</span>);
         <span class="self">self</span>.occluded = <span class="prelude-val">Some</span>(occluded);
         <span class="self">self
     </span>}
@@ -1770,7 +1770,7 @@
 
         <span class="kw">let </span>theme_mode = <span class="kw">match </span>settings.theme_mode.take() {
             <span class="prelude-val">Some</span>(Value::Dynamic(dynamic)) =&gt; {
-                dynamic.update(window.theme().into());
+                dynamic.set(window.theme().into());
                 Value::Dynamic(dynamic)
             }
             <span class="prelude-val">Some</span>(Value::Constant(mode)) =&gt; Value::Constant(mode),
@@ -1902,7 +1902,7 @@
         window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         _kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
     ) {
-        <span class="self">self</span>.focused.update(window.focused());
+        <span class="self">self</span>.focused.set(window.focused());
     }
 
     <span class="kw">fn </span>occlusion_changed(
@@ -1910,7 +1910,7 @@
         window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         _kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
     ) {
-        <span class="self">self</span>.occluded.update(window.ocluded());
+        <span class="self">self</span>.occluded.set(window.ocluded());
     }
 
     <span class="kw">fn </span>render&lt;<span class="lifetime">&#39;pass</span>&gt;(
@@ -2346,7 +2346,7 @@
         _kludgine: <span class="kw-2">&amp;mut </span>Kludgine,
     ) {
         <span class="kw">if let </span>Value::Dynamic(theme_mode) = <span class="kw-2">&amp;</span><span class="self">self</span>.theme_mode {
-            theme_mode.update(window.theme().into());
+            theme_mode.set(window.theme().into());
         }
     }
 

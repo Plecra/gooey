@@ -1247,7 +1247,7 @@
             start = value;
             <span class="self">self</span>.focused_knob = <span class="prelude-val">Some</span>(Knob::Start);
         }
-        <span class="self">self</span>.value.update(T::from_parts(start, opt_end));
+        <span class="self">self</span>.value.set(T::from_parts(start, opt_end));
     }
 
     <span class="kw">fn </span>step(<span class="kw-2">&amp;mut </span><span class="self">self</span>, forwards: bool, factor: f32) {
@@ -1295,7 +1295,7 @@
                 (Knob::Start, <span class="prelude-val">Some</span>(end)) =&gt; (new_value, <span class="prelude-val">Some</span>(end)),
                 (Knob::End, <span class="prelude-val">Some</span>(start)) =&gt; (start, <span class="prelude-val">Some</span>(new_value)),
             };
-            <span class="self">self</span>.value.update(T::from_parts(start, end));
+            <span class="self">self</span>.value.set(T::from_parts(start, end));
         }
     }
 

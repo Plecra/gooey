@@ -808,7 +808,7 @@
                     .spawn();
             }
             (<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(style)) =&gt; {
-                style.update(new_style);
+                style.set(new_style);
                 <span class="self">self</span>.color_animation.clear();
             }
             <span class="kw">_ </span>=&gt; {

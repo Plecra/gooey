@@ -545,7 +545,7 @@
             <span class="kw">let </span>scroll_pct = scroll.y.into_float() / current_max_scroll.y.into_float();
             scroll.y = max_scroll_y * scroll_pct;
         }
-        <span class="self">self</span>.scroll.update(scroll);
+        <span class="self">self</span>.scroll.set(scroll);
         <span class="self">self</span>.control_size = control_size;
         <span class="self">self</span>.content_size = new_content_size;
 
@@ -581,7 +581,7 @@
             MouseScrollDelta::LineDelta(x, y) =&gt; Point::new(x, y) * <span class="self">self</span>.line_height.into_float(),
             MouseScrollDelta::PixelDelta(px) =&gt; Point::new(px.x.cast(), px.y.cast()),
         };
-
+        context.invalidate_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>.scroll);
         <span class="kw">let </span><span class="kw-2">mut </span>scroll = <span class="self">self</span>.scroll.lock();
         <span class="kw">let </span>old_scroll = <span class="kw-2">*</span>scroll;
         <span class="kw">let </span>new_scroll = <span class="self">Self</span>::constrained_scroll(<span class="kw-2">*</span>scroll + amount.cast(), <span class="self">self</span>.max_scroll.get());

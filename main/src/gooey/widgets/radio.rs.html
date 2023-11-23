@@ -190,7 +190,7 @@
         .into_columns()
         .into_button()
         .on_click(<span class="kw">move </span>|()| {
-            <span class="self">self</span>.state.update(<span class="self">self</span>.value.clone());
+            <span class="self">self</span>.state.set(<span class="self">self</span>.value.clone());
         })
         .kind(<span class="self">self</span>.kind)
         .make_widget()
