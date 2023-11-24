@@ -1622,7 +1622,6 @@
 <a href="#1622" id="1622">1622</a>
 <a href="#1623" id="1623">1623</a>
 <a href="#1624" id="1624">1624</a>
-<a href="#1625" id="1625">1625</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1650,11 +1649,11 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
-<span class="kw">use </span><span class="kw">crate</span>::value::{IntoDynamic, IntoValue, Value};
+<span class="kw">use </span><span class="kw">crate</span>::value::{IntoDynamic, IntoValue, Validation, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::checkbox::{Checkable, CheckboxState};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{
     Align, Button, Checkbox, Collapse, Container, Expand, Resize, Scroll, Space, Stack, Style,
-    Themed, ThemedMode,
+    Themed, ThemedMode, Validated,
 };
 <span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, ThemeMode, Window, WindowBehavior};
 <span class="kw">use crate</span>::{ConstraintLimit, Run};
@@ -2507,6 +2506,11 @@
     </span><span class="kw">fn </span>collapse_vertically(<span class="self">self</span>, collapse_when: <span class="kw">impl </span>IntoDynamic&lt;bool&gt;) -&gt; Collapse {
         Collapse::vertical(collapse_when, <span class="self">self</span>)
     }
+
+    <span class="doccomment">/// Returns a widget that shows validation errors and/or hints.
+    </span><span class="kw">fn </span>validation(<span class="self">self</span>, validation: <span class="kw">impl </span>IntoDynamic&lt;Validation&gt;) -&gt; Validated {
+        Validated::new(validation, <span class="self">self</span>)
+    }
 }
 
 <span class="doccomment">/// A type that can create a [`WidgetInstance`] with a preallocated
@@ -2543,12 +2547,6 @@
 <span class="kw">impl </span>MakeWidget <span class="kw">for </span>Color {
     <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
         Space::colored(<span class="self">self</span>).make_widget()
-    }
-}
-
-<span class="kw">impl </span>MakeWidget <span class="kw">for </span>() {
-    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
-        Space::clear().make_widget()
     }
 }
 
