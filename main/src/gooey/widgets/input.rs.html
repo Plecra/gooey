@@ -1413,6 +1413,50 @@
 <a href="#1413" id="1413">1413</a>
 <a href="#1414" id="1414">1414</a>
 <a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
+<a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
+<a href="#1419" id="1419">1419</a>
+<a href="#1420" id="1420">1420</a>
+<a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
+<a href="#1424" id="1424">1424</a>
+<a href="#1425" id="1425">1425</a>
+<a href="#1426" id="1426">1426</a>
+<a href="#1427" id="1427">1427</a>
+<a href="#1428" id="1428">1428</a>
+<a href="#1429" id="1429">1429</a>
+<a href="#1430" id="1430">1430</a>
+<a href="#1431" id="1431">1431</a>
+<a href="#1432" id="1432">1432</a>
+<a href="#1433" id="1433">1433</a>
+<a href="#1434" id="1434">1434</a>
+<a href="#1435" id="1435">1435</a>
+<a href="#1436" id="1436">1436</a>
+<a href="#1437" id="1437">1437</a>
+<a href="#1438" id="1438">1438</a>
+<a href="#1439" id="1439">1439</a>
+<a href="#1440" id="1440">1440</a>
+<a href="#1441" id="1441">1441</a>
+<a href="#1442" id="1442">1442</a>
+<a href="#1443" id="1443">1443</a>
+<a href="#1444" id="1444">1444</a>
+<a href="#1445" id="1445">1445</a>
+<a href="#1446" id="1446">1446</a>
+<a href="#1447" id="1447">1447</a>
+<a href="#1448" id="1448">1448</a>
+<a href="#1449" id="1449">1449</a>
+<a href="#1450" id="1450">1450</a>
+<a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
+<a href="#1453" id="1453">1453</a>
+<a href="#1454" id="1454">1454</a>
+<a href="#1455" id="1455">1455</a>
+<a href="#1456" id="1456">1456</a>
+<a href="#1457" id="1457">1457</a>
+<a href="#1458" id="1458">1458</a>
+<a href="#1459" id="1459">1459</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A text input widget.
 
 </span><span class="kw">use </span>std::borrow::{Borrow, BorrowMut, Cow};
@@ -1435,7 +1479,7 @@
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
 <span class="kw">use </span>kludgine::text::{MeasuredText, Text, TextOrigin};
 <span class="kw">use </span>kludgine::{Color, DrawableExt};
-<span class="kw">use </span>unicode_segmentation::UnicodeSegmentation;
+<span class="kw">use </span>unicode_segmentation::{GraphemeCursor, UnicodeSegmentation};
 <span class="kw">use </span>zeroize::Zeroizing;
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, LayoutContext};
@@ -1452,6 +1496,8 @@
 </span><span class="kw">pub struct </span>Input&lt;Storage&gt; {
     <span class="doccomment">/// The value of this widget.
     </span><span class="kw">pub </span>value: Dynamic&lt;Storage&gt;,
+    <span class="doccomment">/// The placeholder text to display when no value is present.
+    </span><span class="kw">pub </span>placeholder: Value&lt;String&gt;,
     mask_symbol: Value&lt;CowString&gt;,
     mask: CowString,
     on_key: <span class="prelude-ty">Option</span>&lt;Callback&lt;KeyEvent, EventHandling&gt;&gt;,
@@ -1468,9 +1514,11 @@
     color: Color,
     generation: Generation,
     mask_generation: <span class="prelude-ty">Option</span>&lt;Generation&gt;,
+    placeholder_generation: <span class="prelude-ty">Option</span>&lt;Generation&gt;,
     mask_bytes: usize,
     width: <span class="prelude-ty">Option</span>&lt;Px&gt;,
     measured: MeasuredText&lt;Px&gt;,
+    placeholder: MeasuredText&lt;Px&gt;,
 }
 
 <span class="kw">impl </span>CachedLayout {
@@ -1478,12 +1526,14 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         generation: Generation,
         mask_generation: <span class="prelude-ty">Option</span>&lt;Generation&gt;,
+        placeholder_generation: <span class="prelude-ty">Option</span>&lt;Generation&gt;,
         width: <span class="prelude-ty">Option</span>&lt;Px&gt;,
         color: Color,
         mask_bytes: usize,
     ) -&gt; bool {
         <span class="self">self</span>.generation == generation
             &amp;&amp; <span class="self">self</span>.mask_generation == mask_generation
+            &amp;&amp; <span class="self">self</span>.placeholder_generation == placeholder_generation
             &amp;&amp; <span class="self">self</span>.width == width
             &amp;&amp; <span class="self">self</span>.color == color
             &amp;&amp; <span class="self">self</span>.mask_bytes == mask_bytes
@@ -1533,6 +1583,7 @@
                 .then(|| CowString::from(<span class="string">&#39;\u{2022}&#39;</span>))
                 .unwrap_or_default()
                 .into_value(),
+            placeholder: Value::default(),
             cache: <span class="prelude-val">None</span>,
             blink_state: BlinkState::default(),
             selection: SelectionState::default(),
@@ -1542,6 +1593,13 @@
             line_navigation_x_target: <span class="prelude-val">None</span>,
         }
     }
+
+    <span class="doccomment">/// Sets the `placeholder` text, which is displayed when the field has an
+    /// empty value.
+    </span><span class="kw">pub fn </span>placeholder(<span class="kw-2">mut </span><span class="self">self</span>, placeholder: <span class="kw">impl </span>IntoValue&lt;String&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.placeholder = placeholder.into_value();
+        <span class="self">self
+    </span>}
 
     <span class="doccomment">/// Sets the symbol to use for masking sensitive content to `symbol`.
     ///
@@ -1627,9 +1685,14 @@
                 <span class="kw">return</span>;
             }
 
-            <span class="comment">// TODO remove a full grapheme
-            </span><span class="kw">let </span>removed = value.as_string_mut().remove(cursor.offset - <span class="number">1</span>);
-            <span class="self">self</span>.selection.cursor.offset -= removed.len_utf8();
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(offset)) = GraphemeCursor::new(cursor.offset, value.as_str().len(), <span class="bool-val">true</span>)
+                .prev_boundary(value.as_str(), <span class="number">0</span>)
+            {
+                value
+                    .as_string_mut()
+                    .replace_range(offset..cursor.offset, <span class="string">&quot;&quot;</span>);
+                <span class="self">self</span>.selection.cursor.offset -= cursor.offset - offset;
+            }
         }
     }
 
@@ -1952,6 +2015,7 @@
         <span class="kw">let </span>(<span class="kw-2">mut </span>cursor, <span class="kw-2">mut </span>selection) = <span class="self">self</span>.selected_range();
         <span class="kw">let </span>generation = <span class="self">self</span>.value.generation();
         <span class="kw">let </span>mask_generation = <span class="self">self</span>.mask_symbol.generation();
+        <span class="kw">let </span>placeholder_generation = <span class="self">self</span>.placeholder.generation();
         <span class="kw">let </span><span class="kw-2">mut </span>mask_bytes = <span class="self">self
             </span>.mask_symbol
             .map(|sym| sym.graphemes(<span class="bool-val">true</span>).next().map_or(<span class="number">0</span>, str::len));
@@ -1959,9 +2023,16 @@
         context.invalidate_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>.value);
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.cache {
             <span class="prelude-val">Some</span>(cache)
-                <span class="kw">if </span>cache.is_current(generation, mask_generation, width, color, mask_bytes) =&gt; {}
+                <span class="kw">if </span>cache.is_current(
+                    generation,
+                    mask_generation,
+                    placeholder_generation,
+                    width,
+                    color,
+                    mask_bytes,
+                ) =&gt; {}
             <span class="kw">_ </span>=&gt; {
-                <span class="kw">let </span>(bytes, measured) = <span class="self">self</span>.value.map_ref(|storage| {
+                <span class="kw">let </span>(bytes, measured, placeholder, ) = <span class="self">self</span>.value.map_ref(|storage| {
                     <span class="kw">let </span><span class="kw-2">mut </span>text = storage.as_str();
                     <span class="kw">let </span><span class="kw-2">mut </span>bytes = text.len();
 
@@ -1995,16 +2066,21 @@
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(width) = width {
                         text = text.wrap_at(width);
                     }
-                    (bytes, context.gfx.measure_text(text))
+
+                    <span class="kw">let </span>placeholder_color = context.theme().surface.on_color_variant;
+                    <span class="kw">let </span>placeholder = <span class="self">self</span>.placeholder.map(|placeholder| context.gfx.measure_text(Text::new(placeholder, placeholder_color)));
+                    (bytes, context.gfx.measure_text(text), placeholder)
                 });
                 <span class="self">self</span>.cache = <span class="prelude-val">Some</span>(CachedLayout {
                     bytes,
                     color,
                     generation,
                     mask_generation,
+                    placeholder_generation,
                     mask_bytes,
                     width,
                     measured,
+                    placeholder,
                 });
             }
         }
@@ -2027,6 +2103,7 @@
         <span class="kw">let </span>cache = <span class="self">self</span>.cache.as_ref().expect(<span class="string">&quot;always initialized&quot;</span>);
         CacheInfo {
             measured: <span class="kw-2">&amp;</span>cache.measured,
+            placeholder: <span class="kw-2">&amp;</span>cache.placeholder,
             bytes: cache.bytes,
             masked: mask_bytes &gt; <span class="number">0</span>,
             cursor,
@@ -2292,6 +2369,7 @@
 
 <span class="kw">struct </span>CacheInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
     measured: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>MeasuredText&lt;Px&gt;,
+    placeholder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>MeasuredText&lt;Px&gt;,
     bytes: usize,
     masked: bool,
     cursor: Cursor,
@@ -2491,9 +2569,14 @@
             context.stroke_outline::&lt;Lp&gt;(outline_color, StrokeOptions::default());
         }
 
+        <span class="kw">let </span>text = <span class="kw">if </span>cache.bytes &gt; <span class="number">0 </span>{
+            cache.measured
+        } <span class="kw">else </span>{
+            cache.placeholder
+        };
         context
             .gfx
-            .draw_measured_text(cache.measured.translate_by(padding), TextOrigin::TopLeft);
+            .draw_measured_text(text.translate_by(padding), TextOrigin::TopLeft);
     }
 
     <span class="kw">fn </span>layout(
@@ -2507,7 +2590,12 @@
 
         <span class="kw">let </span>cache = <span class="self">self</span>.layout_text(<span class="prelude-val">Some</span>(width.into_signed()), <span class="kw-2">&amp;mut </span>context.graphics);
 
-        cache.measured.size.into_unsigned() + Size::squared(padding * <span class="number">2</span>)
+        cache
+            .measured
+            .size
+            .max(cache.placeholder.size)
+            .into_unsigned()
+            + Size::squared(padding * <span class="number">2</span>)
     }
 
     <span class="kw">fn </span>keyboard_input(

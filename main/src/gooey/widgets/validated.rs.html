@@ -106,8 +106,6 @@
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span>kludgine::figures::units::Lp;
@@ -161,7 +159,6 @@
             Value::Dynamic(hint) =&gt; (<span class="kw-2">&amp;</span>hint, <span class="kw-2">&amp;</span><span class="self">self</span>.validation)
                 .map_each(<span class="kw">move </span>|(hint, validation)| validation.message(hint).to_string()),
         };
-        <span class="kw">let </span>collapse = message.map_each(String::is_empty);
 
         <span class="kw">let </span>error_color = Dynamic::new(Color::CLEAR_BLACK);
         <span class="kw">let </span>default_color = Dynamic::new(Color::CLEAR_BLACK);
@@ -185,7 +182,6 @@
                             <span class="comment">// TODO these should be components
                             </span>.with(<span class="kw-2">&amp;</span>TextSize, Lp::points(<span class="number">9</span>))
                             .with(<span class="kw-2">&amp;</span>LineHeight, Lp::points(<span class="number">13</span>))
-                            .collapse_vertically(collapse)
                             .align_left(),
                     )
                     .into_rows(),

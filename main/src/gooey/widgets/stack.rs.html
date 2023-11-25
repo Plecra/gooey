@@ -737,6 +737,21 @@
 <a href="#737" id="737">737</a>
 <a href="#738" id="738">738</a>
 <a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines a collection of [`Children`] widgets into one.
 </span><span class="comment">// TODO on scale change, all `Lp` children need to resize
 
@@ -1148,9 +1163,13 @@
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>(space_constraint, other_constraint) = <span class="self">self</span>.orientation.split_size(available);
         <span class="kw">let </span>available_space = space_constraint.max();
-        <span class="kw">let </span>gutter_space = gutter.saturating_mul(UPx::new((<span class="self">self</span>.children.len() - <span class="number">1</span>).cast::&lt;u32&gt;()));
+        <span class="kw">let </span>known_gutters = gutter.saturating_mul(UPx::new(
+            (<span class="self">self</span>.children.len() - <span class="self">self</span>.fit_to_content.len())
+                .saturating_sub(<span class="number">1</span>)
+                .cast::&lt;u32&gt;(),
+        ));
         <span class="kw">let </span>allocated_space =
-            <span class="self">self</span>.allocated_space.<span class="number">0 </span>+ <span class="self">self</span>.allocated_space.<span class="number">1</span>.into_upx(scale).ceil() + gutter_space;
+            <span class="self">self</span>.allocated_space.<span class="number">0 </span>+ <span class="self">self</span>.allocated_space.<span class="number">1</span>.into_upx(scale).ceil() + known_gutters;
         <span class="kw">let </span><span class="kw-2">mut </span>remaining = available_space.saturating_sub(allocated_space);
         <span class="comment">// If our `other_constraint` is not known, we will need to give child
         // widgets an opportunity to lay themselves out in the full area. This
@@ -1160,7 +1179,7 @@
 
         <span class="comment">// Measure the children that fit their content
         </span><span class="self">self</span>.other = UPx::ZERO;
-        <span class="kw">for </span><span class="kw-2">&amp;</span>id <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.fit_to_content {
+        <span class="kw">for </span>(fit_index, <span class="kw-2">&amp;</span>id) <span class="kw">in </span><span class="self">self</span>.fit_to_content.iter().enumerate() {
             <span class="kw">let </span>index = <span class="self">self</span>.children.index_of_id(id).expect(<span class="string">&quot;child not found&quot;</span>);
             <span class="kw">let </span>(measured, other) = <span class="self">self</span>.orientation.split_size(measure(
                 index,
@@ -1169,7 +1188,16 @@
                 !needs_final_layout,
             ));
             <span class="self">self</span>.layouts[index].size = measured;
-            <span class="self">self</span>.other = <span class="self">self</span>.other.max(other);
+            <span class="kw">if </span>measured == <span class="number">0 </span>{
+                <span class="self">self</span>.other = UPx::ZERO;
+            } <span class="kw">else </span>{
+                <span class="kw">if </span>fit_index &lt; <span class="self">self</span>.fit_to_content.len() - <span class="number">1
+                    </span>|| <span class="self">self</span>.fit_to_content.len() != <span class="self">self</span>.children.len()
+                {
+                    remaining = remaining.saturating_sub(gutter);
+                }
+                <span class="self">self</span>.other = <span class="self">self</span>.other.max(other);
+            }
             remaining = remaining.saturating_sub(measured);
         }
 
@@ -1234,7 +1262,9 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>offset = UPx::ZERO;
         <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.children.len() {
             <span class="self">self</span>.layouts[index].offset = offset;
-            offset += <span class="self">self</span>.layouts[index].size + gutter;
+            <span class="kw">if </span><span class="self">self</span>.layouts[index].size &gt; <span class="number">0 </span>{
+                offset += <span class="self">self</span>.layouts[index].size + gutter;
+            }
             <span class="kw">if </span>needs_final_layout {
                 <span class="self">self</span>.orientation.split_size(measure(
                     index,
