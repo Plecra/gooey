@@ -132,10 +132,14 @@
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
 <a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::{IntoSigned, Size};
 
-<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrappedLayout, WrapperWidget};
+<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, LayoutContext};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, RootBehavior, WidgetRef, WrappedLayout, WrapperWidget};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::Space;
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -229,6 +233,10 @@
 <span class="kw">impl </span>WrapperWidget <span class="kw">for </span>Expand {
     <span class="kw">fn </span>child_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.child
+    }
+
+    <span class="kw">fn </span>root_behavior(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;RootBehavior&gt; {
+        <span class="prelude-val">Some</span>(RootBehavior::Expand)
     }
 
     <span class="kw">fn </span>layout_child(

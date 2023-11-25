@@ -204,15 +204,19 @@
 <a href="#204" id="204">204</a>
 <a href="#205" id="205">205</a>
 <a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span>kludgine::figures::units::UPx;
 <span class="kw">use </span>kludgine::figures::{Fraction, IntoSigned, Point, Rect, ScreenScale, Size};
 
-<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, LayoutContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Edges, FlexibleDimension};
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrappedLayout, WrapperWidget};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, RootBehavior, WidgetRef, WrappedLayout, WrapperWidget};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A widget aligns its contents to its container&#39;s boundaries.
@@ -382,6 +386,10 @@
 <span class="kw">impl </span>WrapperWidget <span class="kw">for </span>Align {
     <span class="kw">fn </span>child_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.child
+    }
+
+    <span class="kw">fn </span>root_behavior(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;RootBehavior&gt; {
+        <span class="prelude-val">Some</span>(RootBehavior::Align)
     }
 
     <span class="kw">fn </span>layout_child(

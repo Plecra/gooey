@@ -258,17 +258,27 @@
 <a href="#258" id="258">258</a>
 <a href="#259" id="259">259</a>
 <a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A visual container widget.
 
 </span><span class="kw">use </span>kludgine::figures::units::Px;
 <span class="kw">use </span>kludgine::figures::{IntoUnsigned, Point, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::Color;
 
-<span class="kw">use </span><span class="kw">crate</span>::context::{GraphicsContext, LayoutContext, WidgetContext};
+<span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{IntrinsicPadding, SurfaceColor};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Component, ContainerLevel, Dimension, Edges, RequireInvalidation, Styles};
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrappedLayout, WrapperWidget};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, RootBehavior, WidgetRef, WrappedLayout, WrapperWidget};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A visual container widget, optionally applying padding and a background
@@ -417,6 +427,16 @@
 <span class="kw">impl </span>WrapperWidget <span class="kw">for </span>Container {
     <span class="kw">fn </span>child_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WidgetRef {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.child
+    }
+
+    <span class="kw">fn </span>root_behavior(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;RootBehavior&gt; {
+        <span class="prelude-val">Some</span>(
+            <span class="self">self</span>.padding
+                .as_ref()
+                .map_or(RootBehavior::PassThrough, |padding| {
+                    RootBehavior::Pad(padding.get())
+                }),
+        )
     }
 
     <span class="kw">fn </span>background_color(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;kludgine::Color&gt; {
