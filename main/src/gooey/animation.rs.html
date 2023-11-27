@@ -1252,6 +1252,22 @@
 <a href="#1252" id="1252">1252</a>
 <a href="#1253" id="1253">1253</a>
 <a href="#1254" id="1254">1254</a>
+<a href="#1255" id="1255">1255</a>
+<a href="#1256" id="1256">1256</a>
+<a href="#1257" id="1257">1257</a>
+<a href="#1258" id="1258">1258</a>
+<a href="#1259" id="1259">1259</a>
+<a href="#1260" id="1260">1260</a>
+<a href="#1261" id="1261">1261</a>
+<a href="#1262" id="1262">1262</a>
+<a href="#1263" id="1263">1263</a>
+<a href="#1264" id="1264">1264</a>
+<a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating animations.
 //!
 //! Animations in Gooey are performed by transitioning a [`Dynamic`]&#39;s contained
@@ -1312,7 +1328,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::easings::Linear;
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Component, RequireInvalidation};
-<span class="kw">use </span><span class="kw">crate</span>::utils::{IgnorePoison, UnwindsafeCondvar};
+<span class="kw">use </span><span class="kw">crate</span>::utils::{run_in_bg, IgnorePoison, UnwindsafeCondvar};
 <span class="kw">use </span><span class="kw">crate</span>::value::Dynamic;
 
 <span class="kw">static </span>ANIMATIONS: Mutex&lt;Animating&gt; = Mutex::new(Animating::new());
@@ -1742,6 +1758,20 @@
             thread_state().run_unattached(id);
         }
     }
+
+    <span class="doccomment">/// Returns true if this animation is still running.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>is_running(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(id) = <span class="self">self</span>.<span class="number">0 </span><span class="kw">else </span>{ <span class="kw">return </span><span class="bool-val">false </span>};
+
+        thread_state().running.contains(<span class="kw-2">&amp;</span>id)
+    }
+
+    <span class="doccomment">/// Returns true if this animation is complete.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>is_complete(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        !<span class="self">self</span>.is_running()
+    }
 }
 
 <span class="kw">impl </span>Drop <span class="kw">for </span>AnimationHandle {
@@ -1899,7 +1929,7 @@
 /// will be invoked again.
 </span><span class="kw">pub struct </span>OnCompleteAnimation&lt;A&gt; {
     animation: A,
-    callback: Box&lt;<span class="kw">dyn </span>FnMut() + Send + Sync + <span class="lifetime">&#39;static</span>&gt;,
+    callback: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>FnOnce() + Send + Sync + <span class="lifetime">&#39;static</span>&gt;&gt;,
     completed: bool,
 }
 
@@ -1908,11 +1938,11 @@
     /// `on_complete`.
     </span><span class="kw">pub fn </span>new&lt;F&gt;(animation: A, on_complete: F) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>F: FnMut() + Send + Sync + <span class="lifetime">&#39;static</span>,
+        </span>F: FnOnce() + Send + Sync + <span class="lifetime">&#39;static</span>,
     {
         <span class="self">Self </span>{
             animation,
-            callback: Box::new(on_complete),
+            callback: <span class="prelude-val">Some</span>(Box::new(on_complete)),
             completed: <span class="bool-val">false</span>,
         }
     }
@@ -1944,7 +1974,9 @@
             <span class="kw">match </span><span class="self">self</span>.animation.animate(elapsed) {
                 ControlFlow::Break(remaining) =&gt; {
                     <span class="self">self</span>.completed = <span class="bool-val">true</span>;
-                    (<span class="self">self</span>.callback)();
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(callback) = <span class="self">self</span>.callback.take() {
+                        run_in_bg(callback);
+                    }
                     ControlFlow::Break(remaining)
                 }
                 ControlFlow::Continue(()) =&gt; ControlFlow::Continue(()),

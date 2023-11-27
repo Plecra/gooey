@@ -2023,6 +2023,26 @@
 <a href="#2023" id="2023">2023</a>
 <a href="#2024" id="2024">2024</a>
 <a href="#2025" id="2025">2025</a>
+<a href="#2026" id="2026">2026</a>
+<a href="#2027" id="2027">2027</a>
+<a href="#2028" id="2028">2028</a>
+<a href="#2029" id="2029">2029</a>
+<a href="#2030" id="2030">2030</a>
+<a href="#2031" id="2031">2031</a>
+<a href="#2032" id="2032">2032</a>
+<a href="#2033" id="2033">2033</a>
+<a href="#2034" id="2034">2034</a>
+<a href="#2035" id="2035">2035</a>
+<a href="#2036" id="2036">2036</a>
+<a href="#2037" id="2037">2037</a>
+<a href="#2038" id="2038">2038</a>
+<a href="#2039" id="2039">2039</a>
+<a href="#2040" id="2040">2040</a>
+<a href="#2041" id="2041">2041</a>
+<a href="#2042" id="2042">2042</a>
+<a href="#2043" id="2043">2043</a>
+<a href="#2044" id="2044">2044</a>
+<a href="#2045" id="2045">2045</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::fmt::{Debug, Display};
@@ -2034,14 +2054,13 @@
 <span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard, TryLockError};
 <span class="kw">use </span>std::task::{Poll, Waker};
 <span class="kw">use </span>std::thread::ThreadId;
-<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>ahash::AHashSet;
 
-<span class="kw">use </span><span class="kw">crate</span>::animation::{DynamicTransition, IntoAnimate, LinearInterpolate, Spawn};
+<span class="kw">use </span><span class="kw">crate</span>::animation::{DynamicTransition, LinearInterpolate};
 <span class="kw">use </span><span class="kw">crate</span>::context::sealed::WindowHandle;
 <span class="kw">use </span><span class="kw">crate</span>::context::{<span class="self">self</span>, WidgetContext};
-<span class="kw">use </span><span class="kw">crate</span>::utils::{IgnorePoison, UnwindsafeCondvar, WithClone};
+<span class="kw">use </span><span class="kw">crate</span>::utils::{run_in_bg, IgnorePoison, UnwindsafeCondvar, WithClone};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetId, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Radio, Switcher};
 
@@ -2597,6 +2616,12 @@
     }
 }
 
+<span class="kw">impl</span>&lt;T&gt; PartialEq <span class="kw">for </span>Dynamic&lt;T&gt; {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        Arc::ptr_eq(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span>other.<span class="number">0</span>)
+    }
+}
+
 <span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>Dynamic&lt;T&gt;
 <span class="kw">where
     </span>T: Default,
@@ -2964,9 +2989,7 @@
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span><span class="self">self</span>.accessed_mut {
             <span class="kw">let </span><span class="kw-2">mut </span>callbacks = <span class="prelude-val">Some</span>(<span class="self">self</span>.guard.note_changed());
-            Duration::ZERO
-                .on_complete(<span class="kw">move </span>|| drop(callbacks.take()))
-                .launch();
+            run_in_bg(<span class="kw">move </span>|| drop(callbacks.take()));
         }
     }
 }
@@ -3445,6 +3468,12 @@
     }
 }
 
+<span class="kw">impl </span>IntoValue&lt;String&gt; <span class="kw">for </span>Dynamic&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; {
+    <span class="kw">fn </span>into_value(<span class="self">self</span>) -&gt; Value&lt;String&gt; {
+        <span class="self">self</span>.map_each(ToString::to_string).into_value()
+    }
+}
+
 <span class="kw">impl</span>&lt;T&gt; IntoValue&lt;T&gt; <span class="kw">for </span>Dynamic&lt;T&gt; {
     <span class="kw">fn </span>into_value(<span class="self">self</span>) -&gt; Value&lt;T&gt; {
         Value::Dynamic(<span class="self">self</span>)
@@ -3785,6 +3814,18 @@
     </span><span class="kw">pub const fn </span>is_error(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="macro">matches!</span>(<span class="self">self</span>, <span class="self">Self</span>::Invalid(<span class="kw">_</span>))
     }
+
+    <span class="doccomment">/// Returns the result of merging both validations.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>and(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>(<span class="self">self</span>, other) {
+            (Validation::Valid, Validation::Valid) =&gt; Validation::Valid,
+            (Validation::Invalid(error), <span class="kw">_</span>) | (<span class="kw">_</span>, Validation::Invalid(error)) =&gt; {
+                Validation::Invalid(error.clone())
+            }
+            (Validation::None, <span class="kw">_</span>) | (<span class="kw">_</span>, Validation::None) =&gt; Validation::None,
+        }
+    }
 }
 
 <span class="doccomment">/// A grouping of validations that can be checked simultaneously.
@@ -3889,11 +3930,10 @@
                 ValidationsState::Resetting =&gt; {
                     initial_generation = dynamic.generation();
                     <span class="kw">let </span>state = state.clone();
-                    Duration::ZERO
-                        .on_complete(<span class="kw">move </span>|| {
-                            state.set(ValidationsState::Initial);
-                        })
-                        .launch();
+
+                    run_in_bg(<span class="kw">move </span>|| {
+                        state.set(ValidationsState::Initial);
+                    });
                     Validation::None
                 }
                 ValidationsState::Initial <span class="kw">if </span>initial_generation == dynamic.generation() =&gt; {
