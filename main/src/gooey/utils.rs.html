@@ -230,7 +230,7 @@
     <span class="kw">pub const fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="attr">#[cfg(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>))]
         </span>{
-            <span class="self">Self</span>(AssertUnwindSafe(Condvar::new()))
+            <span class="self">Self</span>(std::panic::AssertUnwindSafe(Condvar::new()))
         }
 
         <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>)))]
