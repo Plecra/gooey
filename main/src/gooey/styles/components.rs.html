@@ -149,6 +149,94 @@
 <a href="#149" id="149">149</a>
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 
 </span><span class="kw">use </span>kludgine::cosmic_text::{FamilyOwned, Style, Weight};
@@ -243,9 +331,52 @@
 <span class="macro">define_components! </span>{
     Global {
         <span class="doccomment">/// The [`Dimension`] to use as the size to render text.
-        </span>TextSize(Dimension, <span class="string">&quot;text_size&quot;</span>, Dimension::Lp(Lp::points(<span class="number">12</span>)))
+        </span>TextSize(Dimension, <span class="string">&quot;text_size&quot;</span>, @BaseTextSize)
         <span class="doccomment">/// The [`Dimension`] to use to space multiple lines of text.
-        </span>LineHeight(Dimension,<span class="string">&quot;line_height&quot;</span>,Dimension::Lp(Lp::points(<span class="number">16</span>)))
+        </span>LineHeight(Dimension,<span class="string">&quot;line_height&quot;</span>, @BaseLineHeight)
+
+        <span class="doccomment">/// The base [`Dimension`] to use as the normal text size. Unless
+        /// overridden, all other sizes for built-in widgets will be based on
+        /// this dimension.
+        </span>BaseTextSize(Dimension, <span class="string">&quot;base_text_size&quot;</span>, Dimension::Lp(Lp::points(<span class="number">12</span>)))
+        <span class="doccomment">/// The base [`Dimension`] to use to space multiple lines of text.
+        /// Unless overridden, all other sizes for built-in widgets will be
+        /// based on this dimension.
+        </span>BaseLineHeight(Dimension,<span class="string">&quot;base_line_height&quot;</span>, Dimension::Lp(Lp::points(<span class="number">16</span>)))
+        <span class="doccomment">/// The largest text size on a series of 8 steps.
+        </span>TextSize8(Dimension, <span class="string">&quot;text_size_8&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseTextSize) * <span class="number">2.5</span>)
+        <span class="doccomment">/// The second-largest text size on a series of 8 steps.
+        </span>TextSize7(Dimension, <span class="string">&quot;text_size_7&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseTextSize) * <span class="number">2.25</span>)
+        <span class="doccomment">/// The third-largest text size on a series of 8 steps.
+        </span>TextSize6(Dimension, <span class="string">&quot;text_size_6&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseTextSize) * <span class="number">2.0</span>)
+        <span class="doccomment">/// The fourth-largest text size on a series of 8 steps.
+        </span>TextSize5(Dimension, <span class="string">&quot;text_size_5&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseTextSize) * <span class="number">1.5</span>)
+        <span class="doccomment">/// The fifth-largest text size on a series of 8 steps.
+        </span>TextSize4(Dimension, <span class="string">&quot;text_size_4&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseTextSize) * <span class="number">1.25</span>)
+        <span class="doccomment">/// The base text size on a series of 8 steps.
+        </span>TextSize3(Dimension, <span class="string">&quot;text_size_3&quot;</span>, @BaseTextSize)
+        <span class="doccomment">/// The second-smallest text size on a series of 8 steps.
+        </span>TextSize2(Dimension, <span class="string">&quot;text_size_2&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseTextSize) * <span class="number">0.75</span>)
+        <span class="doccomment">/// The smallest text size on a series of 8 steps.
+        </span>TextSize1(Dimension, <span class="string">&quot;text_size_1&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseTextSize) * <span class="number">0.5</span>)
+
+        <span class="doccomment">/// The largest line height on a series of 8 steps.
+        </span>LineHeight8(Dimension, <span class="string">&quot;line_height_8&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseLineHeight) * <span class="number">2.5</span>)
+        <span class="doccomment">/// The second-largest line height on a series of 8 steps.
+        </span>LineHeight7(Dimension, <span class="string">&quot;line_height_7&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseLineHeight) * <span class="number">2.25</span>)
+        <span class="doccomment">/// The third-largest line height on a series of 8 steps.
+        </span>LineHeight6(Dimension, <span class="string">&quot;line_height_6&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseLineHeight) * <span class="number">2.0</span>)
+        <span class="doccomment">/// The fourth-largest line height on a series of 8 steps.
+        </span>LineHeight5(Dimension, <span class="string">&quot;line_height_5&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseLineHeight) * <span class="number">1.5</span>)
+        <span class="doccomment">/// The fifth-largest line height on a series of 8 steps.
+        </span>LineHeight4(Dimension, <span class="string">&quot;line_height_4&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseLineHeight) * <span class="number">1.25</span>)
+        <span class="doccomment">/// The base line height on a series of 8 steps.
+        </span>LineHeight3(Dimension, <span class="string">&quot;line_height_4&quot;</span>, @BaseLineHeight)
+        <span class="doccomment">/// The second-smallest line height on a series of 8 steps.
+        </span>LineHeight2(Dimension, <span class="string">&quot;line_height_2&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseLineHeight) * <span class="number">0.75</span>)
+        <span class="doccomment">/// The smallest line height on a series of 8 steps.
+        </span>LineHeight1(Dimension, <span class="string">&quot;line_height_1&quot;</span>, |context| context.get(<span class="kw-2">&amp;</span>BaseLineHeight) * <span class="number">0.675</span>)
+
         <span class="doccomment">/// The [`Color`] of the surface for the user interface to draw upon.
         </span>SurfaceColor(Color, <span class="string">&quot;surface_color&quot;</span>, .surface.color)
         <span class="doccomment">/// The [`Color`] to use when rendering text.
@@ -298,6 +429,51 @@
         </span>FontWeight(Weight, <span class="string">&quot;font_weight&quot;</span>, Weight::NORMAL)
         <span class="doccomment">/// The font style to apply to text rendering.
         </span>FontStyle(Style, <span class="string">&quot;font_style&quot;</span>, Style::Normal)
+
+        <span class="doccomment">/// The default [`Weight`] to apply to headings.
+        </span>HeadingWeight(Weight, <span class="string">&quot;heading_weight&quot;</span>, Weight::BOLD)
+        <span class="doccomment">/// The [`Weight`] to apply to h1 headings.
+        </span>Heading1Weight(Weight, <span class="string">&quot;heading_weight_1&quot;</span>, @HeadingWeight)
+        <span class="doccomment">/// The [`Weight`] to apply to h2 headings.
+        </span>Heading2Weight(Weight, <span class="string">&quot;heading_weight_2&quot;</span>, @HeadingWeight)
+        <span class="doccomment">/// The [`Weight`] to apply to h3 headings.
+        </span>Heading3Weight(Weight, <span class="string">&quot;heading_weight_3&quot;</span>, @HeadingWeight)
+        <span class="doccomment">/// The [`Weight`] to apply to h4 headings.
+        </span>Heading4Weight(Weight, <span class="string">&quot;heading_weight_4&quot;</span>, @HeadingWeight)
+        <span class="doccomment">/// The [`Weight`] to apply to h5 headings.
+        </span>Heading5Weight(Weight, <span class="string">&quot;heading_weight_5&quot;</span>, @HeadingWeight)
+        <span class="doccomment">/// The [`Weight`] to apply to h6 headings.
+        </span>Heading6Weight(Weight, <span class="string">&quot;heading_weight_6&quot;</span>, @HeadingWeight)
+
+        <span class="doccomment">/// The default [`Style`] to apply to headings.
+        </span>HeadingStyle(Style, <span class="string">&quot;heading_style&quot;</span>, Style::Normal)
+        <span class="doccomment">/// The [`Style`] to apply to h1 headings.
+        </span>Heading1Style(Style, <span class="string">&quot;heading_style_1&quot;</span>, @HeadingStyle)
+        <span class="doccomment">/// The [`Style`] to apply to h2 headings.
+        </span>Heading2Style(Style, <span class="string">&quot;heading_style_2&quot;</span>, @HeadingStyle)
+        <span class="doccomment">/// The [`Style`] to apply to h3 headings.
+        </span>Heading3Style(Style, <span class="string">&quot;heading_style_3&quot;</span>, @HeadingStyle)
+        <span class="doccomment">/// The [`Style`] to apply to h4 headings.
+        </span>Heading4Style(Style, <span class="string">&quot;heading_style_4&quot;</span>, @HeadingStyle)
+        <span class="doccomment">/// The [`Style`] to apply to h5 headings.
+        </span>Heading5Style(Style, <span class="string">&quot;heading_style_5&quot;</span>, @HeadingStyle)
+        <span class="doccomment">/// The [`Style`] to apply to h6 headings.
+        </span>Heading6Style(Style, <span class="string">&quot;heading_style_6&quot;</span>, @HeadingStyle)
+
+        <span class="doccomment">/// The default [`FontFamilyList`] to apply to headings.
+        </span>HeadingFontFamily(FontFamilyList, <span class="string">&quot;heading_font_family&quot;</span>, FontFamilyList::from(FamilyOwned::SansSerif))
+        <span class="doccomment">/// The [`FontFamilyList`] to apply to h1 headings.
+        </span>Heading1FontFamily(FontFamilyList, <span class="string">&quot;heading_font_family_1&quot;</span>, @HeadingFontFamily)
+        <span class="doccomment">/// The [`FontFamilyList`] to apply to h2 headings.
+        </span>Heading2FontFamily(FontFamilyList, <span class="string">&quot;heading_font_family_2&quot;</span>, @HeadingFontFamily)
+        <span class="doccomment">/// The [`FontFamilyList`] to apply to h3 headings.
+        </span>Heading3FontFamily(FontFamilyList, <span class="string">&quot;heading_font_family_3&quot;</span>, @HeadingFontFamily)
+        <span class="doccomment">/// The [`FontFamilyList`] to apply to h4 headings.
+        </span>Heading4FontFamily(FontFamilyList, <span class="string">&quot;heading_font_family_4&quot;</span>, @HeadingFontFamily)
+        <span class="doccomment">/// The [`FontFamilyList`] to apply to h5 headings.
+        </span>Heading5FontFamily(FontFamilyList, <span class="string">&quot;heading_font_family_5&quot;</span>, @HeadingFontFamily)
+        <span class="doccomment">/// The [`FontFamilyList`] to apply to h6 headings.
+        </span>Heading6FontFamily(FontFamilyList, <span class="string">&quot;heading_font_family_6&quot;</span>, @HeadingFontFamily)
     }
 }
 </code></pre></div></section></main></body></html>
