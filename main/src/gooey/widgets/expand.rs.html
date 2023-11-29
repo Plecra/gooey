@@ -136,6 +136,7 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>kludgine::figures::{IntoSigned, Size};
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, LayoutContext};
@@ -153,7 +154,7 @@
     child: WidgetRef,
 }
 
-<span class="attr">#[derive(Debug)]
+<span class="attr">#[derive(Debug, Clone, Copy)]
 </span><span class="kw">enum </span>ExpandKind {
     Weighted(u8),
     Horizontal,
@@ -222,10 +223,11 @@
     }
 
     <span class="attr">#[must_use]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>weight(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u8&gt; {
-        <span class="kw">match </span><span class="self">self</span>.kind {
-            ExpandKind::Weighted(weight) =&gt; <span class="prelude-val">Some</span>(weight),
-            ExpandKind::Horizontal | ExpandKind::Vertical =&gt; <span class="prelude-val">None</span>,
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>weight(<span class="kw-2">&amp;</span><span class="self">self</span>, vertical: bool) -&gt; <span class="prelude-ty">Option</span>&lt;u8&gt; {
+        <span class="kw">match </span>(<span class="self">self</span>.kind, vertical) {
+            (ExpandKind::Weighted(weight), <span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(weight),
+            (ExpandKind::Horizontal, <span class="bool-val">false</span>) | (ExpandKind::Vertical, <span class="bool-val">true</span>) =&gt; <span class="prelude-val">Some</span>(<span class="number">1</span>),
+            (ExpandKind::Horizontal | ExpandKind::Vertical, <span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
         }
     }
 }
@@ -261,10 +263,10 @@
                 available_space
                     .width
                     .fit_measured(size.width, context.gfx.scale()),
-                size.height,
+                size.height.min(available_space.height.max()),
             ),
             ExpandKind::Vertical =&gt; (
-                size.width,
+                size.width.min(available_space.width.max()),
                 available_space
                     .height
                     .fit_measured(size.height, context.gfx.scale()),

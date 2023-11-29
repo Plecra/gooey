@@ -2118,6 +2118,23 @@
 <a href="#2118" id="2118">2118</a>
 <a href="#2119" id="2119">2119</a>
 <a href="#2120" id="2120">2120</a>
+<a href="#2121" id="2121">2121</a>
+<a href="#2122" id="2122">2122</a>
+<a href="#2123" id="2123">2123</a>
+<a href="#2124" id="2124">2124</a>
+<a href="#2125" id="2125">2125</a>
+<a href="#2126" id="2126">2126</a>
+<a href="#2127" id="2127">2127</a>
+<a href="#2128" id="2128">2128</a>
+<a href="#2129" id="2129">2129</a>
+<a href="#2130" id="2130">2130</a>
+<a href="#2131" id="2131">2131</a>
+<a href="#2132" id="2132">2132</a>
+<a href="#2133" id="2133">2133</a>
+<a href="#2134" id="2134">2134</a>
+<a href="#2135" id="2135">2135</a>
+<a href="#2136" id="2136">2136</a>
+<a href="#2137" id="2137">2137</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::fmt::{Debug, Display};
@@ -2138,7 +2155,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::{<span class="self">self</span>, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::utils::{run_in_bg, IgnorePoison, UnwindsafeCondvar, WithClone};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetId, WidgetInstance};
-<span class="kw">use </span><span class="kw">crate</span>::widgets::{Radio, Switcher};
+<span class="kw">use </span><span class="kw">crate</span>::widgets::{Radio, Space, Switcher};
 
 <span class="doccomment">/// An instance of a value that provides APIs to observe and react to its
 /// contents.
@@ -2706,6 +2723,23 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>switcher(<span class="self">self</span>) -&gt; Switcher {
         Switcher::new(<span class="self">self</span>)
+    }
+}
+
+<span class="kw">impl </span>MakeWidget <span class="kw">for </span>Dynamic&lt;WidgetInstance&gt; {
+    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
+        <span class="self">self</span>.switcher().make_widget()
+    }
+}
+
+<span class="kw">impl </span>MakeWidget <span class="kw">for </span>Dynamic&lt;<span class="prelude-ty">Option</span>&lt;WidgetInstance&gt;&gt; {
+    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
+        <span class="self">self</span>.map_each(|widget| {
+            widget
+                .as_ref()
+                .map_or_else(|| Space::clear().make_widget(), Clone::clone)
+        })
+        .make_widget()
     }
 }
 

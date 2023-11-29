@@ -749,9 +749,6 @@
 <a href="#749" id="749">749</a>
 <a href="#750" id="750">750</a>
 <a href="#751" id="751">751</a>
-<a href="#752" id="752">752</a>
-<a href="#753" id="753">753</a>
-<a href="#754" id="754">754</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines a collection of [`Children`] widgets into one.
 </span><span class="comment">// TODO on scale change, all `Lp` children need to resize
 
@@ -776,8 +773,7 @@
 /// [direction](StackDirection).
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Stack {
-    <span class="doccomment">/// The direction to display the children using.
-    </span><span class="kw">pub </span>direction: Value&lt;StackDirection&gt;,
+    direction: StackDirection,
     <span class="doccomment">/// The children widgets that belong to this array.
     </span><span class="kw">pub </span>children: Value&lt;Children&gt;,
     layout: Layout,
@@ -788,18 +784,11 @@
 
 <span class="kw">impl </span>Stack {
     <span class="doccomment">/// Returns a new widget with the given direction and widgets.
-    </span><span class="kw">pub fn </span>new(
-        direction: <span class="kw">impl </span>IntoValue&lt;StackDirection&gt;,
-        widgets: <span class="kw">impl </span>IntoValue&lt;Children&gt;,
-    ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>direction = direction.into_value();
-
-        <span class="kw">let </span>initial_direction = direction.get();
-
+    </span><span class="kw">pub fn </span>new(direction: StackDirection, widgets: <span class="kw">impl </span>IntoValue&lt;Children&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             direction,
             children: widgets.into_value(),
-            layout: Layout::new(initial_direction),
+            layout: Layout::new(direction),
             layout_generation: <span class="prelude-val">None</span>,
             synced_children: Vec::new(),
         }
@@ -817,6 +806,7 @@
 
     <span class="kw">fn </span>synchronize_children(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>current_generation = <span class="self">self</span>.children.generation();
+        <span class="self">self</span>.children.invalidate_when_changed(context);
         <span class="kw">if </span>current_generation.map_or_else(
             || <span class="self">self</span>.children.map(Children::len) != <span class="self">self</span>.layout.children.len(),
             |gen| <span class="prelude-val">Some</span>(gen) != <span class="self">self</span>.layout_generation,
@@ -843,10 +833,12 @@
                         } <span class="kw">else </span>{
                             <span class="comment">// This is a brand new child.
                             </span><span class="kw">let </span>guard = widget.lock();
-                            <span class="kw">let </span>(<span class="kw-2">mut </span>widget, dimension) = <span class="kw">if let </span><span class="prelude-val">Some</span>((weight, expand)) = guard
-                                .downcast_ref::&lt;Expand&gt;()
-                                .and_then(|expand| expand.weight().map(|weight| (weight, expand)))
-                            {
+                            <span class="kw">let </span>(<span class="kw-2">mut </span>widget, dimension) = <span class="kw">if let </span><span class="prelude-val">Some</span>((weight, expand)) =
+                                guard.downcast_ref::&lt;Expand&gt;().and_then(|expand| {
+                                    expand
+                                        .weight(<span class="self">self</span>.direction.orientation == StackOrientation::Row)
+                                        .map(|weight| (weight, expand))
+                                }) {
                                 (
                                     expand.child().clone(),
                                     StackDimension::Fractional { weight },
@@ -1183,8 +1175,10 @@
             <span class="kw">let </span>index = <span class="self">self</span>.children.index_of_id(id).expect(<span class="string">&quot;child not found&quot;</span>);
             <span class="kw">let </span>(measured, other) = <span class="self">self</span>.orientation.split_size(measure(
                 index,
-                <span class="self">self</span>.orientation
-                    .make_size(ConstraintLimit::SizeToFit(remaining), other_constraint),
+                <span class="self">self</span>.orientation.make_size(
+                    ConstraintLimit::SizeToFit(available_space),
+                    other_constraint,
+                ),
                 !needs_final_layout,
             ));
             <span class="self">self</span>.layouts[index].size = measured;
