@@ -1395,6 +1395,7 @@
 <a href="#1395" id="1395">1395</a>
 <a href="#1396" id="1396">1396</a>
 <a href="#1397" id="1397">1397</a>
+<a href="#1398" id="1398">1398</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
@@ -2376,7 +2377,7 @@
     /// Widget events relating to focus changes are deferred until after the all
     /// contexts for the currently firing event are dropped.
     </span><span class="kw">pub fn </span>blur(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">if </span><span class="self">self</span>.focused() {
+        <span class="kw">if </span><span class="self">self</span>.focused(<span class="bool-val">true</span>) {
             <span class="self">self</span>.clear_focus();
             <span class="bool-val">true
         </span>} <span class="kw">else </span>{
@@ -2449,8 +2450,9 @@
 
     <span class="doccomment">/// Returns true if this widget is currently focused for user input.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>focused(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+    </span><span class="kw">pub fn </span>focused(<span class="kw-2">&amp;</span><span class="self">self</span>, check_window: bool) -&gt; bool {
         <span class="self">self</span>.pending_state.focus == <span class="prelude-val">Some</span>(<span class="self">self</span>.current_node.id())
+            &amp;&amp; (!check_window || <span class="self">self</span>.window.focused().get_tracking_refresh(<span class="self">self</span>))
     }
 
     <span class="doccomment">/// Returns true if this widget is the target to activate when the user

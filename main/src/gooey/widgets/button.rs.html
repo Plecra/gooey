@@ -908,7 +908,7 @@
         <span class="kw">let </span>two_lp_stroke = StrokeOptions::lp_wide(Lp::points(<span class="number">2</span>));
         context.stroke_outline(style.outline, two_lp_stroke);
 
-        <span class="kw">if </span>context.focused() {
+        <span class="kw">if </span>context.focused(<span class="bool-val">true</span>) {
             <span class="kw">if </span>current_style == ButtonKind::Transparent {
                 <span class="kw">let </span>two_lp_stroke = two_lp_stroke.into_px(context.gfx.scale());
                 <span class="kw">let </span>focus_color = context.get(<span class="kw-2">&amp;</span>HighlightColor);

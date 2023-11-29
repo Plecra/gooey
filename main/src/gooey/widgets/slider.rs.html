@@ -1123,7 +1123,7 @@
 
         <span class="comment">// Draw the knob
         </span><span class="kw">if </span>spec.knob_size &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>focus = context.focused().then_some(<span class="self">self</span>.focused_knob).flatten();
+            <span class="kw">let </span>focus = context.focused(<span class="bool-val">true</span>).then_some(<span class="self">self</span>.focused_knob).flatten();
             <span class="self">Self</span>::draw_knobs(
                 <span class="self">self</span>.flip_pt_if_vertical(Point::new(end + spec.half_knob, spec.half_knob) + inset),
                 spec.end.map(|<span class="kw">_</span>| {

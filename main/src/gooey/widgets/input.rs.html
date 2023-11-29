@@ -1469,6 +1469,17 @@
 <a href="#1469" id="1469">1469</a>
 <a href="#1470" id="1470">1470</a>
 <a href="#1471" id="1471">1471</a>
+<a href="#1472" id="1472">1472</a>
+<a href="#1473" id="1473">1473</a>
+<a href="#1474" id="1474">1474</a>
+<a href="#1475" id="1475">1475</a>
+<a href="#1476" id="1476">1476</a>
+<a href="#1477" id="1477">1477</a>
+<a href="#1478" id="1478">1478</a>
+<a href="#1479" id="1479">1479</a>
+<a href="#1480" id="1480">1480</a>
+<a href="#1481" id="1481">1481</a>
+<a href="#1482" id="1482">1482</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A text input widget.
 
 </span><span class="kw">use </span>std::borrow::{Borrow, BorrowMut, Cow};
@@ -1519,6 +1530,7 @@
     needs_to_select_all: bool,
     mouse_buttons_down: usize,
     line_navigation_x_target: <span class="prelude-ty">Option</span>&lt;Px&gt;,
+    window_focused: bool,
 }
 
 <span class="kw">struct </span>CachedLayout {
@@ -1603,6 +1615,7 @@
             mouse_buttons_down: <span class="number">0</span>,
             needs_to_select_all: <span class="bool-val">true</span>,
             line_navigation_x_target: <span class="prelude-val">None</span>,
+            window_focused: <span class="bool-val">false</span>,
         }
     }
 
@@ -2477,16 +2490,31 @@
         }
 
         <span class="self">self</span>.blink_state.update(context.elapsed());
+        <span class="kw">let </span>window_focused = context.window().focused().get_tracking_refresh(context);
+        <span class="kw">if </span>window_focused != <span class="self">self</span>.window_focused {
+            <span class="kw">if </span>window_focused {
+                <span class="self">self</span>.blink_state.force_on();
+            }
+            <span class="self">self</span>.window_focused = window_focused;
+        }
+
         <span class="kw">let </span>cursor_state = <span class="self">self</span>.blink_state;
         <span class="kw">let </span>size = context.gfx.size();
         <span class="kw">let </span>padding = context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_px(context.gfx.scale());
         <span class="kw">let </span>padding = Point::&lt;Px&gt;::new(padding, padding);
-        <span class="kw">let </span>highlight = context.get(<span class="kw-2">&amp;</span>HighlightColor);
 
         <span class="kw">let </span>cache = <span class="self">self</span>.layout_text(<span class="prelude-val">Some</span>(size.width.into_signed()), context);
 
-        <span class="kw">if </span>context.focused() {
+        <span class="kw">let </span>highlight = <span class="kw">if </span>context.focused(<span class="bool-val">false</span>) &amp;&amp; window_focused {
             context.draw_focus_ring();
+            context.get(<span class="kw-2">&amp;</span>HighlightColor)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>outline_color = context.get(<span class="kw-2">&amp;</span>OutlineColor);
+            context.stroke_outline::&lt;Lp&gt;(outline_color, StrokeOptions::default());
+            outline_color
+        };
+
+        <span class="kw">if </span>context.focused(<span class="bool-val">false</span>) {
             context.set_ime_allowed(<span class="bool-val">true</span>);
             context.set_ime_purpose(<span class="kw">if </span>cache.masked {
                 ImePurpose::Password
@@ -2553,11 +2581,10 @@
                         .translate_by(padding),
                     );
                 }
-            } <span class="kw">else </span>{
+            } <span class="kw">else if </span>window_focused {
                 <span class="kw">let </span>(location, <span class="kw">_</span>) =
                     <span class="self">Self</span>::point_from_cursor(cache.measured, cache.cursor, cache.bytes);
-                <span class="kw">let </span>window_focused = context.window().focused().get();
-                <span class="kw">if </span>window_focused &amp;&amp; cursor_state.visible {
+                <span class="kw">if </span>cursor_state.visible {
                     <span class="kw">let </span>cursor_width = Lp::points(<span class="number">2</span>).into_px(context.gfx.scale());
                     context.gfx.draw_shape(
                         Shape::filled_rect(
@@ -2570,15 +2597,10 @@
                         .translate_by(padding),
                     );
                 }
-                <span class="kw">if </span>window_focused {
-                    context.redraw_in(cursor_state.remaining_until_blink);
-                } <span class="kw">else </span>{
-                    context.redraw_when_changed(context.window().focused());
-                }
+                context.redraw_in(cursor_state.remaining_until_blink);
+            } <span class="kw">else </span>{
+                context.redraw_when_changed(context.window().focused());
             }
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>outline_color = context.get(<span class="kw-2">&amp;</span>OutlineColor);
-            context.stroke_outline::&lt;Lp&gt;(outline_color, StrokeOptions::default());
         }
 
         <span class="kw">let </span>text = <span class="kw">if </span>cache.bytes &gt; <span class="number">0 </span>{
