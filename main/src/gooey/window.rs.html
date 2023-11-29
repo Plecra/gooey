@@ -1917,9 +1917,9 @@
 
         <span class="self">self</span>.redraw_status.refresh_received();
         graphics.reset_text_attributes();
-        <span class="comment">// TODO re-check why we can&#39;t add drain without a range to kempt. Or even intoiter.
-        </span><span class="kw">let </span>invalidations = std::mem::take(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.redraw_status.invalidations());
-        <span class="self">self</span>.root.tree.new_frame(invalidations.iter().copied());
+        <span class="self">self</span>.root
+            .tree
+            .new_frame(<span class="self">self</span>.redraw_status.invalidations().drain());
 
         <span class="kw">let </span>resizable = window.winit().is_resizable();
         <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.clipboard, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
