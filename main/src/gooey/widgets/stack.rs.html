@@ -747,6 +747,35 @@
 <a href="#747" id="747">747</a>
 <a href="#748" id="748">748</a>
 <a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines a collection of [`Children`] widgets into one.
 </span><span class="comment">// TODO on scale change, all `Lp` children need to resize
 
@@ -1169,22 +1198,28 @@
 
         <span class="comment">// Measure the children that fit their content
         </span><span class="self">self</span>.other = UPx::ZERO;
-        <span class="kw">for </span>(fit_index, <span class="kw-2">&amp;</span>id) <span class="kw">in </span><span class="self">self</span>.fit_to_content.iter().enumerate() {
+        <span class="kw">let </span><span class="kw-2">mut </span>requires_gutter = <span class="bool-val">false</span>;
+        <span class="kw">for </span><span class="kw-2">&amp;</span>id <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.fit_to_content {
             <span class="kw">let </span>index = <span class="self">self</span>.children.index_of_id(id).expect(<span class="string">&quot;child not found&quot;</span>);
+
             <span class="kw">let </span>(measured, other) = <span class="self">self</span>.orientation.split_size(measure(
                 index,
                 <span class="self">self</span>.orientation.make_size(
-                    ConstraintLimit::SizeToFit(available_space),
+                    ConstraintLimit::SizeToFit(remaining.saturating_sub(<span class="kw">if </span>requires_gutter {
+                        gutter
+                    } <span class="kw">else </span>{
+                        UPx::ZERO
+                    })),
                     other_constraint,
                 ),
                 !needs_final_layout,
             ));
             <span class="self">self</span>.layouts[index].size = measured;
             <span class="kw">if </span>measured &gt; <span class="number">0 </span>{
-                <span class="kw">if </span>fit_index &lt; <span class="self">self</span>.fit_to_content.len() - <span class="number">1
-                    </span>|| <span class="self">self</span>.fit_to_content.len() != <span class="self">self</span>.children.len()
-                {
+                <span class="kw">if </span>requires_gutter {
                     remaining = remaining.saturating_sub(gutter);
+                } <span class="kw">else </span>{
+                    requires_gutter = <span class="bool-val">true</span>;
                 }
                 <span class="self">self</span>.other = <span class="self">self</span>.other.max(other);
             }
@@ -1207,8 +1242,14 @@
 
         <span class="comment">// Measure the weighted children within the remaining space
         </span><span class="kw">if </span><span class="self">self</span>.total_weights &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>space_per_weight = (remaining / <span class="self">self</span>.total_weights).floor();
-            remaining -= space_per_weight * <span class="self">self</span>.total_weights;
+            <span class="kw">let </span><span class="kw-2">mut </span>needed_gutters = u32::try_from(<span class="self">self</span>.fractional.len()).unwrap_or(u32::MAX);
+            <span class="kw">if </span>!requires_gutter {
+                needed_gutters -= <span class="number">1</span>;
+            }
+            <span class="kw">let </span>gutters = gutter * needed_gutters;
+            <span class="kw">let </span>space_per_weight =
+                ((remaining.saturating_sub(gutters)) / <span class="self">self</span>.total_weights).floor();
+            remaining = remaining.saturating_sub(space_per_weight * <span class="self">self</span>.total_weights + gutters);
             <span class="kw">for </span>(fractional_index, <span class="kw-2">&amp;</span>(id, weight)) <span class="kw">in </span><span class="self">self</span>.fractional.iter().enumerate() {
                 <span class="kw">let </span>index = <span class="self">self</span>.children.index_of_id(id).expect(<span class="string">&quot;child not found&quot;</span>);
                 <span class="kw">let </span><span class="kw-2">mut </span>size = space_per_weight * u32::from(weight);
@@ -1248,26 +1289,43 @@
             ConstraintLimit::SizeToFit(clip_limit) =&gt; <span class="self">self</span>.other.min(clip_limit),
         };
 
-        <span class="comment">// Finally, compute the offsets of all of the widgets.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>offset = UPx::ZERO;
+        <span class="kw">let </span>measured = <span class="self">self</span>.update_offsets(needs_final_layout, gutter, scale, measure);
+
+        <span class="self">self</span>.orientation.make_size(measured, <span class="self">self</span>.other)
+    }
+
+    <span class="kw">fn </span>update_offsets(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        needs_final_layout: bool,
+        gutter: UPx,
+        scale: Fraction,
+        <span class="kw-2">mut </span>measure: <span class="kw">impl </span>FnMut(usize, Size&lt;ConstraintLimit&gt;, bool) -&gt; Size&lt;UPx&gt;,
+    ) -&gt; UPx {
+        <span class="kw">let </span><span class="kw-2">mut </span>offset = UPx::ZERO;
         <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.children.len() {
-            <span class="self">self</span>.layouts[index].offset = offset;
-            <span class="kw">if </span><span class="self">self</span>.layouts[index].size &gt; <span class="number">0 </span>{
-                offset += <span class="self">self</span>.layouts[index].size + gutter;
+            <span class="kw">let </span>visible = <span class="self">self</span>.layouts[index].size &gt; <span class="number">0</span>;
+
+            <span class="kw">if </span>visible &amp;&amp; offset &gt; <span class="number">0 </span>{
+                offset += gutter;
             }
-            <span class="kw">if </span>needs_final_layout {
-                <span class="self">self</span>.orientation.split_size(measure(
-                    index,
-                    <span class="self">self</span>.orientation.make_size(
-                        ConstraintLimit::Fill(<span class="self">self</span>.layouts[index].size.into_upx(scale)),
-                        ConstraintLimit::Fill(<span class="self">self</span>.other),
-                    ),
-                    <span class="bool-val">true</span>,
-                ));
+
+            <span class="self">self</span>.layouts[index].offset = offset;
+
+            <span class="kw">if </span>visible {
+                offset += <span class="self">self</span>.layouts[index].size;
+                <span class="kw">if </span>needs_final_layout {
+                    measure(
+                        index,
+                        <span class="self">self</span>.orientation.make_size(
+                            ConstraintLimit::Fill(<span class="self">self</span>.layouts[index].size.into_upx(scale)),
+                            ConstraintLimit::Fill(<span class="self">self</span>.other),
+                        ),
+                        <span class="bool-val">true</span>,
+                    );
+                }
             }
         }
-
-        <span class="self">self</span>.orientation.make_size(offset, <span class="self">self</span>.other)
+        offset
     }
 }
 

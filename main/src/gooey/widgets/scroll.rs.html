@@ -492,12 +492,12 @@
             Size::new(available_space.width.max(), available_space.height.max()).into_signed();
         <span class="kw">let </span>max_extents = Size::new(
             <span class="kw">if </span><span class="self">self</span>.enabled.x {
-                ConstraintLimit::SizeToFit((control_size.width).into_unsigned())
+                ConstraintLimit::SizeToFit(UPx::MAX)
             } <span class="kw">else </span>{
                 available_space.width
             },
             <span class="kw">if </span><span class="self">self</span>.enabled.y {
-                ConstraintLimit::SizeToFit((control_size.height).into_unsigned())
+                ConstraintLimit::SizeToFit(UPx::MAX)
             } <span class="kw">else </span>{
                 available_space.height
             },
