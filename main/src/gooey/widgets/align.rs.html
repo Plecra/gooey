@@ -208,6 +208,7 @@
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span>kludgine::figures::units::UPx;
@@ -360,6 +361,7 @@
     <span class="kw">fn </span>measure(<span class="kw-2">&amp;</span><span class="self">self</span>, available: ConstraintLimit, content: UPx) -&gt; (UPx, UPx, UPx) {
         <span class="kw">match </span>available {
             ConstraintLimit::Fill(size) =&gt; {
+                <span class="kw">let </span>size = size.max(content);
                 <span class="kw">let </span>remaining = size.saturating_sub(content);
                 <span class="kw">let </span>(a, b) = <span class="kw">match </span>(<span class="self">self</span>.a, <span class="self">self</span>.b) {
                     (<span class="prelude-val">Some</span>(a), <span class="prelude-val">Some</span>(b)) =&gt; (a, b),

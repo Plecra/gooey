@@ -1287,6 +1287,10 @@
 <a href="#1287" id="1287">1287</a>
 <a href="#1288" id="1288">1288</a>
 <a href="#1289" id="1289">1289</a>
+<a href="#1290" id="1290">1290</a>
+<a href="#1291" id="1291">1291</a>
+<a href="#1292" id="1292">1292</a>
+<a href="#1293" id="1293">1293</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
@@ -1953,7 +1957,7 @@
                 window_size.map(ConstraintLimit::SizeToFit)
             });
         <span class="kw">let </span>actual_size = <span class="kw">if </span>root_mode == RootMode::Align {
-            window_size
+            window_size.max(layout_size)
         } <span class="kw">else </span>{
             layout_size
         };
@@ -1969,6 +1973,10 @@
             <span class="kw">let _ </span>= layout_context
                 .winit()
                 .request_inner_size(PhysicalSize::from(new_size));
+        } <span class="kw">else if </span>render_size != actual_size &amp;&amp; resizable {
+            <span class="kw">let _ </span>= layout_context
+                .winit()
+                .request_inner_size(PhysicalSize::from(actual_size));
         }
         <span class="self">self</span>.root.set_layout(Rect::from(render_size.into_signed()));
 
