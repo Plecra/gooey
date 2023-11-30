@@ -245,7 +245,7 @@
     AnimationHandle, AnimationTarget, IntoAnimate, PercentBetween, Spawn, ZeroToOne,
 };
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoDynamic, IntoValue, MapEach, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithId, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::slider::Slidable;
 <span class="kw">use </span><span class="kw">crate</span>::widgets::Data;
 
@@ -282,8 +282,8 @@
     </span>Percent(T),
 }
 
-<span class="kw">impl </span>MakeWidget <span class="kw">for </span>ProgressBar {
-    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
+<span class="kw">impl </span>MakeWidgetWithId <span class="kw">for </span>ProgressBar {
+    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
         <span class="kw">let </span>start = Dynamic::new(ZeroToOne::ZERO);
         <span class="kw">let </span>end = Dynamic::new(ZeroToOne::ZERO);
         <span class="kw">let </span>value = (<span class="kw-2">&amp;</span>start, <span class="kw-2">&amp;</span>end).map_each(|(start, end)| <span class="kw-2">*</span>start..=<span class="kw-2">*</span>end);
@@ -296,7 +296,7 @@
             <span class="kw-2">&amp;</span>end,
         );
 
-        <span class="kw">let </span>slider = value.slider().knobless().non_interactive();
+        <span class="kw">let </span>slider = value.slider().knobless().non_interactive().make_with_id(id);
         <span class="kw">match </span><span class="self">self</span>.progress {
             Value::Dynamic(progress) =&gt; {
                 progress.for_each(<span class="kw">move </span>|progress| {

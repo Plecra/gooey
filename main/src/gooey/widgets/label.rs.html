@@ -115,7 +115,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::{GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::TextColor;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, Generation, IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, Widget, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{Widget, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A read-only text widget.
@@ -197,9 +197,9 @@
 
 <span class="macro">macro_rules! </span>impl_make_widget {
     ($(<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>),<span class="kw-2">*</span>) =&gt; {
-        $(<span class="kw">impl </span>MakeWidget <span class="kw">for </span><span class="macro-nonterminal">$</span><span class="kw">type </span>{
-            <span class="kw">fn </span><span class="macro-nonterminal">make_widget</span>(<span class="self">self</span>) -&gt; WidgetInstance {
-                Label::new(<span class="self">self</span>).make_widget()
+        $(<span class="kw">impl </span><span class="kw">crate</span>::widget::MakeWidgetWithId <span class="kw">for </span><span class="macro-nonterminal">$</span><span class="kw">type </span>{
+            <span class="kw">fn </span><span class="macro-nonterminal">make_with_id</span>(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
+                Label::new(<span class="self">self</span>).make_with_id(id)
             }
         })*
     };

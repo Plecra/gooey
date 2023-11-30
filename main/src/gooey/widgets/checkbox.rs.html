@@ -267,7 +267,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::{GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{LineHeight, OutlineColor, TextColor, WidgetAccentColor};
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, DynamicReader, IntoDynamic, IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, Widget, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithId, Widget, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::button::ButtonKind;
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -307,8 +307,8 @@
     </span>}
 }
 
-<span class="kw">impl </span>MakeWidget <span class="kw">for </span>Checkbox {
-    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
+<span class="kw">impl </span>MakeWidgetWithId <span class="kw">for </span>Checkbox {
+    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
         CheckboxOrnament {
             value: <span class="self">self</span>.state.create_reader(),
         }
@@ -320,7 +320,7 @@
             <span class="kw-2">*</span>value = !<span class="kw-2">*</span>value;
         })
         .kind(<span class="self">self</span>.kind)
-        .make_widget()
+        .make_with_id(id)
     }
 }
 

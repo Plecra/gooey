@@ -2225,7 +2225,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::sealed::WindowHandle;
 <span class="kw">use </span><span class="kw">crate</span>::context::{<span class="self">self</span>, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::utils::{run_in_bg, IgnorePoison, UnwindsafeCondvar, WithClone};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{Children, MakeWidget, WidgetId, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{Children, MakeWidget, MakeWidgetWithId, WidgetId, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Radio, Select, Space, Switcher};
 
 <span class="doccomment">/// An instance of a value that provides APIs to observe and react to its
@@ -2812,20 +2812,20 @@
     }
 }
 
-<span class="kw">impl </span>MakeWidget <span class="kw">for </span>Dynamic&lt;WidgetInstance&gt; {
-    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
-        <span class="self">self</span>.switcher().make_widget()
+<span class="kw">impl </span>MakeWidgetWithId <span class="kw">for </span>Dynamic&lt;WidgetInstance&gt; {
+    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
+        <span class="self">self</span>.switcher().make_with_id(id)
     }
 }
 
-<span class="kw">impl </span>MakeWidget <span class="kw">for </span>Dynamic&lt;<span class="prelude-ty">Option</span>&lt;WidgetInstance&gt;&gt; {
-    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
+<span class="kw">impl </span>MakeWidgetWithId <span class="kw">for </span>Dynamic&lt;<span class="prelude-ty">Option</span>&lt;WidgetInstance&gt;&gt; {
+    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
         <span class="self">self</span>.map_each(|widget| {
             widget
                 .as_ref()
                 .map_or_else(|| Space::clear().make_widget(), Clone::clone)
         })
-        .make_widget()
+        .make_with_id(id)
     }
 }
 

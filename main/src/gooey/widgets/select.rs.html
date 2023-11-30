@@ -98,7 +98,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::OutlineColor;
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Component, DynamicComponent};
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoDynamic, IntoValue, MapEach, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithId, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::button::{ButtonBackground, ButtonHoverBackground, ButtonKind};
 
 <span class="doccomment">/// A selectable, labeled widget representing a value.
@@ -136,11 +136,11 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;T&gt; MakeWidget <span class="kw">for </span>Select&lt;T&gt;
+<span class="kw">impl</span>&lt;T&gt; MakeWidgetWithId <span class="kw">for </span>Select&lt;T&gt;
 <span class="kw">where
     </span>T: Clone + Debug + Eq + RefUnwindSafe + UnwindSafe + Send + Sync + <span class="lifetime">&#39;static</span>,
 {
-    <span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance {
+    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
         <span class="kw">let </span>selected = <span class="self">self</span>.state.map_each({
             <span class="kw">let </span>value = <span class="self">self</span>.value.clone();
             <span class="kw">move </span>|state| state == <span class="kw-2">&amp;</span>value
@@ -170,7 +170,7 @@
             .kind(kind)
             .with_dynamic(<span class="kw-2">&amp;</span>ButtonBackground, selected_color.clone())
             .with_dynamic(<span class="kw-2">&amp;</span>ButtonHoverBackground, selected_color)
-            .make_widget()
+            .make_with_id(id)
     }
 }
 
