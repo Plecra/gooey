@@ -747,8 +747,6 @@
 <a href="#747" id="747">747</a>
 <a href="#748" id="748">748</a>
 <a href="#749" id="749">749</a>
-<a href="#750" id="750">750</a>
-<a href="#751" id="751">751</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines a collection of [`Children`] widgets into one.
 </span><span class="comment">// TODO on scale change, all `Lp` children need to resize
 
@@ -1182,9 +1180,7 @@
                 !needs_final_layout,
             ));
             <span class="self">self</span>.layouts[index].size = measured;
-            <span class="kw">if </span>measured == <span class="number">0 </span>{
-                <span class="self">self</span>.other = UPx::ZERO;
-            } <span class="kw">else </span>{
+            <span class="kw">if </span>measured &gt; <span class="number">0 </span>{
                 <span class="kw">if </span>fit_index &lt; <span class="self">self</span>.fit_to_content.len() - <span class="number">1
                     </span>|| <span class="self">self</span>.fit_to_content.len() != <span class="self">self</span>.children.len()
                 {

@@ -2135,10 +2135,80 @@
 <a href="#2135" id="2135">2135</a>
 <a href="#2136" id="2136">2136</a>
 <a href="#2137" id="2137">2137</a>
+<a href="#2138" id="2138">2138</a>
+<a href="#2139" id="2139">2139</a>
+<a href="#2140" id="2140">2140</a>
+<a href="#2141" id="2141">2141</a>
+<a href="#2142" id="2142">2142</a>
+<a href="#2143" id="2143">2143</a>
+<a href="#2144" id="2144">2144</a>
+<a href="#2145" id="2145">2145</a>
+<a href="#2146" id="2146">2146</a>
+<a href="#2147" id="2147">2147</a>
+<a href="#2148" id="2148">2148</a>
+<a href="#2149" id="2149">2149</a>
+<a href="#2150" id="2150">2150</a>
+<a href="#2151" id="2151">2151</a>
+<a href="#2152" id="2152">2152</a>
+<a href="#2153" id="2153">2153</a>
+<a href="#2154" id="2154">2154</a>
+<a href="#2155" id="2155">2155</a>
+<a href="#2156" id="2156">2156</a>
+<a href="#2157" id="2157">2157</a>
+<a href="#2158" id="2158">2158</a>
+<a href="#2159" id="2159">2159</a>
+<a href="#2160" id="2160">2160</a>
+<a href="#2161" id="2161">2161</a>
+<a href="#2162" id="2162">2162</a>
+<a href="#2163" id="2163">2163</a>
+<a href="#2164" id="2164">2164</a>
+<a href="#2165" id="2165">2165</a>
+<a href="#2166" id="2166">2166</a>
+<a href="#2167" id="2167">2167</a>
+<a href="#2168" id="2168">2168</a>
+<a href="#2169" id="2169">2169</a>
+<a href="#2170" id="2170">2170</a>
+<a href="#2171" id="2171">2171</a>
+<a href="#2172" id="2172">2172</a>
+<a href="#2173" id="2173">2173</a>
+<a href="#2174" id="2174">2174</a>
+<a href="#2175" id="2175">2175</a>
+<a href="#2176" id="2176">2176</a>
+<a href="#2177" id="2177">2177</a>
+<a href="#2178" id="2178">2178</a>
+<a href="#2179" id="2179">2179</a>
+<a href="#2180" id="2180">2180</a>
+<a href="#2181" id="2181">2181</a>
+<a href="#2182" id="2182">2182</a>
+<a href="#2183" id="2183">2183</a>
+<a href="#2184" id="2184">2184</a>
+<a href="#2185" id="2185">2185</a>
+<a href="#2186" id="2186">2186</a>
+<a href="#2187" id="2187">2187</a>
+<a href="#2188" id="2188">2188</a>
+<a href="#2189" id="2189">2189</a>
+<a href="#2190" id="2190">2190</a>
+<a href="#2191" id="2191">2191</a>
+<a href="#2192" id="2192">2192</a>
+<a href="#2193" id="2193">2193</a>
+<a href="#2194" id="2194">2194</a>
+<a href="#2195" id="2195">2195</a>
+<a href="#2196" id="2196">2196</a>
+<a href="#2197" id="2197">2197</a>
+<a href="#2198" id="2198">2198</a>
+<a href="#2199" id="2199">2199</a>
+<a href="#2200" id="2200">2200</a>
+<a href="#2201" id="2201">2201</a>
+<a href="#2202" id="2202">2202</a>
+<a href="#2203" id="2203">2203</a>
+<a href="#2204" id="2204">2204</a>
+<a href="#2205" id="2205">2205</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
-</span><span class="kw">use </span>std::fmt::{Debug, Display};
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::fmt::{Debug, Display};
 <span class="kw">use </span>std::future::Future;
+<span class="kw">use </span>std::hash::{BuildHasher, Hash};
 <span class="kw">use </span>std::ops::{Deref, DerefMut, Not};
 <span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::str::FromStr;
@@ -2149,13 +2219,14 @@
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>ahash::AHashSet;
+<span class="kw">use </span>kempt::{Map, Sort};
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationHandle, DynamicTransition, IntoAnimate, LinearInterpolate, Spawn};
 <span class="kw">use </span><span class="kw">crate</span>::context::sealed::WindowHandle;
 <span class="kw">use </span><span class="kw">crate</span>::context::{<span class="self">self</span>, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::utils::{run_in_bg, IgnorePoison, UnwindsafeCondvar, WithClone};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetId, WidgetInstance};
-<span class="kw">use </span><span class="kw">crate</span>::widgets::{Radio, Space, Switcher};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{Children, MakeWidget, WidgetId, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widgets::{Radio, Select, Space, Switcher};
 
 <span class="doccomment">/// An instance of a value that provides APIs to observe and react to its
 /// contents.
@@ -2687,11 +2758,26 @@
     <span class="kw">where
         </span><span class="self">Self</span>: Clone,
         <span class="comment">// Technically this trait bound isn&#39;t necessary, but it prevents trying
-        // to call into_radio on unsupported types. The MakeWidget/Widget
+        // to call new_radio on unsupported types. The MakeWidget/Widget
         // implementations require these bounds (and more).
         </span>T: Clone + Eq,
     {
         Radio::new(widget_value, <span class="self">self</span>.clone(), label)
+    }
+
+    <span class="doccomment">/// Returns a new [`Select`] that updates this dynamic to `widget_value`
+    /// when pressed. `label` is drawn next to the checkbox and is also
+    /// clickable to select the widget.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>new_select(<span class="kw-2">&amp;</span><span class="self">self</span>, widget_value: T, label: <span class="kw">impl </span>MakeWidget) -&gt; Select&lt;T&gt;
+    <span class="kw">where
+        </span><span class="self">Self</span>: Clone,
+        <span class="comment">// Technically this trait bound isn&#39;t necessary, but it prevents trying
+        // to call new_select on unsupported types. The MakeWidget/Widget
+        // implementations require these bounds (and more).
+        </span>T: Clone + Eq,
+    {
+        Select::new(widget_value, <span class="self">self</span>.clone(), label)
     }
 
     <span class="doccomment">/// Validates the contents of this dynamic using the `check` function,
@@ -3423,6 +3509,56 @@
         T: Send + <span class="lifetime">&#39;static</span>,
     {
         Switcher::mapping(<span class="self">self</span>, map)
+    }
+
+    <span class="doccomment">/// Returns a new [`Switcher`] whose contents switches between the values
+    /// contained in `map` using the value in `self` as the key.
+    </span><span class="kw">fn </span>switch_between&lt;Collection&gt;(<span class="self">self</span>, map: Collection) -&gt; Switcher
+    <span class="kw">where
+        </span>Collection: GetWidget&lt;T&gt; + Send + <span class="lifetime">&#39;static</span>,
+        T: Send + <span class="lifetime">&#39;static</span>,
+    {
+        Switcher::mapping(<span class="self">self</span>, <span class="kw">move </span>|key, <span class="kw">_</span>| {
+            map.get(key)
+                .map_or_else(|| Space::clear().make_widget(), Clone::clone)
+        })
+    }
+}
+
+<span class="doccomment">/// A collection of widgets that can be queried by `Key`.
+</span><span class="kw">pub trait </span>GetWidget&lt;Key&gt; {
+    <span class="doccomment">/// Returns the widget associated with `key`, if found.
+    </span><span class="kw">fn </span>get&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>Key) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>WidgetInstance&gt;;
+}
+
+<span class="kw">impl</span>&lt;Key, State&gt; GetWidget&lt;Key&gt; <span class="kw">for </span>HashMap&lt;Key, WidgetInstance, State&gt;
+<span class="kw">where
+    </span>Key: Hash + Eq,
+    State: BuildHasher,
+{
+    <span class="kw">fn </span>get&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>Key) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>WidgetInstance&gt; {
+        HashMap::get(<span class="self">self</span>, key)
+    }
+}
+
+<span class="kw">impl</span>&lt;Key&gt; GetWidget&lt;Key&gt; <span class="kw">for </span>Map&lt;Key, WidgetInstance&gt;
+<span class="kw">where
+    </span>Key: Sort,
+{
+    <span class="kw">fn </span>get&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>Key) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>WidgetInstance&gt; {
+        Map::get(<span class="self">self</span>, key)
+    }
+}
+
+<span class="kw">impl </span>GetWidget&lt;usize&gt; <span class="kw">for </span>Children {
+    <span class="kw">fn </span>get&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>WidgetInstance&gt; {
+        (<span class="kw-2">**</span><span class="self">self</span>).get(<span class="kw-2">*</span>key)
+    }
+}
+
+<span class="kw">impl </span>GetWidget&lt;usize&gt; <span class="kw">for </span>Vec&lt;WidgetInstance&gt; {
+    <span class="kw">fn </span>get&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>WidgetInstance&gt; {
+        (<span class="kw-2">**</span><span class="self">self</span>).get(<span class="kw-2">*</span>key)
     }
 }
 

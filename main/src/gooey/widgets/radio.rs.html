@@ -125,7 +125,7 @@
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
 <a href="#127" id="127">127</a>
-</pre></div><pre class="rust"><code><span class="doccomment">//! A tri-state, labelable checkbox widget.
+</pre></div><pre class="rust"><code><span class="doccomment">//! A labeled widget with a circular indicator representing a value.
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
 
@@ -141,12 +141,11 @@
 <span class="kw">use </span><span class="kw">crate</span>::widgets::button::ButtonKind;
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
-<span class="doccomment">/// A labeled-widget that supports three states: Checked, Unchecked, and
-/// Indeterminant
+<span class="doccomment">/// A labeled widget with a circular indicator representing a value.
 </span><span class="kw">pub struct </span>Radio&lt;T&gt; {
     <span class="doccomment">/// The value this button represents.
     </span><span class="kw">pub </span>value: T,
-    <span class="doccomment">/// The state (value) of the checkbox.
+    <span class="doccomment">/// The state (value) of the radio.
     </span><span class="kw">pub </span>state: Dynamic&lt;T&gt;,
     <span class="doccomment">/// The button kind to use as the basis for this radio. Radios default to
     /// [`ButtonKind::Transparent`].
@@ -156,7 +155,8 @@
 
 <span class="kw">impl</span>&lt;T&gt; Radio&lt;T&gt; {
     <span class="doccomment">/// Returns a new radio that sets `state` to `value` when pressed. `label`
-    /// is drawn next to the checkbox and is also clickable to select the radio.
+    /// is drawn next to the radio indicator and is also clickable to select the
+    /// radio.
     </span><span class="kw">pub fn </span>new(value: T, state: <span class="kw">impl </span>IntoDynamic&lt;T&gt;, label: <span class="kw">impl </span>MakeWidget) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             value,
