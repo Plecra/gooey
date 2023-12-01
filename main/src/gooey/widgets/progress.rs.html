@@ -299,10 +299,10 @@
         <span class="kw">let </span>slider = value.slider().knobless().non_interactive().make_with_id(id);
         <span class="kw">match </span><span class="self">self</span>.progress {
             Value::Dynamic(progress) =&gt; {
-                progress.for_each(<span class="kw">move </span>|progress| {
+                <span class="kw">let </span>callback = progress.for_each(<span class="kw">move </span>|progress| {
                     update_progress_bar(<span class="kw-2">*</span>progress, <span class="kw-2">&amp;mut </span>indeterminant_animation, <span class="kw-2">&amp;</span>start, <span class="kw-2">&amp;</span>end);
                 });
-                Data::new_wrapping(progress, slider).make_widget()
+                Data::new_wrapping((callback, progress), slider).make_widget()
             }
             Value::Constant(<span class="kw">_</span>) =&gt; Data::new_wrapping(indeterminant_animation, slider).make_widget(),
         }
