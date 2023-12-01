@@ -3362,7 +3362,7 @@
 }
 
 <span class="doccomment">/// A list of [`Widget`]s.
-</span><span class="attr">#[derive(Debug, Default)]
+</span><span class="attr">#[derive(Debug, Default, Eq, PartialEq)]
 #[must_use]
 </span><span class="kw">pub struct </span>Children {
     ordered: Vec&lt;WidgetInstance&gt;,
