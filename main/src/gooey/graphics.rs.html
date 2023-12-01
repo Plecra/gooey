@@ -321,6 +321,15 @@
 <a href="#321" id="321">321</a>
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::{Deref, DerefMut};
 
 <span class="kw">use </span>ahash::{HashSet, HashSetExt};
@@ -342,6 +351,7 @@
 </span><span class="kw">pub struct </span>Graphics&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
     renderer: RenderContext&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;,
     region: Rect&lt;Px&gt;,
+    current_font_family: <span class="kw-2">&amp;</span><span class="lifetime">&#39;clip </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;FontFamilyList&gt;,
 }
 
 <span class="kw">enum </span>RenderContext&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
@@ -352,10 +362,14 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; Graphics&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
     <span class="doccomment">/// Returns a new graphics context for the given [`Renderer`].
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>new(renderer: Renderer&lt;<span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(
+        renderer: Renderer&lt;<span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;,
+        current_font_family: <span class="kw-2">&amp;</span><span class="lifetime">&#39;clip </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;FontFamilyList&gt;,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             region: renderer.clip_rect().into_signed(),
             renderer: RenderContext::Renderer(renderer),
+            current_font_family,
         }
     }
 
@@ -409,8 +423,11 @@
 
     <span class="doccomment">/// Sets the font family to the first family in `list`.
     </span><span class="kw">pub fn </span>set_available_font_family(<span class="kw-2">&amp;mut </span><span class="self">self</span>, list: <span class="kw-2">&amp;</span>FontFamilyList) {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(family) = <span class="self">self</span>.find_available_font_family(list) {
-            <span class="self">self</span>.set_font_family(family);
+        <span class="kw">if </span><span class="self">self</span>.current_font_family.as_ref() != <span class="prelude-val">Some</span>(list) {
+            <span class="kw-2">*</span><span class="self">self</span>.current_font_family = <span class="prelude-val">Some</span>(list.clone());
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(family) = <span class="self">self</span>.find_available_font_family(list) {
+                <span class="self">self</span>.set_font_family(family);
+            }
         }
     }
 
@@ -446,6 +463,7 @@
         Graphics {
             renderer: RenderContext::Clipped(<span class="self">self</span>.renderer.clipped_to(new_clip)),
             region,
+            current_font_family: <span class="kw-2">&amp;mut *</span><span class="self">self</span>.current_font_family,
         }
     }
 

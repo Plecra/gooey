@@ -1291,6 +1291,7 @@
 <a href="#1291" id="1291">1291</a>
 <a href="#1292" id="1292">1292</a>
 <a href="#1293" id="1293">1293</a>
+<a href="#1294" id="1294">1294</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
@@ -1930,6 +1931,7 @@
         <span class="kw">let </span>root_mode = <span class="self">self</span>.constrain_window_resizing(resizable, <span class="kw-2">&amp;mut </span>window, graphics);
 
         <span class="kw">let </span>graphics = <span class="self">self</span>.contents.new_frame(graphics);
+        <span class="kw">let </span><span class="kw-2">mut </span>current_font_family = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>context = GraphicsContext {
             widget: WidgetContext::new(
                 <span class="self">self</span>.root.clone(),
@@ -1939,7 +1941,7 @@
                 <span class="self">self</span>.theme_mode.get(),
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>.cursor,
             ),
-            gfx: Exclusive::Owned(Graphics::new(graphics)),
+            gfx: Exclusive::Owned(Graphics::new(graphics, <span class="kw-2">&amp;mut </span>current_font_family)),
         };
         <span class="self">self</span>.theme_mode.redraw_when_changed(<span class="kw-2">&amp;</span>context);
         <span class="kw">let </span><span class="kw-2">mut </span>layout_context = LayoutContext::new(<span class="kw-2">&amp;mut </span>context);

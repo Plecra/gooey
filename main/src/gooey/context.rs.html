@@ -1395,7 +1395,6 @@
 <a href="#1395" id="1395">1395</a>
 <a href="#1396" id="1396">1396</a>
 <a href="#1397" id="1397">1397</a>
-<a href="#1398" id="1398">1398</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
@@ -2021,16 +2020,7 @@
         <span class="self">self</span>.gfx.set_font_weight(<span class="self">self</span>.widget.get(<span class="kw-2">&amp;</span>FontWeight));
     }
 
-    <span class="comment">// /// Applies the current style settings for font family, text size, font
-    // /// style, and font weight.
-    // pub fn apply_current_font_settings_to&lt;&#39;a&gt;(&amp;self, attrs: Attrs&lt;&#39;a&gt;) -&gt; Attrs&lt;&#39;a&gt; {
-    //     attrs.set_available_font_family(&amp;self.widget.get(&amp;FontFamily));
-    //     attrs.set_font_size(self.widget.get(&amp;TextSize));
-    //     attrs.set_font_style(self.widget.get(&amp;FontStyle));
-    //     attrs.set_font_weight(self.widget.get(&amp;FontWeight));
-    // }
-
-    </span><span class="doccomment">/// Invokes [`Widget::redraw()`](crate::widget::Widget::redraw) on this
+    <span class="doccomment">/// Invokes [`Widget::redraw()`](crate::widget::Widget::redraw) on this
     /// context&#39;s widget.
     ///
     /// # Panics
@@ -2666,6 +2656,14 @@
 
     <span class="doccomment">/// Resolve `self` into a [`ManagedWidget`].
     </span><span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed;
+}
+
+<span class="kw">impl </span>ManageWidget <span class="kw">for </span>WidgetId {
+    <span class="kw">type </span>Managed = <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;;
+
+    <span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed {
+        context.current_node.tree.widget(<span class="kw-2">*</span><span class="self">self</span>)
+    }
 }
 
 <span class="kw">impl </span>ManageWidget <span class="kw">for </span>WidgetInstance {

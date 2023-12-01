@@ -2581,7 +2581,7 @@
                         .translate_by(padding),
                     );
                 }
-            } <span class="kw">else if </span>window_focused {
+            } <span class="kw">else if </span>window_focused &amp;&amp; context.enabled() {
                 <span class="kw">let </span>(location, <span class="kw">_</span>) =
                     <span class="self">Self</span>::point_from_cursor(cache.measured, cache.cursor, cache.bytes);
                 <span class="kw">if </span>cursor_state.visible {

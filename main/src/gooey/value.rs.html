@@ -2203,10 +2203,55 @@
 <a href="#2203" id="2203">2203</a>
 <a href="#2204" id="2204">2204</a>
 <a href="#2205" id="2205">2205</a>
+<a href="#2206" id="2206">2206</a>
+<a href="#2207" id="2207">2207</a>
+<a href="#2208" id="2208">2208</a>
+<a href="#2209" id="2209">2209</a>
+<a href="#2210" id="2210">2210</a>
+<a href="#2211" id="2211">2211</a>
+<a href="#2212" id="2212">2212</a>
+<a href="#2213" id="2213">2213</a>
+<a href="#2214" id="2214">2214</a>
+<a href="#2215" id="2215">2215</a>
+<a href="#2216" id="2216">2216</a>
+<a href="#2217" id="2217">2217</a>
+<a href="#2218" id="2218">2218</a>
+<a href="#2219" id="2219">2219</a>
+<a href="#2220" id="2220">2220</a>
+<a href="#2221" id="2221">2221</a>
+<a href="#2222" id="2222">2222</a>
+<a href="#2223" id="2223">2223</a>
+<a href="#2224" id="2224">2224</a>
+<a href="#2225" id="2225">2225</a>
+<a href="#2226" id="2226">2226</a>
+<a href="#2227" id="2227">2227</a>
+<a href="#2228" id="2228">2228</a>
+<a href="#2229" id="2229">2229</a>
+<a href="#2230" id="2230">2230</a>
+<a href="#2231" id="2231">2231</a>
+<a href="#2232" id="2232">2232</a>
+<a href="#2233" id="2233">2233</a>
+<a href="#2234" id="2234">2234</a>
+<a href="#2235" id="2235">2235</a>
+<a href="#2236" id="2236">2236</a>
+<a href="#2237" id="2237">2237</a>
+<a href="#2238" id="2238">2238</a>
+<a href="#2239" id="2239">2239</a>
+<a href="#2240" id="2240">2240</a>
+<a href="#2241" id="2241">2241</a>
+<a href="#2242" id="2242">2242</a>
+<a href="#2243" id="2243">2243</a>
+<a href="#2244" id="2244">2244</a>
+<a href="#2245" id="2245">2245</a>
+<a href="#2246" id="2246">2246</a>
+<a href="#2247" id="2247">2247</a>
+<a href="#2248" id="2248">2248</a>
+<a href="#2249" id="2249">2249</a>
+<a href="#2250" id="2250">2250</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::fmt::{Debug, Display};
+<span class="kw">use </span>std::fmt::{<span class="self">self</span>, Debug, Display};
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::hash::{BuildHasher, Hash};
 <span class="kw">use </span>std::ops::{Deref, DerefMut, Not};
@@ -2230,7 +2275,6 @@
 
 <span class="doccomment">/// An instance of a value that provides APIs to observe and react to its
 /// contents.
-</span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Dynamic&lt;T&gt;(Arc&lt;DynamicData&lt;T&gt;&gt;);
 
 <span class="kw">impl</span>&lt;T&gt; Dynamic&lt;T&gt; {
@@ -2803,18 +2847,34 @@
     }
 }
 
+<span class="kw">impl</span>&lt;T&gt; Debug <span class="kw">for </span>Dynamic&lt;T&gt;
+<span class="kw">where
+    </span>T: Debug,
+{
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">match </span><span class="self">self</span>.<span class="number">0</span>.state() {
+            <span class="prelude-val">Ok</span>(state) =&gt; f
+                .debug_struct(<span class="string">&quot;Dynamic&quot;</span>)
+                .field(<span class="string">&quot;value&quot;</span>, <span class="kw-2">&amp;</span>state.wrapped.value)
+                .field(<span class="string">&quot;generation&quot;</span>, <span class="kw-2">&amp;</span>state.wrapped.generation)
+                .finish(),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; f.debug_tuple(<span class="string">&quot;Dynamic&quot;</span>).field(<span class="kw-2">&amp;</span><span class="string">&quot;&lt;unable to lock&gt;&quot;</span>).finish(),
+        }
+    }
+}
+
 <span class="kw">impl </span>Dynamic&lt;WidgetInstance&gt; {
     <span class="doccomment">/// Returns a new [`Switcher`] widget whose contents is the value of this
     /// dynamic.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>switcher(<span class="self">self</span>) -&gt; Switcher {
+    </span><span class="kw">pub fn </span>into_switcher(<span class="self">self</span>) -&gt; Switcher {
         Switcher::new(<span class="self">self</span>)
     }
 }
 
 <span class="kw">impl </span>MakeWidgetWithId <span class="kw">for </span>Dynamic&lt;WidgetInstance&gt; {
     <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
-        <span class="self">self</span>.switcher().make_with_id(id)
+        <span class="self">self</span>.into_switcher().make_with_id(id)
     }
 }
 
@@ -2838,6 +2898,8 @@
         <span class="self">self</span>.invalidate_when_changed(handle, id);
     }
 }
+
+<span class="kw">impl</span>&lt;T&gt; Eq <span class="kw">for </span>Dynamic&lt;T&gt; {}
 
 <span class="kw">impl</span>&lt;T&gt; PartialEq <span class="kw">for </span>Dynamic&lt;T&gt; {
     <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
@@ -3038,7 +3100,7 @@
 <span class="kw">impl </span>std::error::Error <span class="kw">for </span>DeadlockError {}
 
 <span class="kw">impl </span>Display <span class="kw">for </span>DeadlockError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
         f.write_str(<span class="string">&quot;a deadlock was detected&quot;</span>)
     }
 }
@@ -3074,7 +3136,7 @@
 <span class="kw">where
     </span>T: Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
         f.debug_struct(<span class="string">&quot;State&quot;</span>)
             .field(<span class="string">&quot;wrapped&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.wrapped)
             .field(<span class="string">&quot;readers&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.readers)
@@ -3191,6 +3253,17 @@
 </span><span class="kw">pub struct </span>DynamicGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
     guard: DynamicMutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt;,
     accessed_mut: bool,
+}
+
+<span class="kw">impl</span>&lt;T&gt; DynamicGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    <span class="doccomment">/// Returns the generation of the value at the time of locking the dynamic.
+    ///
+    /// Even if this guard accesses the data through [`DerefMut`], this value
+    /// will remain unchanged while the guard is held.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>generation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Generation {
+        <span class="self">self</span>.guard.wrapped.generation
+    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Deref <span class="kw">for </span>DynamicGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
@@ -4101,6 +4174,19 @@
     }
 }
 
+<span class="kw">impl</span>&lt;T, E&gt; IntoDynamic&lt;Validation&gt; <span class="kw">for </span>Dynamic&lt;<span class="prelude-ty">Result</span>&lt;T, E&gt;&gt;
+<span class="kw">where
+    </span>T: Send + <span class="lifetime">&#39;static</span>,
+    E: Display + Send + <span class="lifetime">&#39;static</span>,
+{
+    <span class="kw">fn </span>into_dynamic(<span class="self">self</span>) -&gt; Dynamic&lt;Validation&gt; {
+        <span class="self">self</span>.map_each(|result| <span class="kw">match </span>result {
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; Validation::Valid,
+            <span class="prelude-val">Err</span>(err) =&gt; Validation::Invalid(err.to_string()),
+        })
+    }
+}
+
 <span class="doccomment">/// A grouping of validations that can be checked simultaneously.
 </span><span class="attr">#[derive(Debug, Default, Clone)]
 </span><span class="kw">pub struct </span>Validations {
@@ -4340,13 +4426,17 @@
     /// The validation is linked with `self` such that checking `self`&#39;s
     /// validation status will include this validation.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>validate_result&lt;E&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, result: <span class="kw">impl </span>IntoDynamic&lt;<span class="prelude-ty">Result</span>&lt;(), E&gt;&gt;) -&gt; Dynamic&lt;Validation&gt;
+    </span><span class="kw">pub fn </span>validate_result&lt;T, E&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        result: <span class="kw">impl </span>IntoDynamic&lt;<span class="prelude-ty">Result</span>&lt;T, E&gt;&gt;,
+    ) -&gt; Dynamic&lt;Validation&gt;
     <span class="kw">where
-        </span>E: Display + Send + <span class="lifetime">&#39;static</span>,
+        </span>T: Send + <span class="lifetime">&#39;static</span>,
+        E: Display + Send + <span class="lifetime">&#39;static</span>,
     {
         <span class="kw">let </span>result = result.into_dynamic();
         <span class="kw">let </span>error_message = result.map_each(<span class="kw">move </span>|value| <span class="kw">match </span>value {
-            <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">None</span>,
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
             <span class="prelude-val">Err</span>(err) =&gt; <span class="prelude-val">Some</span>(err.to_string()),
         });
 
