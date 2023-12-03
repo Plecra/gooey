@@ -1292,6 +1292,57 @@
 <a href="#1292" id="1292">1292</a>
 <a href="#1293" id="1293">1293</a>
 <a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
+<a href="#1296" id="1296">1296</a>
+<a href="#1297" id="1297">1297</a>
+<a href="#1298" id="1298">1298</a>
+<a href="#1299" id="1299">1299</a>
+<a href="#1300" id="1300">1300</a>
+<a href="#1301" id="1301">1301</a>
+<a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
+<a href="#1311" id="1311">1311</a>
+<a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
+<a href="#1318" id="1318">1318</a>
+<a href="#1319" id="1319">1319</a>
+<a href="#1320" id="1320">1320</a>
+<a href="#1321" id="1321">1321</a>
+<a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
+<a href="#1331" id="1331">1331</a>
+<a href="#1332" id="1332">1332</a>
+<a href="#1333" id="1333">1333</a>
+<a href="#1334" id="1334">1334</a>
+<a href="#1335" id="1335">1335</a>
+<a href="#1336" id="1336">1336</a>
+<a href="#1337" id="1337">1337</a>
+<a href="#1338" id="1338">1338</a>
+<a href="#1339" id="1339">1339</a>
+<a href="#1340" id="1340">1340</a>
+<a href="#1341" id="1341">1341</a>
+<a href="#1342" id="1342">1342</a>
+<a href="#1343" id="1343">1343</a>
+<a href="#1344" id="1344">1344</a>
+<a href="#1345" id="1345">1345</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
@@ -1299,6 +1350,7 @@
 <span class="kw">use </span>std::ops::{Deref, DerefMut, Not};
 <span class="kw">use </span>std::panic::{AssertUnwindSafe, UnwindSafe};
 <span class="kw">use </span>std::path::Path;
+<span class="kw">use </span>std::process::Command;
 <span class="kw">use </span>std::string::ToString;
 <span class="kw">use </span>std::sync::{MutexGuard, OnceLock};
 
@@ -1312,7 +1364,7 @@
 <span class="kw">use </span>kludgine::app::winit::keyboard::{Key, NamedKey};
 <span class="kw">use </span>kludgine::app::winit::window;
 <span class="kw">use </span>kludgine::app::WindowBehavior <span class="kw">as _</span>;
-<span class="kw">use </span>kludgine::cosmic_text::FamilyOwned;
+<span class="kw">use </span>kludgine::cosmic_text::{Family, FamilyOwned};
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoSigned, IntoUnsigned, Point, Ranged, Rect, ScreenScale, Size};
 <span class="kw">use </span>kludgine::render::Drawing;
@@ -1828,34 +1880,53 @@
         <span class="kw">let </span>theme = settings.theme.take().expect(<span class="string">&quot;theme always present&quot;</span>);
 
         <span class="kw">let </span>fontdb = graphics.font_system().db_mut();
+
         <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) =
             Graphics::inner_find_available_font_family(fontdb, <span class="kw-2">&amp;</span>settings.serif_font_family)
+                .or_else(|| default_family(Family::Serif))
         {
             fontdb.set_serif_family(name);
         }
+
+        <span class="kw">let </span>bundled_font_name;
+        <span class="attr">#[cfg(feature = <span class="string">&quot;roboto-flex&quot;</span>)]
+        </span>{
+            fontdb.load_font_data(<span class="macro">include_bytes!</span>(<span class="string">&quot;../assets/RobotoFlex.ttf&quot;</span>).to_vec());
+            bundled_font_name = <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Roboto Flex&quot;</span>));
+        }
+        <span class="attr">#[cfg(not(feature = <span class="string">&quot;roboto-flex&quot;</span>))]
+        </span>{
+            bundled_font_name = <span class="prelude-val">None</span>;
+        }
+
         <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) =
             Graphics::inner_find_available_font_family(fontdb, <span class="kw-2">&amp;</span>settings.sans_serif_font_family)
+                .or_else(|| {
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = bundled_font_name {
+                        <span class="prelude-val">Some</span>(FamilyOwned::Name(name))
+                    } <span class="kw">else </span>{
+                        default_family(Family::SansSerif)
+                    }
+                })
         {
             fontdb.set_sans_serif_family(name);
-        } <span class="kw">else </span>{
-            <span class="attr">#[cfg(feature = <span class="string">&quot;roboto-flex&quot;</span>)]
-            </span>{
-                fontdb.load_font_data(<span class="macro">include_bytes!</span>(<span class="string">&quot;../assets/RobotoFlex.ttf&quot;</span>).to_vec());
-                fontdb.set_sans_serif_family(<span class="string">&quot;Roboto Flex&quot;</span>);
-            }
         }
+
         <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) =
             Graphics::inner_find_available_font_family(fontdb, <span class="kw-2">&amp;</span>settings.fantasy_font_family)
+                .or_else(|| default_family(Family::Fantasy))
         {
             fontdb.set_fantasy_family(name);
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) =
             Graphics::inner_find_available_font_family(fontdb, <span class="kw-2">&amp;</span>settings.monospace_font_family)
+                .or_else(|| default_family(Family::Monospace))
         {
             fontdb.set_monospace_family(name);
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) =
             Graphics::inner_find_available_font_family(fontdb, <span class="kw-2">&amp;</span>settings.cursive_font_family)
+                .or_else(|| default_family(Family::Cursive))
         {
             fontdb.set_cursive_family(name);
         }
@@ -2585,5 +2656,36 @@
 <span class="kw">impl </span>Ranged <span class="kw">for </span>ThemeMode {
     <span class="kw">const </span>MAX: <span class="self">Self </span>= <span class="self">Self</span>::Dark;
     <span class="kw">const </span>MIN: <span class="self">Self </span>= <span class="self">Self</span>::Light;
+}
+
+<span class="attr">#[cfg(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;windows&quot;</span>))]
+</span><span class="kw">fn </span>default_family(query: Family&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;FamilyOwned&gt; {
+    <span class="comment">// fontdb uses system APIs to determine these defaults.
+    </span><span class="prelude-val">None
+</span>}
+
+<span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;windows&quot;</span>)))]
+</span><span class="kw">fn </span>default_family(query: Family&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;FamilyOwned&gt; {
+    <span class="comment">// fontdb does not yet support configuring itself automatically. We will try
+    // to use `fc-match` to query font config. Once this is supported, we can
+    // remove this functionality.
+    // &lt;https://github.com/RazrFalcon/fontdb/issues/24&gt;
+    </span><span class="kw">let </span>query = <span class="kw">match </span>query {
+        Family::Serif =&gt; <span class="string">&quot;serif&quot;</span>,
+        Family::SansSerif =&gt; <span class="string">&quot;sans&quot;</span>,
+        Family::Cursive =&gt; <span class="string">&quot;cursive&quot;</span>,
+        Family::Fantasy =&gt; <span class="string">&quot;fantasy&quot;</span>,
+        Family::Monospace =&gt; <span class="string">&quot;monospace&quot;</span>,
+        Family::Name(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
+    };
+
+    Command::new(<span class="string">&quot;fc-match&quot;</span>)
+        .arg(<span class="string">&quot;-f&quot;</span>)
+        .arg(<span class="string">&quot;%{family}&quot;</span>)
+        .arg(query)
+        .output()
+        .ok()
+        .and_then(|output| String::from_utf8(output.stdout).ok())
+        .map(FamilyOwned::Name)
 }
 </code></pre></div></section></main></body></html>

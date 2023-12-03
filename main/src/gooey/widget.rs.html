@@ -1870,8 +1870,8 @@
     TextSize7, TextSize8,
 };
 <span class="kw">use </span><span class="kw">crate</span>::styles::{
-    ComponentDefinition, ContainerLevel, Dimension, DimensionRange, DynamicComponent, Edges,
-    IntoComponentValue, Styles, ThemePair, VisualOrder,
+    ComponentDefinition, ContainerLevel, Dimension, DimensionRange, Edges, IntoComponentValue,
+    IntoDynamicComponentValue, Styles, ThemePair, VisualOrder,
 };
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
@@ -2552,7 +2552,7 @@
     </span><span class="kw">fn </span>with_dynamic&lt;C: ComponentDefinition&gt;(
         <span class="self">self</span>,
         name: <span class="kw-2">&amp;</span>C,
-        dynamic: <span class="kw">impl </span>Into&lt;DynamicComponent&gt;,
+        dynamic: <span class="kw">impl </span>IntoDynamicComponentValue,
     ) -&gt; Style
     <span class="kw">where
         </span>Value&lt;C::ComponentType&gt;: IntoComponentValue,

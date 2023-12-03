@@ -570,6 +570,19 @@
 <a href="#570" id="570">570</a>
 <a href="#571" id="571">571</a>
 <a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A clickable, labeled button
 </span><span class="kw">use </span>std::panic::UnwindSafe;
 <span class="kw">use </span>std::time::Duration;
@@ -604,6 +617,7 @@
     </span><span class="kw">pub </span>on_click: <span class="prelude-ty">Option</span>&lt;Callback&lt;()&gt;&gt;,
     <span class="doccomment">/// The kind of button to draw.
     </span><span class="kw">pub </span>kind: Value&lt;ButtonKind&gt;,
+    focusable: bool,
     buttons_pressed: usize,
     cached_state: CacheState,
     active_colors: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;ButtonColors&gt;&gt;,
@@ -712,6 +726,7 @@
             active_colors: <span class="prelude-val">None</span>,
             kind: Value::Constant(ButtonKind::default()),
             color_animation: AnimationHandle::default(),
+            focusable: <span class="bool-val">true</span>,
         }
     }
 
@@ -731,6 +746,13 @@
         </span>F: FnMut(()) + Send + UnwindSafe + <span class="lifetime">&#39;static</span>,
     {
         <span class="self">self</span>.on_click = <span class="prelude-val">Some</span>(Callback::new(callback));
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Prevents focus being given to this button.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>prevent_focus(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.focusable = <span class="bool-val">false</span>;
         <span class="self">self
     </span>}
 
@@ -762,7 +784,9 @@
     ) -&gt; ButtonColors {
         <span class="kw">match </span>visual_state {
             VisualState::Normal =&gt; ButtonColors {
-                background: Color::CLEAR_BLACK,
+                background: context
+                    .try_get(<span class="kw-2">&amp;</span>ButtonBackground)
+                    .unwrap_or(Color::CLEAR_BLACK),
                 foreground: context.get(<span class="kw-2">&amp;</span>TextColor),
                 outline: context.get(<span class="kw-2">&amp;</span>ButtonOutline),
             },
@@ -777,7 +801,9 @@
                 outline: context.get(<span class="kw-2">&amp;</span>ButtonActiveOutline),
             },
             VisualState::Disabled =&gt; ButtonColors {
-                background: Color::CLEAR_BLACK,
+                background: context
+                    .try_get(<span class="kw-2">&amp;</span>ButtonDisabledBackground)
+                    .unwrap_or(Color::CLEAR_BLACK),
                 foreground: context.theme().surface.on_color_variant,
                 outline: context.get(<span class="kw-2">&amp;</span>ButtonDisabledOutline),
             },
@@ -963,7 +989,7 @@
     </span>}
 
     <span class="kw">fn </span>accept_focus(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
-        context.enabled() &amp;&amp; context.get(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
+        <span class="self">self</span>.focusable &amp;&amp; context.enabled() &amp;&amp; context.get(<span class="kw-2">&amp;</span>AutoFocusableControls).is_all()
     }
 
     <span class="kw">fn </span>mouse_down(
@@ -1009,7 +1035,7 @@
         <span class="kw">if </span><span class="self">self</span>.buttons_pressed == <span class="number">0 </span>{
             context.deactivate();
 
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(location) = location {
+            <span class="kw">if let </span>(<span class="bool-val">true</span>, <span class="prelude-val">Some</span>(location)) = (<span class="self">self</span>.focusable, location) {
                 <span class="kw">if </span>Rect::from(context.last_layout().expect(<span class="string">&quot;must have been rendered&quot;</span>).size)
                     .contains(location)
                 {

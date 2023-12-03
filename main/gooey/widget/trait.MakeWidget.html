@@ -15,7 +15,7 @@
 <span class="item-spacer"></span>    fn <a href="#method.with_dynamic" class="fn">with_dynamic</a>&lt;C: <a class="trait" href="../styles/trait.ComponentDefinition.html" title="trait gooey::styles::ComponentDefinition">ComponentDefinition</a>&gt;(
         self,
         name: <a class="primitive" href="https://doc.rust-lang.org/1.74.0/std/primitive.reference.html">&amp;C</a>,
-        dynamic: impl <a class="trait" href="https://doc.rust-lang.org/1.74.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="../styles/struct.DynamicComponent.html" title="struct gooey::styles::DynamicComponent">DynamicComponent</a>&gt;
+        dynamic: impl <a class="trait" href="../styles/trait.IntoDynamicComponentValue.html" title="trait gooey::styles::IntoDynamicComponentValue">IntoDynamicComponentValue</a>
     ) -&gt; <a class="struct" href="../widgets/struct.Style.html" title="struct gooey::widgets::Style">Style</a>
        <span class="where">where <a class="enum" href="../value/enum.Value.html" title="enum gooey::value::Value">Value</a>&lt;C::<a class="associatedtype" href="../styles/trait.ComponentDefinition.html#associatedtype.ComponentType" title="type gooey::styles::ComponentDefinition::ComponentType">ComponentType</a>&gt;: <a class="trait" href="../styles/trait.IntoComponentValue.html" title="trait gooey::styles::IntoComponentValue">IntoComponentValue</a></span> { ... }
 <span class="item-spacer"></span>    fn <a href="#method.h1" class="fn">h1</a>(self) -&gt; <a class="struct" href="../widgets/struct.Style.html" title="struct gooey::widgets::Style">Style</a> { ... }
@@ -92,7 +92,7 @@
 </div></details><details class="toggle method-toggle" open><summary><section id="method.with_dynamic" class="method"><a class="src rightside" href="../../src/gooey/widget.rs.html#712-721">source</a><h4 class="code-header">fn <a href="#method.with_dynamic" class="fn">with_dynamic</a>&lt;C: <a class="trait" href="../styles/trait.ComponentDefinition.html" title="trait gooey::styles::ComponentDefinition">ComponentDefinition</a>&gt;(
     self,
     name: <a class="primitive" href="https://doc.rust-lang.org/1.74.0/std/primitive.reference.html">&amp;C</a>,
-    dynamic: impl <a class="trait" href="https://doc.rust-lang.org/1.74.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="../styles/struct.DynamicComponent.html" title="struct gooey::styles::DynamicComponent">DynamicComponent</a>&gt;
+    dynamic: impl <a class="trait" href="../styles/trait.IntoDynamicComponentValue.html" title="trait gooey::styles::IntoDynamicComponentValue">IntoDynamicComponentValue</a>
 ) -&gt; <a class="struct" href="../widgets/struct.Style.html" title="struct gooey::widgets::Style">Style</a><span class="where fmt-newline">where
     <a class="enum" href="../value/enum.Value.html" title="enum gooey::value::Value">Value</a>&lt;C::<a class="associatedtype" href="../styles/trait.ComponentDefinition.html#associatedtype.ComponentType" title="type gooey::styles::ComponentDefinition::ComponentType">ComponentType</a>&gt;: <a class="trait" href="../styles/trait.IntoComponentValue.html" title="trait gooey::styles::IntoComponentValue">IntoComponentValue</a>,</span></h4></section></summary><div class="docblock"><p>Associates a style component with <code>self</code>, resolving its value using
 <code>dynamic</code> at runtime.</p>

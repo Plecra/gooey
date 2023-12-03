@@ -199,7 +199,7 @@
     LineHeight8, TextSize, TextSize1, TextSize2, TextSize3, TextSize4, TextSize5, TextSize6,
     TextSize7, TextSize8,
 };
-<span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, DynamicComponent, IntoComponentValue, Styles};
+<span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, IntoComponentValue, IntoDynamicComponentValue, Styles};
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrapperWidget};
 
@@ -249,7 +249,7 @@
     </span><span class="kw">pub fn </span>with_dynamic&lt;C: ComponentDefinition&gt;(
         <span class="kw-2">mut </span><span class="self">self</span>,
         name: <span class="kw-2">&amp;</span>C,
-        dynamic: <span class="kw">impl </span>Into&lt;DynamicComponent&gt;,
+        dynamic: <span class="kw">impl </span>IntoDynamicComponentValue,
     ) -&gt; Style
     <span class="kw">where
         </span>Value&lt;C::ComponentType&gt;: IntoComponentValue,
