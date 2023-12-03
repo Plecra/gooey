@@ -1480,6 +1480,8 @@
 <a href="#1480" id="1480">1480</a>
 <a href="#1481" id="1481">1481</a>
 <a href="#1482" id="1482">1482</a>
+<a href="#1483" id="1483">1483</a>
+<a href="#1484" id="1484">1484</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A text input widget.
 
 </span><span class="kw">use </span>std::borrow::{Borrow, BorrowMut, Cow};
@@ -2417,6 +2419,8 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
         f.debug_struct(<span class="string">&quot;Input&quot;</span>)
             .field(<span class="string">&quot;text&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value)
+            .field(<span class="string">&quot;mask_symbol&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mask_symbol)
+            .field(<span class="string">&quot;placeholder&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.placeholder)
             .finish_non_exhaustive()
     }
 }

@@ -902,6 +902,14 @@
 <a href="#902" id="902">902</a>
 <a href="#903" id="903">903</a>
 <a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that allows a user to &quot;slide&quot; between values.
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::mem;
@@ -1631,6 +1639,14 @@
         <span class="comment">// @ecton: Unlike scroll alreas cascasing, I feel like scrolling while
         // using a mouse wheel as an input is annoying.
         </span>HANDLED
+    }
+
+    <span class="kw">fn </span>summarize(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        fmt.debug_struct(<span class="string">&quot;Slider&quot;</span>)
+            .field(<span class="string">&quot;value&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value)
+            .field(<span class="string">&quot;min&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.minimum)
+            .field(<span class="string">&quot;max&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.maximum)
+            .finish()
     }
 }
 
