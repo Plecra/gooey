@@ -2447,6 +2447,16 @@
 <a href="#2447" id="2447">2447</a>
 <a href="#2448" id="2448">2448</a>
 <a href="#2449" id="2449">2449</a>
+<a href="#2450" id="2450">2450</a>
+<a href="#2451" id="2451">2451</a>
+<a href="#2452" id="2452">2452</a>
+<a href="#2453" id="2453">2453</a>
+<a href="#2454" id="2454">2454</a>
+<a href="#2455" id="2455">2455</a>
+<a href="#2456" id="2456">2456</a>
+<a href="#2457" id="2457">2457</a>
+<a href="#2458" id="2458">2458</a>
+<a href="#2459" id="2459">2459</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -4488,7 +4498,7 @@
 }
 
 <span class="doccomment">/// A builder of [`ColorScheme`]s.
-</span><span class="attr">#[derive(Clone, Copy, Debug)]
+</span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq)]
 </span><span class="kw">pub struct </span>ColorSchemeBuilder {
     <span class="doccomment">/// The primary color of the scheme.
     </span><span class="kw">pub </span>primary: ColorSource,
@@ -4583,7 +4593,17 @@
     /// 33% of the primary saturation will be picked.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>tertiary(<span class="kw-2">mut </span><span class="self">self</span>, tertiary: <span class="kw">impl </span>ProtoColor) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.secondary = <span class="prelude-val">Some</span>(tertiary.into_source(<span class="self">self</span>.primary.saturation / <span class="number">3.</span>));
+        <span class="self">self</span>.tertiary = <span class="prelude-val">Some</span>(tertiary.into_source(<span class="self">self</span>.primary.saturation / <span class="number">3.</span>));
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Sets the error color and returns self.
+    ///
+    /// If `error` doesn&#39;t specify a saturation, the primary color&#39;s saturation
+    /// will be used.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>error(<span class="kw-2">mut </span><span class="self">self</span>, error: <span class="kw">impl </span>ProtoColor) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.error = <span class="prelude-val">Some</span>(error.into_source(<span class="self">self</span>.primary.saturation));
         <span class="self">self
     </span>}
 

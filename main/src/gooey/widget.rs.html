@@ -1837,6 +1837,7 @@
 <a href="#1837" id="1837">1837</a>
 <a href="#1838" id="1838">1838</a>
 <a href="#1839" id="1839">1839</a>
+<a href="#1840" id="1840">1840</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1856,6 +1857,7 @@
 <span class="kw">use </span>kludgine::figures::{IntoSigned, IntoUnsigned, Point, Rect, Size};
 <span class="kw">use </span>kludgine::Color;
 
+<span class="kw">use </span><span class="kw">crate</span>::app::Gooey;
 <span class="kw">use </span><span class="kw">crate</span>::context::sealed::WindowHandle;
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
@@ -2519,8 +2521,8 @@
     </span><span class="kw">fn </span>make_widget(<span class="self">self</span>) -&gt; WidgetInstance;
 
     <span class="doccomment">/// Returns a new window containing `self` as the root widget.
-    </span><span class="kw">fn </span>into_window(<span class="self">self</span>) -&gt; Window&lt;WidgetInstance&gt; {
-        Window::new(<span class="self">self</span>.make_widget())
+    </span><span class="kw">fn </span>into_window(<span class="self">self</span>, gooey: Gooey) -&gt; Window&lt;WidgetInstance&gt; {
+        Window::new(<span class="self">self</span>.make_widget(), gooey.clone())
     }
 
     <span class="doccomment">/// Associates `styles` with this widget.
@@ -3128,7 +3130,7 @@
 
     <span class="doccomment">/// Runs this widget instance as an application.
     </span><span class="kw">pub fn </span>run(<span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result {
-        Window::&lt;WidgetInstance&gt;::new(<span class="self">self</span>).run()
+        Window::&lt;WidgetInstance&gt;::new(<span class="self">self</span>, Gooey::default()).run()
     }
 
     <span class="doccomment">/// Returns the id of the widget that should receive focus after this

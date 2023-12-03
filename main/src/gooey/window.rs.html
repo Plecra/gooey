@@ -1300,7 +1300,7 @@
 <span class="kw">use </span>std::panic::{AssertUnwindSafe, UnwindSafe};
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::string::ToString;
-<span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard, OnceLock};
+<span class="kw">use </span>std::sync::{MutexGuard, OnceLock};
 
 <span class="kw">use </span>ahash::AHashMap;
 <span class="kw">use </span>alot::LotId;
@@ -1321,6 +1321,7 @@
 <span class="kw">use </span>tracing::Level;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::{LinearInterpolate, PercentBetween, ZeroToOne};
+<span class="kw">use </span><span class="kw">crate</span>::app::Gooey;
 <span class="kw">use </span><span class="kw">crate</span>::context::{
     AsEventContext, EventContext, Exclusive, GraphicsContext, InvalidationStatus, LayoutContext,
     WidgetContext,
@@ -1328,7 +1329,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Edges, FontFamilyList, ThemePair};
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
-<span class="kw">use </span><span class="kw">crate</span>::utils::{IgnorePoison, ModifiersExt};
+<span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, DynamicReader, IntoDynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{
     EventHandling, ManagedWidget, RootBehavior, Widget, WidgetId, WidgetInstance, HANDLED, IGNORED,
@@ -1339,7 +1340,7 @@
 <span class="doccomment">/// A currently running Gooey window.
 </span><span class="kw">pub struct </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; {
     window: kludgine::app::Window&lt;<span class="lifetime">&#39;window</span>, WindowCommand&gt;,
-    clipboard: <span class="prelude-ty">Option</span>&lt;Arc&lt;Mutex&lt;Clipboard&gt;&gt;&gt;,
+    gooey: Gooey,
     focused: Dynamic&lt;bool&gt;,
     occluded: Dynamic&lt;bool&gt;,
 }
@@ -1347,13 +1348,13 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;window</span>&gt; RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
         window: kludgine::app::Window&lt;<span class="lifetime">&#39;window</span>, WindowCommand&gt;,
-        clipboard: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Arc&lt;Mutex&lt;Clipboard&gt;&gt;&gt;,
+        gooey: <span class="kw-2">&amp;</span>Gooey,
         focused: <span class="kw-2">&amp;</span>Dynamic&lt;bool&gt;,
         occluded: <span class="kw-2">&amp;</span>Dynamic&lt;bool&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             window,
-            clipboard: clipboard.clone(),
+            gooey: gooey.clone(),
             focused: focused.clone(),
             occluded: occluded.clone(),
         }
@@ -1376,10 +1377,8 @@
     <span class="doccomment">/// Returns a locked mutex guard to the OS&#39;s clipboard, if one was able to be
     /// initialized when the window opened.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>clipboard_guard(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;MutexGuard&lt;<span class="lifetime">&#39;_</span>, Clipboard&gt;&gt; {
-        <span class="self">self</span>.clipboard
-            .as_ref()
-            .map(|mutex| mutex.lock().ignore_poison())
+    </span><span class="kw">pub fn </span>clipboard_guard(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;MutexGuard&lt;<span class="lifetime">&#39;_</span>, Clipboard&gt;&gt; {
+        <span class="self">self</span>.gooey.clipboard_guard()
     }
 }
 
@@ -1407,6 +1406,7 @@
     </span>Behavior: WindowBehavior,
 {
     context: Behavior::Context,
+    gooey: Gooey,
     <span class="doccomment">/// The attributes of this window.
     </span><span class="kw">pub </span>attributes: WindowAttributes,
     <span class="doccomment">/// The colors to use to theme the user interface.
@@ -1442,7 +1442,7 @@
 {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>context = Behavior::Context::default();
-        <span class="self">Self</span>::new(context)
+        <span class="self">Self</span>::new(context, Gooey::default())
     }
 }
 
@@ -1452,7 +1452,7 @@
     </span><span class="kw">where
         </span>W: Widget,
     {
-        <span class="self">Self</span>::new(WidgetInstance::new(widget))
+        <span class="self">Self</span>::new(WidgetInstance::new(widget), Gooey::default())
     }
 
     <span class="doccomment">/// Sets `focused` to be the dynamic updated when this window&#39;s focus status
@@ -1516,7 +1516,7 @@
 {
     <span class="doccomment">/// Returns a new instance using `context` to initialize the window upon
     /// opening.
-    </span><span class="kw">pub fn </span>new(context: Behavior::Context) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(context: Behavior::Context, gooey: Gooey) -&gt; <span class="self">Self </span>{
         <span class="kw">static </span>EXECUTABLE_NAME: OnceLock&lt;String&gt; = OnceLock::new();
 
         <span class="kw">let </span>title = EXECUTABLE_NAME
@@ -1537,6 +1537,7 @@
                 title,
                 ..WindowAttributes::default()
             },
+            gooey,
             context,
             load_system_fonts: <span class="bool-val">true</span>,
             theme: Value::default(),
@@ -1561,6 +1562,7 @@
         GooeyWindow::&lt;Behavior&gt;::run_with(AssertUnwindSafe(sealed::Context {
             user: <span class="self">self</span>.context,
             settings: RefCell::new(sealed::WindowSettings {
+                gooey: <span class="self">self</span>.gooey,
                 transparent: <span class="self">self</span>.attributes.transparent,
                 attributes: <span class="prelude-val">Some</span>(<span class="self">self</span>.attributes),
                 occluded: <span class="self">self</span>.occluded,
@@ -1607,7 +1609,7 @@
 
     <span class="doccomment">/// Runs this behavior as an application, initialized with `context`.
     </span><span class="kw">fn </span>run_with(context: <span class="self">Self</span>::Context) -&gt; <span class="kw">crate</span>::Result {
-        Window::&lt;<span class="self">Self</span>&gt;::new(context).run()
+        Window::&lt;<span class="self">Self</span>&gt;::new(context, Gooey::default()).run()
     }
 }
 
@@ -1629,7 +1631,7 @@
     current_theme: ThemePair,
     theme_mode: Value&lt;ThemeMode&gt;,
     transparent: bool,
-    clipboard: <span class="prelude-ty">Option</span>&lt;Arc&lt;Mutex&lt;Clipboard&gt;&gt;&gt;,
+    gooey: Gooey,
 }
 
 <span class="kw">impl</span>&lt;T&gt; GooeyWindow&lt;T&gt;
@@ -1820,6 +1822,7 @@
         AssertUnwindSafe(context): <span class="self">Self</span>::Context,
     ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>settings = context.settings.borrow_mut();
+        <span class="kw">let </span>gooey = settings.gooey.clone();
         <span class="kw">let </span>occluded = settings.occluded.take().unwrap_or_default();
         <span class="kw">let </span>focused = settings.focused.take().unwrap_or_default();
         <span class="kw">let </span>theme = settings.theme.take().expect(<span class="string">&quot;theme always present&quot;</span>);
@@ -1857,10 +1860,6 @@
             fontdb.set_cursive_family(name);
         }
 
-        <span class="kw">let </span>clipboard = Clipboard::new()
-            .ok()
-            .map(|clipboard| Arc::new(Mutex::new(clipboard)));
-
         <span class="kw">let </span>theme_mode = <span class="kw">match </span>settings.theme_mode.take() {
             <span class="prelude-val">Some</span>(Value::Dynamic(dynamic)) =&gt; {
                 dynamic.set(window.theme().into());
@@ -1871,7 +1870,7 @@
         };
         <span class="kw">let </span>transparent = settings.transparent;
         <span class="kw">let </span><span class="kw-2">mut </span>behavior = T::initialize(
-            <span class="kw-2">&amp;mut </span>RunningWindow::new(window, <span class="kw-2">&amp;</span>clipboard, <span class="kw-2">&amp;</span>focused, <span class="kw-2">&amp;</span>occluded),
+            <span class="kw-2">&amp;mut </span>RunningWindow::new(window, <span class="kw-2">&amp;</span>gooey, <span class="kw-2">&amp;</span>focused, <span class="kw-2">&amp;</span>occluded),
             context.user,
         );
         <span class="kw">let </span>root = Tree::default().push_boxed(behavior.make_root(), <span class="prelude-val">None</span>);
@@ -1902,7 +1901,7 @@
             theme,
             theme_mode,
             transparent,
-            clipboard,
+            gooey,
         }
     }
 
@@ -1927,7 +1926,7 @@
             .new_frame(<span class="self">self</span>.redraw_status.invalidations().drain());
 
         <span class="kw">let </span>resizable = window.winit().is_resizable();
-        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.clipboard, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.gooey, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span>root_mode = <span class="self">self</span>.constrain_window_resizing(resizable, <span class="kw-2">&amp;mut </span>window, graphics);
 
         <span class="kw">let </span>graphics = <span class="self">self</span>.contents.new_frame(graphics);
@@ -2048,7 +2047,7 @@
         <span class="self">Self</span>::request_close(
             <span class="kw-2">&amp;mut </span><span class="self">self</span>.should_close,
             <span class="kw-2">&amp;mut </span><span class="self">self</span>.behavior,
-            <span class="kw-2">&amp;mut </span>RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.clipboard, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded),
+            <span class="kw-2">&amp;mut </span>RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.gooey, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded),
         )
     }
 
@@ -2112,7 +2111,7 @@
         <span class="kw">let </span><span class="prelude-val">Some</span>(target) = <span class="self">self</span>.root.tree.widget_from_node(target) <span class="kw">else </span>{
             <span class="kw">return</span>;
         };
-        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.clipboard, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.gooey, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span><span class="kw-2">mut </span>target = EventContext::new(
             WidgetContext::new(
                 target,
@@ -2222,7 +2221,7 @@
                     .expect(<span class="string">&quot;missing widget&quot;</span>)
             });
 
-        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.clipboard, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.gooey, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span><span class="kw-2">mut </span>widget = EventContext::new(
             WidgetContext::new(
                 widget,
@@ -2258,7 +2257,7 @@
                     .widget(<span class="self">self</span>.root.id())
                     .expect(<span class="string">&quot;missing widget&quot;</span>)
             });
-        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.clipboard, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.gooey, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span><span class="kw-2">mut </span>target = EventContext::new(
             WidgetContext::new(
                 widget,
@@ -2285,7 +2284,7 @@
         <span class="kw">let </span>location = Point::&lt;Px&gt;::from(position);
         <span class="self">self</span>.cursor.location = <span class="prelude-val">Some</span>(location);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.clipboard, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.gooey, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
 
         EventContext::new(
             WidgetContext::new(
@@ -2332,8 +2331,7 @@
         _device_id: DeviceId,
     ) {
         <span class="kw">if </span><span class="self">self</span>.cursor.widget.take().is_some() {
-            <span class="kw">let </span><span class="kw-2">mut </span>window =
-                RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.clipboard, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
+            <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.gooey, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
             <span class="kw">let </span><span class="kw-2">mut </span>context = EventContext::new(
                 WidgetContext::new(
                     <span class="self">self</span>.root.clone(),
@@ -2357,7 +2355,7 @@
         state: ElementState,
         button: MouseButton,
     ) {
-        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.clipboard, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
+        <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.gooey, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">match </span>state {
             ElementState::Pressed =&gt; {
                 EventContext::new(
@@ -2492,6 +2490,7 @@
     <span class="kw">use </span><span class="kw">crate</span>::styles::{FontFamilyList, ThemePair};
     <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, Value};
     <span class="kw">use </span><span class="kw">crate</span>::window::{ThemeMode, WindowAttributes};
+    <span class="kw">use </span><span class="kw">crate</span>::Gooey;
 
     <span class="kw">pub struct </span>Context&lt;C&gt; {
         <span class="kw">pub </span>user: C,
@@ -2499,6 +2498,7 @@
     }
 
     <span class="kw">pub struct </span>WindowSettings {
+        <span class="kw">pub </span>gooey: Gooey,
         <span class="kw">pub </span>attributes: <span class="prelude-ty">Option</span>&lt;WindowAttributes&gt;,
         <span class="kw">pub </span>occluded: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;bool&gt;&gt;,
         <span class="kw">pub </span>focused: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;bool&gt;&gt;,
