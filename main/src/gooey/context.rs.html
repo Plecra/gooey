@@ -1408,6 +1408,19 @@
 <a href="#1408" id="1408">1408</a>
 <a href="#1409" id="1409">1409</a>
 <a href="#1410" id="1410">1410</a>
+<a href="#1411" id="1411">1411</a>
+<a href="#1412" id="1412">1412</a>
+<a href="#1413" id="1413">1413</a>
+<a href="#1414" id="1414">1414</a>
+<a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
+<a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
+<a href="#1419" id="1419">1419</a>
+<a href="#1420" id="1420">1420</a>
+<a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
@@ -1433,7 +1446,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, Styles, Theme, ThemePair};
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{EventHandling, ManagedWidget, WidgetId, WidgetInstance, WidgetRef};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{
+    EventHandling, ManagedWidget, RootBehavior, WidgetId, WidgetInstance, WidgetRef,
+};
 <span class="kw">use </span><span class="kw">crate</span>::window::{CursorState, RunningWindow, ThemeMode};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -1870,6 +1885,17 @@
         <span class="comment">// It is important to set focus-is_advancing after `focus()` because it
         // sets it to `true` explicitly.
         </span><span class="self">self</span>.pending_state.focus_is_advancing = advance;
+    }
+
+    <span class="doccomment">/// Invokes
+    /// [`Widget::root_behavior()`](crate::widget::Widget::root_behavior) on
+    /// this context&#39;s widget and returns the result.
+    </span><span class="kw">pub fn </span>root_behavior(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(RootBehavior, WidgetInstance)&gt; {
+        <span class="self">self</span>.current_node
+            .clone()
+            .lock()
+            .as_widget()
+            .root_behavior(<span class="self">self</span>)
     }
 }
 

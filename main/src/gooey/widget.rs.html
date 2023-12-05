@@ -1838,6 +1838,31 @@
 <a href="#1838" id="1838">1838</a>
 <a href="#1839" id="1839">1839</a>
 <a href="#1840" id="1840">1840</a>
+<a href="#1841" id="1841">1841</a>
+<a href="#1842" id="1842">1842</a>
+<a href="#1843" id="1843">1843</a>
+<a href="#1844" id="1844">1844</a>
+<a href="#1845" id="1845">1845</a>
+<a href="#1846" id="1846">1846</a>
+<a href="#1847" id="1847">1847</a>
+<a href="#1848" id="1848">1848</a>
+<a href="#1849" id="1849">1849</a>
+<a href="#1850" id="1850">1850</a>
+<a href="#1851" id="1851">1851</a>
+<a href="#1852" id="1852">1852</a>
+<a href="#1853" id="1853">1853</a>
+<a href="#1854" id="1854">1854</a>
+<a href="#1855" id="1855">1855</a>
+<a href="#1856" id="1856">1856</a>
+<a href="#1857" id="1857">1857</a>
+<a href="#1858" id="1858">1858</a>
+<a href="#1859" id="1859">1859</a>
+<a href="#1860" id="1860">1860</a>
+<a href="#1861" id="1861">1861</a>
+<a href="#1862" id="1862">1862</a>
+<a href="#1863" id="1863">1863</a>
+<a href="#1864" id="1864">1864</a>
+<a href="#1865" id="1865">1865</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1845,6 +1870,7 @@
 <span class="kw">use </span>std::fmt::{<span class="self">self</span>, Debug};
 <span class="kw">use </span>std::ops::{ControlFlow, Deref, DerefMut};
 <span class="kw">use </span>std::panic::UnwindSafe;
+<span class="kw">use </span>std::slice;
 <span class="kw">use </span>std::sync::atomic::{<span class="self">self</span>, AtomicU64};
 <span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard};
 
@@ -1878,8 +1904,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoDynamic, IntoValue, Validation, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::checkbox::{Checkable, CheckboxState};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{
-    Align, Button, Checkbox, Collapse, Container, Expand, Resize, Scroll, Space, Stack, Style,
-    Themed, ThemedMode, Validated,
+    Align, Button, Checkbox, Collapse, Container, Expand, Layers, Resize, Scroll, Space, Stack,
+    Style, Themed, ThemedMode, Validated,
 };
 <span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, ThemeMode, Window, WindowBehavior};
 <span class="kw">use crate</span>::{ConstraintLimit, Run};
@@ -2062,7 +2088,7 @@
     </span><span class="kw">fn </span>root_behavior(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;(RootBehavior, <span class="kw-2">&amp;</span>WidgetInstance)&gt; {
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;(RootBehavior, WidgetInstance)&gt; {
         <span class="prelude-val">None
     </span>}
 }
@@ -2371,8 +2397,9 @@
     <span class="kw">fn </span>root_behavior(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;(RootBehavior, <span class="kw-2">&amp;</span>WidgetInstance)&gt; {
-        T::root_behavior(<span class="self">self</span>, context).map(|behavior| (behavior, T::child_mut(<span class="self">self</span>).widget()))
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;(RootBehavior, WidgetInstance)&gt; {
+        T::root_behavior(<span class="self">self</span>, context)
+            .map(|behavior| (behavior, T::child_mut(<span class="self">self</span>).widget().clone()))
     }
 
     <span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
@@ -3515,6 +3542,13 @@
     </span><span class="kw">pub fn </span>into_columns(<span class="self">self</span>) -&gt; Stack {
         Stack::columns(<span class="self">self</span>)
     }
+
+    <span class="doccomment">/// Returns `self` as [`Layers`], with the widgets being stacked in the Z
+    /// direction.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>into_layers(<span class="self">self</span>) -&gt; Layers {
+        Layers::new(<span class="self">self</span>)
+    }
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>Children {
@@ -3534,6 +3568,13 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>into_columns(<span class="self">self</span>) -&gt; Stack {
         Stack::columns(<span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Returns `self` as [`Layers`], with the widgets being stacked in the Z
+    /// direction.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>into_layers(<span class="self">self</span>) -&gt; Layers {
+        Layers::new(<span class="self">self</span>)
     }
 }
 
@@ -3559,6 +3600,15 @@
 <span class="kw">impl </span>DerefMut <span class="kw">for </span>Children {
     <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.ordered
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Children {
+    <span class="kw">type </span>IntoIter = slice::Iter&lt;<span class="lifetime">&#39;a</span>, WidgetInstance&gt;;
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>WidgetInstance;
+
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
+        <span class="self">self</span>.ordered.iter()
     }
 }
 
