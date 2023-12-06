@@ -599,6 +599,24 @@
 <a href="#599" id="599">599</a>
 <a href="#600" id="600">600</a>
 <a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::sync::{Arc, Mutex};
 
@@ -943,6 +961,24 @@
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         data.nodes.get(id).expect(<span class="string">&quot;missing widget&quot;</span>).parent
     }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_child(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>id: LotId, possible_parent: <span class="kw-2">&amp;</span>WidgetInstance) -&gt; bool {
+        <span class="kw">let </span>data = <span class="self">self</span>.data.lock().ignore_poison();
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(node) = data.nodes.get(id) {
+            <span class="kw">if </span><span class="kw-2">&amp;</span>node.widget == possible_parent {
+                <span class="kw">return </span><span class="bool-val">true</span>;
+            }
+
+            <span class="kw">match </span>node.parent {
+                <span class="prelude-val">Some</span>(parent) =&gt; {
+                    id = parent;
+                }
+                <span class="prelude-val">None </span>=&gt; <span class="kw">break</span>,
+            }
+        }
+
+        <span class="bool-val">false
+    </span>}
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>attach_styles(<span class="kw-2">&amp;</span><span class="self">self</span>, id: LotId, styles: Value&lt;Styles&gt;) {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().ignore_poison();
