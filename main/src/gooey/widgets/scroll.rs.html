@@ -325,6 +325,7 @@
 <a href="#325" id="325">325</a>
 <a href="#326" id="326">326</a>
 <a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
 </span><span class="kw">use </span>std::time::Duration;
 
@@ -591,7 +592,8 @@
         context.invalidate_when_changed(<span class="kw-2">&amp;</span><span class="self">self</span>.scroll);
         <span class="kw">let </span><span class="kw-2">mut </span>scroll = <span class="self">self</span>.scroll.lock();
         <span class="kw">let </span>old_scroll = <span class="kw-2">*</span>scroll;
-        <span class="kw">let </span>new_scroll = <span class="self">Self</span>::constrained_scroll(<span class="kw-2">*</span>scroll + amount.cast(), <span class="self">self</span>.max_scroll.get());
+        <span class="kw">let </span>new_scroll =
+            <span class="self">Self</span>::constrained_scroll(<span class="kw-2">*</span>scroll + amount.cast::&lt;Px&gt;(), <span class="self">self</span>.max_scroll.get());
         <span class="kw">if </span>old_scroll == new_scroll {
             IGNORED
         } <span class="kw">else </span>{

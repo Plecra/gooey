@@ -1268,6 +1268,17 @@
 <a href="#1268" id="1268">1268</a>
 <a href="#1269" id="1269">1269</a>
 <a href="#1270" id="1270">1270</a>
+<a href="#1271" id="1271">1271</a>
+<a href="#1272" id="1272">1272</a>
+<a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a>
+<a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating animations.
 //!
 //! Animations in Gooey are performed by transitioning a [`Dynamic`]&#39;s contained
@@ -1319,7 +1330,6 @@
 <span class="kw">use </span>std::time::{Duration, Instant};
 
 <span class="kw">use </span>alot::{LotId, Lots};
-<span class="kw">use </span>derive_more::From;
 <span class="kw">use </span>intentional::Cast;
 <span class="kw">use </span>kempt::Set;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
@@ -2188,8 +2198,8 @@
 ///
 /// This wrapper can be used to add [`LinearInterpolate`] to types that normally
 /// don&#39;t support interpolation.
-</span><span class="attr">#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd, From)]
-</span><span class="kw">pub struct </span>BinaryLerp&lt;T&gt;(T);
+</span><span class="attr">#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
+</span><span class="kw">pub struct </span>BinaryLerp&lt;T&gt;(<span class="kw">pub </span>T);
 
 <span class="kw">impl</span>&lt;T&gt; LinearInterpolate <span class="kw">for </span>BinaryLerp&lt;T&gt;
 <span class="kw">where
@@ -2204,12 +2214,18 @@
     }
 }
 
+<span class="kw">impl</span>&lt;T&gt; From&lt;T&gt; <span class="kw">for </span>BinaryLerp&lt;T&gt; {
+    <span class="kw">fn </span>from(value: T) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(value)
+    }
+}
+
 <span class="doccomment">/// A wrapper that implements [`LinearInterpolate`] such that the target value
 /// is immediately returned as long as percent is &gt; 0.
 ///
 /// This wrapper can be used to add [`LinearInterpolate`] to types that normally
 /// don&#39;t support interpolation.
-</span><span class="attr">#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd, From)]
+</span><span class="attr">#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
 </span><span class="kw">pub struct </span>ImmediateLerp&lt;T&gt;(T);
 
 <span class="kw">impl</span>&lt;T&gt; LinearInterpolate <span class="kw">for </span>ImmediateLerp&lt;T&gt;
@@ -2222,6 +2238,12 @@
         } <span class="kw">else </span>{
             <span class="self">self</span>.clone()
         }
+    }
+}
+
+<span class="kw">impl</span>&lt;T&gt; From&lt;T&gt; <span class="kw">for </span>ImmediateLerp&lt;T&gt; {
+    <span class="kw">fn </span>from(value: T) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(value)
     }
 }
 
