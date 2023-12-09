@@ -1279,6 +1279,12 @@
 <a href="#1279" id="1279">1279</a>
 <a href="#1280" id="1280">1280</a>
 <a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
+<a href="#1283" id="1283">1283</a>
+<a href="#1284" id="1284">1284</a>
+<a href="#1285" id="1285">1285</a>
+<a href="#1286" id="1286">1286</a>
+<a href="#1287" id="1287">1287</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating animations.
 //!
 //! Animations in Gooey are performed by transitioning a [`Dynamic`]&#39;s contained
@@ -1333,7 +1339,7 @@
 <span class="kw">use </span>intentional::Cast;
 <span class="kw">use </span>kempt::Set;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
-<span class="kw">use </span>kludgine::figures::{Ranged, UnscaledUnit};
+<span class="kw">use </span>kludgine::figures::{Ranged, UnscaledUnit, Zero};
 <span class="kw">use </span>kludgine::Color;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::easings::Linear;
@@ -2355,8 +2361,6 @@
 <span class="kw">impl </span>ZeroToOne {
     <span class="doccomment">/// The maximum value this type can contain.
     </span><span class="kw">pub const </span>ONE: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">1.</span>);
-    <span class="doccomment">/// The minimum type this type can contain.
-    </span><span class="kw">pub const </span>ZERO: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">0.</span>);
 
     <span class="doccomment">/// Returns a new instance after clamping `value` between +0.0 and 1.0.
     ///
@@ -2387,6 +2391,14 @@
     </span><span class="kw">pub fn </span>one_minus(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(<span class="number">1. </span>- <span class="self">self</span>.<span class="number">0</span>)
     }
+}
+
+<span class="kw">impl </span>Zero <span class="kw">for </span>ZeroToOne {
+    <span class="kw">const </span>ZERO: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">0.</span>);
+
+    <span class="kw">fn </span>is_zero(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="kw-2">*</span><span class="self">self </span>== <span class="number">0.
+    </span>}
 }
 
 <span class="kw">impl </span>Display <span class="kw">for </span>ZeroToOne {
