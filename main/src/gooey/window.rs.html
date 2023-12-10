@@ -1343,6 +1343,28 @@
 <a href="#1343" id="1343">1343</a>
 <a href="#1344" id="1344">1344</a>
 <a href="#1345" id="1345">1345</a>
+<a href="#1346" id="1346">1346</a>
+<a href="#1347" id="1347">1347</a>
+<a href="#1348" id="1348">1348</a>
+<a href="#1349" id="1349">1349</a>
+<a href="#1350" id="1350">1350</a>
+<a href="#1351" id="1351">1351</a>
+<a href="#1352" id="1352">1352</a>
+<a href="#1353" id="1353">1353</a>
+<a href="#1354" id="1354">1354</a>
+<a href="#1355" id="1355">1355</a>
+<a href="#1356" id="1356">1356</a>
+<a href="#1357" id="1357">1357</a>
+<a href="#1358" id="1358">1358</a>
+<a href="#1359" id="1359">1359</a>
+<a href="#1360" id="1360">1360</a>
+<a href="#1361" id="1361">1361</a>
+<a href="#1362" id="1362">1362</a>
+<a href="#1363" id="1363">1363</a>
+<a href="#1364" id="1364">1364</a>
+<a href="#1365" id="1365">1365</a>
+<a href="#1366" id="1366">1366</a>
+<a href="#1367" id="1367">1367</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
@@ -1378,7 +1400,7 @@
     AsEventContext, EventContext, Exclusive, GraphicsContext, InvalidationStatus, LayoutContext,
     WidgetContext,
 };
-<span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
+<span class="kw">use </span><span class="kw">crate</span>::graphics::{FontState, Graphics};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Edges, FontFamilyList, ThemePair};
 <span class="kw">use </span><span class="kw">crate</span>::tree::Tree;
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
@@ -1481,6 +1503,9 @@
     <span class="doccomment">/// The list of font families to try to find when a [`FamilyOwned::Cursive`]
     /// font is requested.
     </span><span class="kw">pub </span>cursive_font_family: FontFamilyList,
+    <span class="doccomment">/// A list of data buffers that contain font data to ensure are loaded
+    /// during drawing operations.
+    </span><span class="kw">pub </span>font_data_to_load: Vec&lt;Vec&lt;u8&gt;&gt;,
 
     occluded: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;bool&gt;&gt;,
     focused: <span class="prelude-ty">Option</span>&lt;Dynamic&lt;bool&gt;&gt;,
@@ -1560,6 +1585,15 @@
         <span class="self">self</span>.theme = theme.into_value();
         <span class="self">self
     </span>}
+
+    <span class="doccomment">/// Adds `font_data` to the list of fonts to load for availability when
+    /// rendering.
+    ///
+    /// All font families contained in `font_data` will be loaded.
+    </span><span class="kw">pub fn </span>loading_font(<span class="kw-2">mut </span><span class="self">self</span>, font_data: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.font_data_to_load.push(font_data);
+        <span class="self">self
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;Behavior&gt; Window&lt;Behavior&gt;
@@ -1601,6 +1635,10 @@
             fantasy_font_family: FontFamilyList::default(),
             monospace_font_family: FontFamilyList::default(),
             cursive_font_family: FontFamilyList::default(),
+            font_data_to_load: <span class="macro">vec!</span>[
+                <span class="attr">#[cfg(feature = <span class="string">&quot;roboto-flex&quot;</span>)]
+                </span><span class="macro">include_bytes!</span>(<span class="string">&quot;../assets/RobotoFlex.ttf&quot;</span>).to_vec(),
+            ],
         }
     }
 }
@@ -1621,7 +1659,7 @@
                 focused: <span class="self">self</span>.focused,
                 theme: <span class="prelude-val">Some</span>(<span class="self">self</span>.theme),
                 theme_mode: <span class="self">self</span>.theme_mode,
-                load_system_fonts: <span class="self">self</span>.load_system_fonts,
+                font_data_to_load: <span class="self">self</span>.font_data_to_load,
                 serif_font_family: <span class="self">self</span>.serif_font_family,
                 sans_serif_font_family: <span class="self">self</span>.sans_serif_font_family,
                 fantasy_font_family: <span class="self">self</span>.fantasy_font_family,
@@ -1683,6 +1721,7 @@
     current_theme: ThemePair,
     theme_mode: Value&lt;ThemeMode&gt;,
     transparent: bool,
+    fonts: FontState,
     gooey: Gooey,
 }
 
@@ -1880,10 +1919,15 @@
         <span class="kw">let </span>theme = settings.theme.take().expect(<span class="string">&quot;theme always present&quot;</span>);
 
         <span class="kw">let </span>fontdb = graphics.font_system().db_mut();
+        <span class="kw">for </span>font_to_load <span class="kw">in </span>settings.font_data_to_load.drain(..) {
+            fontdb.load_font_data(font_to_load);
+        }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) =
-            Graphics::inner_find_available_font_family(fontdb, <span class="kw-2">&amp;</span>settings.serif_font_family)
-                .or_else(|| default_family(Family::Serif))
+        <span class="kw">let </span>fonts = FontState::new(fontdb);
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) = fonts
+            .find_available_font_family(<span class="kw-2">&amp;</span>settings.serif_font_family)
+            .or_else(|| default_family(Family::Serif))
         {
             fontdb.set_serif_family(name);
         }
@@ -1891,7 +1935,6 @@
         <span class="kw">let </span>bundled_font_name;
         <span class="attr">#[cfg(feature = <span class="string">&quot;roboto-flex&quot;</span>)]
         </span>{
-            fontdb.load_font_data(<span class="macro">include_bytes!</span>(<span class="string">&quot;../assets/RobotoFlex.ttf&quot;</span>).to_vec());
             bundled_font_name = <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Roboto Flex&quot;</span>));
         }
         <span class="attr">#[cfg(not(feature = <span class="string">&quot;roboto-flex&quot;</span>))]
@@ -1899,34 +1942,34 @@
             bundled_font_name = <span class="prelude-val">None</span>;
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) =
-            Graphics::inner_find_available_font_family(fontdb, <span class="kw-2">&amp;</span>settings.sans_serif_font_family)
-                .or_else(|| {
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = bundled_font_name {
-                        <span class="prelude-val">Some</span>(FamilyOwned::Name(name))
-                    } <span class="kw">else </span>{
-                        default_family(Family::SansSerif)
-                    }
-                })
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) = fonts
+            .find_available_font_family(<span class="kw-2">&amp;</span>settings.sans_serif_font_family)
+            .or_else(|| {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = bundled_font_name {
+                    <span class="prelude-val">Some</span>(FamilyOwned::Name(name))
+                } <span class="kw">else </span>{
+                    default_family(Family::SansSerif)
+                }
+            })
         {
             fontdb.set_sans_serif_family(name);
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) =
-            Graphics::inner_find_available_font_family(fontdb, <span class="kw-2">&amp;</span>settings.fantasy_font_family)
-                .or_else(|| default_family(Family::Fantasy))
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) = fonts
+            .find_available_font_family(<span class="kw-2">&amp;</span>settings.fantasy_font_family)
+            .or_else(|| default_family(Family::Fantasy))
         {
             fontdb.set_fantasy_family(name);
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) =
-            Graphics::inner_find_available_font_family(fontdb, <span class="kw-2">&amp;</span>settings.monospace_font_family)
-                .or_else(|| default_family(Family::Monospace))
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) = fonts
+            .find_available_font_family(<span class="kw-2">&amp;</span>settings.monospace_font_family)
+            .or_else(|| default_family(Family::Monospace))
         {
             fontdb.set_monospace_family(name);
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) =
-            Graphics::inner_find_available_font_family(fontdb, <span class="kw-2">&amp;</span>settings.cursive_font_family)
-                .or_else(|| default_family(Family::Cursive))
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(FamilyOwned::Name(name)) = fonts
+            .find_available_font_family(<span class="kw-2">&amp;</span>settings.cursive_font_family)
+            .or_else(|| default_family(Family::Cursive))
         {
             fontdb.set_cursive_family(name);
         }
@@ -1972,6 +2015,7 @@
             theme,
             theme_mode,
             transparent,
+            fonts,
             gooey,
         }
     }
@@ -2000,8 +2044,8 @@
         <span class="kw">let </span><span class="kw-2">mut </span>window = RunningWindow::new(window, <span class="kw-2">&amp;</span><span class="self">self</span>.gooey, <span class="kw-2">&amp;</span><span class="self">self</span>.focused, <span class="kw-2">&amp;</span><span class="self">self</span>.occluded);
         <span class="kw">let </span>root_mode = <span class="self">self</span>.constrain_window_resizing(resizable, <span class="kw-2">&amp;mut </span>window, graphics);
 
+        <span class="self">self</span>.fonts.next_frame();
         <span class="kw">let </span>graphics = <span class="self">self</span>.contents.new_frame(graphics);
-        <span class="kw">let </span><span class="kw-2">mut </span>current_font_family = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>context = GraphicsContext {
             widget: WidgetContext::new(
                 <span class="self">self</span>.root.clone(),
@@ -2011,7 +2055,7 @@
                 <span class="self">self</span>.theme_mode.get(),
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>.cursor,
             ),
-            gfx: Exclusive::Owned(Graphics::new(graphics, <span class="kw-2">&amp;mut </span>current_font_family)),
+            gfx: Exclusive::Owned(Graphics::new(graphics, <span class="kw-2">&amp;mut </span><span class="self">self</span>.fonts)),
         };
         <span class="self">self</span>.theme_mode.redraw_when_changed(<span class="kw-2">&amp;</span>context);
         <span class="kw">let </span><span class="kw-2">mut </span>layout_context = LayoutContext::new(<span class="kw-2">&amp;mut </span>context);
@@ -2576,12 +2620,12 @@
         <span class="kw">pub </span>theme: <span class="prelude-ty">Option</span>&lt;Value&lt;ThemePair&gt;&gt;,
         <span class="kw">pub </span>theme_mode: <span class="prelude-ty">Option</span>&lt;Value&lt;ThemeMode&gt;&gt;,
         <span class="kw">pub </span>transparent: bool,
-        <span class="kw">pub </span>load_system_fonts: bool,
         <span class="kw">pub </span>serif_font_family: FontFamilyList,
         <span class="kw">pub </span>sans_serif_font_family: FontFamilyList,
         <span class="kw">pub </span>fantasy_font_family: FontFamilyList,
         <span class="kw">pub </span>monospace_font_family: FontFamilyList,
         <span class="kw">pub </span>cursive_font_family: FontFamilyList,
+        <span class="kw">pub </span>font_data_to_load: Vec&lt;Vec&lt;u8&gt;&gt;,
     }
 
     <span class="attr">#[derive(Clone)]

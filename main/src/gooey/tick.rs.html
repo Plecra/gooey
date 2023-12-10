@@ -224,11 +224,11 @@
 <a href="#224" id="224">224</a>
 <a href="#225" id="225">225</a>
 <a href="#226" id="226">226</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashSet;
-<span class="kw">use </span>std::sync::atomic::{AtomicUsize, Ordering};
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::atomic::{AtomicUsize, Ordering};
 <span class="kw">use </span>std::sync::{Arc, Mutex, MutexGuard};
 <span class="kw">use </span>std::time::{Duration, Instant};
 
+<span class="kw">use </span>ahash::AHashSet;
 <span class="kw">use </span>intentional::Assert;
 <span class="kw">use </span>kludgine::app::winit::event::{ElementState, KeyEvent, MouseButton};
 <span class="kw">use </span>kludgine::app::winit::keyboard::Key;
@@ -246,7 +246,7 @@
 #[must_use]
 </span><span class="kw">pub struct </span>Tick {
     data: Arc&lt;TickData&gt;,
-    handled_keys: HashSet&lt;Key&gt;,
+    handled_keys: AHashSet&lt;Key&gt;,
 }
 
 <span class="kw">impl </span>Tick {
@@ -340,7 +340,7 @@
 
         <span class="self">Self </span>{
             data,
-            handled_keys: HashSet::new(),
+            handled_keys: AHashSet::new(),
         }
     }
 
@@ -373,7 +373,7 @@
 </span><span class="attr">#[derive(Default, Debug)]
 </span><span class="kw">pub struct </span>InputState {
     <span class="doccomment">/// A collection of all keys currently pressed.
-    </span><span class="kw">pub </span>keys: HashSet&lt;Key&gt;,
+    </span><span class="kw">pub </span>keys: AHashSet&lt;Key&gt;,
     <span class="doccomment">/// The state of the mouse cursor and any buttons pressed.
     </span><span class="kw">pub </span>mouse: <span class="prelude-ty">Option</span>&lt;Mouse&gt;,
 }
@@ -381,7 +381,7 @@
 <span class="attr">#[derive(Debug, Default)]
 </span><span class="kw">pub struct </span>Mouse {
     <span class="kw">pub </span>position: Point&lt;Px&gt;,
-    <span class="kw">pub </span>buttons: HashSet&lt;MouseButton&gt;,
+    <span class="kw">pub </span>buttons: AHashSet&lt;MouseButton&gt;,
 }
 
 <span class="attr">#[derive(Debug)]

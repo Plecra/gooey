@@ -938,6 +938,7 @@
 <a href="#938" id="938">938</a>
 <a href="#939" id="939">939</a>
 <a href="#940" id="940">940</a>
+<a href="#941" id="941">941</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A Widget that arranges children into rows and columns.
 </span><span class="comment">// TODO on scale change, all `Lp` children need to resize
 
@@ -1178,7 +1179,8 @@
     }
 }
 
-<span class="doccomment">/// The strategy to use when laying a widget out inside of an [`Stack`].
+<span class="doccomment">/// The strategy to use when laying a widget out inside of an [`Grid`] or
+/// [`Stack`](crate::widgets::Stack).
 </span><span class="attr">#[derive(Default, Debug, Clone, Copy)]
 </span><span class="kw">pub enum </span>GridDimension {
     <span class="doccomment">/// Attempt to lay out the widget based on its contents.

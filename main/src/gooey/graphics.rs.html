@@ -330,9 +330,21 @@
 <a href="#330" id="330">330</a>
 <a href="#331" id="331">331</a>
 <a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::{Deref, DerefMut};
 
-<span class="kw">use </span>ahash::{HashSet, HashSetExt};
+<span class="kw">use </span>ahash::AHashSet;
 <span class="kw">use </span>kludgine::cosmic_text::FamilyOwned;
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{
@@ -351,7 +363,7 @@
 </span><span class="kw">pub struct </span>Graphics&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
     renderer: RenderContext&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;,
     region: Rect&lt;Px&gt;,
-    current_font_family: <span class="kw-2">&amp;</span><span class="lifetime">&#39;clip </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;FontFamilyList&gt;,
+    font_state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;clip </span><span class="kw-2">mut </span>FontState,
 }
 
 <span class="kw">enum </span>RenderContext&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
@@ -362,14 +374,11 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; Graphics&lt;<span class="lifetime">&#39;clip</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
     <span class="doccomment">/// Returns a new graphics context for the given [`Renderer`].
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>new(
-        renderer: Renderer&lt;<span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;,
-        current_font_family: <span class="kw-2">&amp;</span><span class="lifetime">&#39;clip </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;FontFamilyList&gt;,
-    ) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(renderer: Renderer&lt;<span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;, font_state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;clip </span><span class="kw-2">mut </span>FontState) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             region: renderer.clip_rect().into_signed(),
             renderer: RenderContext::Renderer(renderer),
-            current_font_family,
+            font_state,
         }
     }
 
@@ -398,33 +407,16 @@
         )
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>inner_find_available_font_family(
-        db: <span class="kw-2">&amp;</span>cosmic_text::fontdb::Database,
-        list: <span class="kw-2">&amp;</span>FontFamilyList,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;FamilyOwned&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>fonts = HashSet::new();
-        <span class="kw">for </span>(family, <span class="kw">_</span>) <span class="kw">in </span>db.faces().filter_map(|f| f.families.first()) {
-            fonts.insert(family.clone());
-        }
-
-        list.iter()
-            .find(|family| <span class="kw">match </span>family {
-                FamilyOwned::Name(name) =&gt; fonts.contains(name),
-                <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
-            })
-            .cloned()
-    }
-
     <span class="doccomment">/// Returns the first font family in `list` that is currently in the font
     /// system, or None if no font families match.
     </span><span class="kw">pub fn </span>find_available_font_family(<span class="kw-2">&amp;mut </span><span class="self">self</span>, list: <span class="kw-2">&amp;</span>FontFamilyList) -&gt; <span class="prelude-ty">Option</span>&lt;FamilyOwned&gt; {
-        <span class="self">Self</span>::inner_find_available_font_family(<span class="self">self</span>.font_system().db(), list)
+        <span class="self">self</span>.font_state.find_available_font_family(list)
     }
 
     <span class="doccomment">/// Sets the font family to the first family in `list`.
     </span><span class="kw">pub fn </span>set_available_font_family(<span class="kw-2">&amp;mut </span><span class="self">self</span>, list: <span class="kw-2">&amp;</span>FontFamilyList) {
-        <span class="kw">if </span><span class="self">self</span>.current_font_family.as_ref() != <span class="prelude-val">Some</span>(list) {
-            <span class="kw-2">*</span><span class="self">self</span>.current_font_family = <span class="prelude-val">Some</span>(list.clone());
+        <span class="kw">if </span><span class="self">self</span>.font_state.current_font_family.as_ref() != <span class="prelude-val">Some</span>(list) {
+            <span class="self">self</span>.font_state.current_font_family = <span class="prelude-val">Some</span>(list.clone());
             <span class="kw">if let </span><span class="prelude-val">Some</span>(family) = <span class="self">self</span>.find_available_font_family(list) {
                 <span class="self">self</span>.set_font_family(family);
             }
@@ -463,7 +455,7 @@
         Graphics {
             renderer: RenderContext::Clipped(<span class="self">self</span>.renderer.clipped_to(new_clip)),
             region,
-            current_font_family: <span class="kw-2">&amp;mut *</span><span class="self">self</span>.current_font_family,
+            font_state: <span class="kw-2">&amp;mut *</span><span class="self">self</span>.font_state,
         }
     }
 
@@ -660,6 +652,38 @@
             RenderContext::Renderer(renderer) =&gt; renderer,
             RenderContext::Clipped(clipped) =&gt; <span class="kw-2">&amp;mut *</span>clipped,
         }
+    }
+}
+
+<span class="kw">pub struct </span>FontState {
+    fonts: AHashSet&lt;String&gt;,
+    current_font_family: <span class="prelude-ty">Option</span>&lt;FontFamilyList&gt;,
+}
+
+<span class="kw">impl </span>FontState {
+    <span class="kw">pub fn </span>new(db: <span class="kw-2">&amp;</span>cosmic_text::fontdb::Database) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>faces = db.faces();
+        <span class="kw">let </span><span class="kw-2">mut </span>fonts = AHashSet::with_capacity(faces.size_hint().<span class="number">0</span>);
+        <span class="kw">for </span>(family, <span class="kw">_</span>) <span class="kw">in </span>faces.filter_map(|f| f.families.first()) {
+            fonts.insert(family.clone());
+        }
+        <span class="self">Self </span>{
+            fonts,
+            current_font_family: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="kw">pub fn </span>next_frame(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.current_font_family = <span class="prelude-val">None</span>;
+    }
+
+    <span class="kw">pub fn </span>find_available_font_family(<span class="kw-2">&amp;</span><span class="self">self</span>, list: <span class="kw-2">&amp;</span>FontFamilyList) -&gt; <span class="prelude-ty">Option</span>&lt;FamilyOwned&gt; {
+        list.iter()
+            .find(|family| <span class="kw">match </span>family {
+                FamilyOwned::Name(name) =&gt; <span class="self">self</span>.fonts.contains(name),
+                <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
+            })
+            .cloned()
     }
 }
 </code></pre></div></section></main></body></html>
