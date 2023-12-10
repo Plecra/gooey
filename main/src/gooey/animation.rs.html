@@ -1320,6 +1320,14 @@
 <a href="#1320" id="1320">1320</a>
 <a href="#1321" id="1321">1321</a>
 <a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating animations.
 //!
 //! Animations in Gooey are performed by transitioning a [`Dynamic`]&#39;s contained
@@ -1374,7 +1382,7 @@
 <span class="kw">use </span>intentional::Cast;
 <span class="kw">use </span>kempt::Set;
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
-<span class="kw">use </span>kludgine::figures::{Ranged, UnscaledUnit, Zero};
+<span class="kw">use </span>kludgine::figures::{Angle, Ranged, UnscaledUnit, Zero};
 <span class="kw">use </span>kludgine::Color;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::easings::Linear;
@@ -2192,6 +2200,14 @@
     <span class="kw">fn </span>lerp(<span class="kw-2">&amp;</span><span class="self">self</span>, target: <span class="kw-2">&amp;</span><span class="self">Self</span>, percent: f32) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>delta = <span class="kw-2">*</span>target - <span class="kw-2">*</span><span class="self">self</span>;
         <span class="kw-2">*</span><span class="self">self </span>+ delta * f64::from(percent)
+    }
+}
+
+<span class="kw">impl </span>LinearInterpolate <span class="kw">for </span>Angle {
+    <span class="kw">fn </span>lerp(<span class="kw-2">&amp;</span><span class="self">self</span>, target: <span class="kw-2">&amp;</span><span class="self">Self</span>, percent: f32) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>this = <span class="self">self</span>.into_degrees::&lt;f32&gt;();
+        <span class="kw">let </span>delta = target.into_degrees::&lt;f32&gt;() - this;
+        <span class="self">Self</span>::degrees_f(this + delta * percent)
     }
 }
 

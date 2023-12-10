@@ -387,41 +387,15 @@
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a>
-<a href="#395" id="395">395</a>
-<a href="#396" id="396">396</a>
-<a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
-<a href="#409" id="409">409</a>
-<a href="#410" id="410">410</a>
-<a href="#411" id="411">411</a>
-<a href="#412" id="412">412</a>
-<a href="#413" id="413">413</a>
-<a href="#414" id="414">414</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Widgets for displaying progress indicators.
 
 </span><span class="kw">use </span>std::ops::RangeInclusive;
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>kludgine::figures::units::Px;
-<span class="kw">use </span>kludgine::figures::{FloatConversion, Point, Ranged, ScreenScale, Zero};
-<span class="kw">use </span>kludgine::shapes::{Path, PathEvent, StrokeOptions};
+<span class="kw">use </span>kludgine::figures::{Angle, Point, Ranged, ScreenScale, Size, Zero};
+<span class="kw">use </span>kludgine::shapes::{Path, StrokeOptions};
 <span class="kw">use </span>kludgine::Color;
-<span class="kw">use </span>lyon_geom::Arc;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::easings::{EaseInQuadradic, EaseOutQuadradic};
 <span class="kw">use </span><span class="kw">crate</span>::animation::{
@@ -484,7 +458,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>indeterminant_animation = <span class="prelude-val">None</span>;
 
         <span class="kw">let </span>(slider, degree_offset) = <span class="kw">if </span><span class="self">self</span>.spinner {
-            <span class="kw">let </span>degree_offset = Dynamic::new(<span class="number">0.</span>);
+            <span class="kw">let </span>degree_offset = Dynamic::new(Angle::degrees(<span class="number">270</span>));
             (
                 Spinner {
                     start: start.clone(),
@@ -538,7 +512,7 @@
     indeterminant_animation: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;IndeterminantAnimations&gt;,
     start: <span class="kw-2">&amp;</span>Dynamic&lt;ZeroToOne&gt;,
     end: <span class="kw-2">&amp;</span>Dynamic&lt;ZeroToOne&gt;,
-    degree_offset: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Dynamic&lt;f32&gt;&gt;,
+    degree_offset: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Dynamic&lt;Angle&gt;&gt;,
 ) {
     <span class="kw">match </span>progress {
         Progress::Indeterminant =&gt; {
@@ -578,11 +552,11 @@
                         .spawn(),
                     _degree_offset: degree_offset.map(|degree_offset| {
                         degree_offset
-                            .transition_to(<span class="number">0.</span>)
+                            .transition_to(Angle::MIN)
                             .immediately()
                             .and_then(
                                 degree_offset
-                                    .transition_to(<span class="number">359.9</span>)
+                                    .transition_to(Angle::MAX)
                                     .over(Duration::from_secs_f32(<span class="number">1.66</span>)),
                             )
                             .cycle()
@@ -594,7 +568,7 @@
         Progress::Percent(value) =&gt; {
             <span class="kw">let </span>_stopped_animation = indeterminant_animation.take();
             <span class="kw">if let </span><span class="prelude-val">Some</span>(degree_offset) = degree_offset {
-                degree_offset.set(<span class="number">0.</span>);
+                degree_offset.set(Angle::degrees(<span class="number">270</span>));
             }
             start.set(ZeroToOne::ZERO);
             end.set(value);
@@ -717,52 +691,28 @@
 </span><span class="kw">pub struct </span>Spinner {
     start: Dynamic&lt;ZeroToOne&gt;,
     end: Dynamic&lt;ZeroToOne&gt;,
-    degree_offset: Dynamic&lt;f32&gt;,
+    degree_offset: Dynamic&lt;Angle&gt;,
 }
 
 <span class="kw">impl </span>Spinner {
     <span class="kw">fn </span>draw_arc(
         track_size: Px,
-        radius: f32,
-        degree_offset: f32,
+        radius: Px,
+        degree_offset: Angle,
         start: ZeroToOne,
         sweep: ZeroToOne,
         color: Color,
         context: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::context::GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) {
-        <span class="kw">let </span><span class="kw-2">mut </span>events = Vec::&lt;PathEvent&lt;Px&gt;&gt;::new();
-        Arc {
-            center: lyon_geom::point(
-                radius + track_size.into_float() / <span class="number">2.</span>,
-                radius + track_size.into_float() / <span class="number">2.</span>,
-            ),
-            radii: lyon_geom::vector(radius, radius),
-            start_angle: lyon_geom::Angle::degrees(<span class="kw-2">*</span>start * <span class="number">360. </span>- <span class="number">90. </span>+ degree_offset),
-            sweep_angle: lyon_geom::Angle::degrees(<span class="kw-2">*</span>sweep * <span class="number">360.</span>),
-            x_rotation: lyon_geom::Angle::zero(),
-        }
-        .for_each_cubic_bezier(<span class="kw-2">&amp;mut </span>|segment| {
-            <span class="kw">if </span>events.is_empty() {
-                events.push(PathEvent::Begin {
-                    at: Point::new(segment.from.x, segment.from.y).cast(),
-                    texture: Point::ZERO,
-                });
-            }
-            events.push(PathEvent::Cubic {
-                ctrl1: Point::new(segment.ctrl1.x, segment.ctrl1.y).cast(),
-                ctrl2: Point::new(segment.ctrl2.x, segment.ctrl2.y).cast(),
-                to: Point::new(segment.to.x, segment.to.y).cast(),
-                texture: Point::ZERO,
-            });
-        });
-        <span class="kw">let </span>full = sweep == ZeroToOne::ONE;
-        <span class="kw">if </span>!events.is_empty() {
-            events.push(PathEvent::End { close: full });
+        <span class="kw">if </span>sweep &gt; <span class="number">0. </span>{
             context.gfx.draw_shape(
-                <span class="kw-2">&amp;</span>events
-                    .into_iter()
-                    .collect::&lt;Path&lt;Px, <span class="bool-val">false</span>&gt;&gt;()
-                    .stroke(StrokeOptions::px_wide(track_size).colored(color)),
+                <span class="kw-2">&amp;</span>Path::arc(
+                    Point::squared(radius + track_size / <span class="number">2</span>),
+                    Size::squared(radius),
+                    Angle::degrees_f(<span class="kw-2">*</span>start * <span class="number">360.</span>) + degree_offset,
+                    Angle::degrees_f(<span class="kw-2">*</span>sweep * <span class="number">360.</span>),
+                )
+                .stroke(StrokeOptions::px_wide(track_size).colored(color)),
             );
         }
     }
@@ -774,8 +724,8 @@
         <span class="kw">let </span>start = <span class="self">self</span>.start.get_tracking_refresh(context);
         <span class="kw">let </span>end = <span class="self">self</span>.end.get_tracking_refresh(context);
         <span class="kw">let </span>size = context.gfx.region().size;
-        <span class="kw">let </span>render_size = size.width.min(size.height).into_float();
-        <span class="kw">let </span>radius = render_size / <span class="number">2. </span>- track_size.into_float();
+        <span class="kw">let </span>render_size = size.width.min(size.height);
+        <span class="kw">let </span>radius = render_size / <span class="number">2 </span>- track_size;
         <span class="kw">let </span>degree_offset = <span class="self">self</span>.degree_offset.get();
 
         <span class="kw">if </span>start &gt; ZeroToOne::ZERO {
