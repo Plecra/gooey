@@ -1285,6 +1285,41 @@
 <a href="#1285" id="1285">1285</a>
 <a href="#1286" id="1286">1286</a>
 <a href="#1287" id="1287">1287</a>
+<a href="#1288" id="1288">1288</a>
+<a href="#1289" id="1289">1289</a>
+<a href="#1290" id="1290">1290</a>
+<a href="#1291" id="1291">1291</a>
+<a href="#1292" id="1292">1292</a>
+<a href="#1293" id="1293">1293</a>
+<a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
+<a href="#1296" id="1296">1296</a>
+<a href="#1297" id="1297">1297</a>
+<a href="#1298" id="1298">1298</a>
+<a href="#1299" id="1299">1299</a>
+<a href="#1300" id="1300">1300</a>
+<a href="#1301" id="1301">1301</a>
+<a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
+<a href="#1311" id="1311">1311</a>
+<a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
+<a href="#1318" id="1318">1318</a>
+<a href="#1319" id="1319">1319</a>
+<a href="#1320" id="1320">1320</a>
+<a href="#1321" id="1321">1321</a>
+<a href="#1322" id="1322">1322</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating animations.
 //!
 //! Animations in Gooey are performed by transitioning a [`Dynamic`]&#39;s contained
@@ -1595,6 +1630,30 @@
     </span><span class="kw">fn </span>finish(<span class="kw-2">&amp;</span><span class="self">self</span>);
 }
 
+<span class="macro">macro_rules! </span>impl_tuple_animate {
+    ($(<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ident $field</span>:tt <span class="macro-nonterminal">$var</span>:ident),+) =&gt; {
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$</span><span class="kw">type</span>),+&gt; <span class="macro-nonterminal">AnimationTarget </span><span class="kw">for </span>($(<span class="macro-nonterminal">$</span><span class="kw">type</span>,)+) <span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">type</span>: <span class="macro-nonterminal">AnimationTarget</span>),+ {
+            <span class="kw">type </span>Running = ($(&lt;<span class="macro-nonterminal">$</span><span class="kw">type</span>&gt;<span class="macro-nonterminal">::Running</span>,)+);
+
+            <span class="kw">fn </span>begin(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Running {
+                ($(<span class="self">self</span>.<span class="macro-nonterminal">$field</span>.begin(),)+)
+            }
+        }
+
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$</span><span class="kw">type</span>),+&gt; <span class="macro-nonterminal">AnimateTarget </span><span class="kw">for </span>($(<span class="macro-nonterminal">$</span><span class="kw">type</span>,)+) <span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">type</span>: <span class="macro-nonterminal">AnimateTarget</span>),+ {
+            <span class="kw">fn </span>update(<span class="kw-2">&amp;</span><span class="self">self</span>, percent: f32) {
+                $(<span class="self">self</span>.<span class="macro-nonterminal">$field</span>.update(percent);)+
+            }
+
+            <span class="kw">fn </span>finish(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+                $(<span class="self">self</span>.<span class="macro-nonterminal">$field</span>.finish();)+
+            }
+        }
+    }
+}
+
+<span class="macro">impl_all_tuples!</span>(impl_tuple_animate);
+
 <span class="doccomment">/// A type that can convert into `Box&lt;dyn Animate&gt;`.
 </span><span class="kw">pub trait </span>BoxAnimate {
     <span class="doccomment">/// Returns the boxed animation.
@@ -1640,29 +1699,40 @@
     }
 }
 
-<span class="macro">macro_rules! </span>impl_tuple_animate {
+<span class="macro">macro_rules! </span>impl_tuple_into_animate {
     ($(<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ident $field</span>:tt <span class="macro-nonterminal">$var</span>:ident),+) =&gt; {
-        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$</span><span class="kw">type</span>),+&gt; <span class="macro-nonterminal">AnimationTarget </span><span class="kw">for </span>($(<span class="macro-nonterminal">$</span><span class="kw">type</span>,)+) <span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">type</span>: <span class="macro-nonterminal">AnimationTarget</span>),+ {
-            <span class="kw">type </span>Running = ($(&lt;<span class="macro-nonterminal">$</span><span class="kw">type</span>&gt;<span class="macro-nonterminal">::Running</span>,)+);
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$</span><span class="kw">type</span>),+&gt; <span class="macro-nonterminal">IntoAnimate </span><span class="kw">for </span>($(<span class="macro-nonterminal">$</span><span class="kw">type</span>,)+) <span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">type</span>: <span class="macro-nonterminal">IntoAnimate</span>),+ {
+            <span class="kw">type </span>Animate = ($(&lt;<span class="macro-nonterminal">$</span><span class="kw">type</span>&gt;<span class="macro-nonterminal">::Animate</span>,)+);
 
-            <span class="kw">fn </span>begin(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Running {
-                ($(<span class="self">self</span>.<span class="macro-nonterminal">$field</span>.begin(),)+)
+            <span class="kw">fn </span>into_animate(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Animate {
+                ($(<span class="self">self</span>.<span class="macro-nonterminal">$field</span>.into_animate(),)+)
             }
         }
-
-        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$</span><span class="kw">type</span>),+&gt; <span class="macro-nonterminal">AnimateTarget </span><span class="kw">for </span>($(<span class="macro-nonterminal">$</span><span class="kw">type</span>,)+) <span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">type</span>: <span class="macro-nonterminal">AnimateTarget</span>),+ {
-            <span class="kw">fn </span>update(<span class="kw-2">&amp;</span><span class="self">self</span>, percent: f32) {
-                $(<span class="self">self</span>.<span class="macro-nonterminal">$field</span>.update(percent);)+
-            }
-
-            <span class="kw">fn </span>finish(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-                $(<span class="self">self</span>.<span class="macro-nonterminal">$field</span>.finish();)+
+        <span class="kw">impl</span>&lt;$(<span class="macro-nonterminal">$</span><span class="kw">type</span>),+&gt; <span class="macro-nonterminal">Animate </span><span class="kw">for </span>($(<span class="macro-nonterminal">$</span><span class="kw">type</span>,)+) <span class="kw">where </span>$(<span class="macro-nonterminal">$</span><span class="kw">type</span>: <span class="macro-nonterminal">Animate</span>),+ {
+            <span class="kw">fn </span>animate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, elapsed: Duration) -&gt; ControlFlow&lt;Duration&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>min_remaining = Duration::MAX;
+                <span class="kw">let </span><span class="kw-2">mut </span>completely_done = <span class="bool-val">true</span>;
+                $(
+                    <span class="kw">match </span><span class="self">self</span>.<span class="macro-nonterminal">$field</span>.animate(elapsed) {
+                        ControlFlow::Break(remaining) =&gt; {
+                            min_remaining = min_remaining.min(remaining);
+                        }
+                        ControlFlow::Continue(()) =&gt; {
+                            completely_done = <span class="bool-val">false</span>;
+                        }
+                    }
+                )+
+                <span class="kw">if </span>completely_done {
+                    ControlFlow::Break(min_remaining)
+                } <span class="kw">else </span>{
+                    ControlFlow::Continue(())
+                }
             }
         }
     }
 }
 
-<span class="macro">impl_all_tuples!</span>(impl_tuple_animate);
+<span class="macro">impl_all_tuples!</span>(impl_tuple_into_animate);
 
 <span class="kw">impl</span>&lt;T&gt; BoxAnimate <span class="kw">for </span>T
 <span class="kw">where

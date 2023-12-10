@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Progress"],"struct":["ProgressBar"],"trait":["ProgressValue","Progressable"]};
+window.SIDEBAR_ITEMS = {"enum":["Progress"],"struct":["ProgressBar","Spinner"],"trait":["ProgressValue","Progressable"]};
