@@ -1,3 +1,3 @@
 (function() {var implementors = {
-"gooey":[["impl Zero for <a class=\"struct\" href=\"gooey/animation/struct.ZeroToOne.html\" title=\"struct gooey::animation::ZeroToOne\">ZeroToOne</a>"],["impl Zero for <a class=\"enum\" href=\"gooey/styles/enum.Dimension.html\" title=\"enum gooey::styles::Dimension\">Dimension</a>"]]
+"gooey":[["impl&lt;Unit&gt; Zero for <a class=\"struct\" href=\"gooey/styles/struct.Edges.html\" title=\"struct gooey::styles::Edges\">Edges</a>&lt;Unit&gt;<span class=\"where fmt-newline\">where\n    Unit: Zero,</span>"],["impl Zero for <a class=\"struct\" href=\"gooey/animation/struct.ZeroToOne.html\" title=\"struct gooey::animation::ZeroToOne\">ZeroToOne</a>"],["impl Zero for <a class=\"enum\" href=\"gooey/styles/enum.Dimension.html\" title=\"enum gooey::styles::Dimension\">Dimension</a>"]]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

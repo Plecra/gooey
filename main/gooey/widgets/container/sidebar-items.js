@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ContainerBackground","EffectiveBackground"],"struct":["Container","CurrentContainerBackground"]};
+window.SIDEBAR_ITEMS = {"enum":["ContainerBackground","EffectiveBackground"],"struct":["Container","ContainerShadow","CurrentContainerBackground"]};

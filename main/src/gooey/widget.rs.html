@@ -1939,6 +1939,9 @@
 <a href="#1939" id="1939">1939</a>
 <a href="#1940" id="1940">1940</a>
 <a href="#1941" id="1941">1941</a>
+<a href="#1942" id="1942">1942</a>
+<a href="#1943" id="1943">1943</a>
+<a href="#1944" id="1944">1944</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -3763,14 +3766,17 @@
     }
 
     <span class="doccomment">/// Returns this child, mounting it in the process if necessary.
-    </span><span class="kw">pub fn </span>mount_if_needed(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
+    </span><span class="kw">pub fn </span>mount_if_needed&lt;<span class="lifetime">&#39;window</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>AsEventContext&lt;<span class="lifetime">&#39;window</span>&gt;) {
         <span class="kw">if let </span>WidgetRef::Unmounted(instance) = <span class="self">self </span>{
             <span class="kw-2">*</span><span class="self">self </span>= WidgetRef::Mounted(context.push_child(instance.clone()));
         }
     }
 
     <span class="doccomment">/// Returns this child, mounting it in the process if necessary.
-    </span><span class="kw">pub fn </span>mounted(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; ManagedWidget {
+    </span><span class="kw">pub fn </span>mounted&lt;<span class="lifetime">&#39;window</span>&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        context: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>AsEventContext&lt;<span class="lifetime">&#39;window</span>&gt;,
+    ) -&gt; ManagedWidget {
         <span class="self">self</span>.mount_if_needed(context);
 
         <span class="kw">let </span><span class="self">Self</span>::Mounted(widget) = <span class="self">self </span><span class="kw">else </span>{
