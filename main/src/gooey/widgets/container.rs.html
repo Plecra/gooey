@@ -875,6 +875,24 @@
 <a href="#875" id="875">875</a>
 <a href="#876" id="876">876</a>
 <a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
+<a href="#887" id="887">887</a>
+<a href="#888" id="888">888</a>
+<a href="#889" id="889">889</a>
+<a href="#890" id="890">890</a>
+<a href="#891" id="891">891</a>
+<a href="#892" id="892">892</a>
+<a href="#893" id="893">893</a>
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A visual container widget.
 
 </span><span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
@@ -1143,8 +1161,22 @@
             .into_signed(),
         );
 
-        child_size + padding_amount + child_shadow_offset_amount + shadow_spread * <span class="number">2
-    </span>}
+        <span class="kw">let </span>corner_radii = context.get(<span class="kw-2">&amp;</span>CornerRadius).into_upx(context.gfx.scale());
+        <span class="kw">let </span>max_corner = corner_radii
+            .top_left
+            .max(corner_radii.top_right)
+            .max(corner_radii.bottom_left)
+            .max(corner_radii.bottom_right);
+        <span class="kw">let </span>max_blur = (child_size
+            .width
+            .min(child_size.height)
+            .saturating_sub(shadow.spread.into_unsigned())
+            / <span class="number">2</span>)
+        .saturating_sub(max_corner);
+        <span class="kw">let </span>blur_overage = shadow.blur_radius.into_unsigned().saturating_sub(max_blur);
+
+        child_size + padding_amount + child_shadow_offset_amount + shadow_spread * <span class="number">2 </span>+ blur_overage
+    }
 
     <span class="kw">fn </span>root_behavior(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1192,14 +1224,19 @@
     <span class="kw">let </span>shadow_color =
         shadow_color.with_alpha_f32(shadow_color.alpha_f32() * background.alpha_f32());
 
-    <span class="kw">let </span>gradient_size = (shadow.spread + shadow.blur_radius)
-        .min(child_area.size.width)
-        .min(child_area.size.height);
+    <span class="kw">let </span>max_corner = corner_radii
+        .top_left
+        .max(corner_radii.top_right)
+        .max(corner_radii.bottom_left)
+        .max(corner_radii.bottom_right);
+
+    <span class="kw">let </span>max_blur =
+        (child_area.size.width.min(child_area.size.height) - shadow.spread) / <span class="number">2 </span>- max_corner;
+    <span class="kw">let </span>blur = shadow.blur_radius.min(max_blur);
+    <span class="kw">let </span>gradient_size = shadow.spread + blur;
+
     <span class="kw">if </span>gradient_size &gt; <span class="number">0 </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>solid_area = Rect::new(
-            Point::squared(gradient_size),
-            child_area.size - shadow.blur_radius * <span class="number">2</span>,
-        );
+        <span class="kw">let </span><span class="kw-2">mut </span>solid_area = Rect::new(Point::squared(gradient_size), child_area.size - blur * <span class="number">2</span>);
         solid_area.origin += shadow.offset.max(Point::ZERO);
 
         <span class="kw">let </span>transparent = shadow_color.with_alpha(<span class="number">0</span>);
@@ -1247,18 +1284,6 @@
                 .filled(),
             );
         }
-
-        <span class="comment">// Top Right
-        </span>shadow_arc(
-            Point::new(solid_right_at_top, solid_top_at_right),
-            corner_radii.top_right,
-            gradient_size,
-            shadow_color,
-            transparent,
-            Angle::degrees(<span class="number">270</span>),
-            context,
-        );
-
         <span class="comment">// Right
         </span>context.gfx.draw_shape(
             <span class="kw-2">&amp;</span>PathBuilder::new((Point::new(solid_right, solid_top_at_right), shadow_color))
@@ -1289,17 +1314,6 @@
             .filled(),
         );
 
-        <span class="comment">// Bottom Right
-        </span>shadow_arc(
-            Point::new(solid_right_at_bottom, solid_bottom_at_right),
-            corner_radii.bottom_right,
-            gradient_size,
-            shadow_color,
-            transparent,
-            Angle::degrees(<span class="number">0</span>),
-            context,
-        );
-
         <span class="comment">// Bottom
         </span>context.gfx.draw_shape(
             <span class="kw-2">&amp;</span>PathBuilder::new((
@@ -1325,17 +1339,6 @@
             ))
             .close()
             .filled(),
-        );
-
-        <span class="comment">// Bottom Left
-        </span>shadow_arc(
-            Point::new(solid_left_at_bottom, solid_bottom_at_left),
-            corner_radii.bottom_left,
-            gradient_size,
-            shadow_color,
-            transparent,
-            Angle::degrees(<span class="number">90</span>),
-            context,
         );
 
         <span class="comment">// Left
@@ -1366,6 +1369,39 @@
                 .line_to((Point::new(solid_left, solid_bottom_at_left), shadow_color))
                 .close()
                 .filled(),
+        );
+
+        <span class="comment">// Top Right
+        </span>shadow_arc(
+            Point::new(solid_right_at_top, solid_top_at_right),
+            corner_radii.top_right,
+            gradient_size,
+            shadow_color,
+            transparent,
+            Angle::degrees(<span class="number">270</span>),
+            context,
+        );
+
+        <span class="comment">// Bottom Right
+        </span>shadow_arc(
+            Point::new(solid_right_at_bottom, solid_bottom_at_right),
+            corner_radii.bottom_right,
+            gradient_size,
+            shadow_color,
+            transparent,
+            Angle::degrees(<span class="number">0</span>),
+            context,
+        );
+
+        <span class="comment">// Bottom Left
+        </span>shadow_arc(
+            Point::new(solid_left_at_bottom, solid_bottom_at_left),
+            corner_radii.bottom_left,
+            gradient_size,
+            shadow_color,
+            transparent,
+            Angle::degrees(<span class="number">90</span>),
+            context,
         );
 
         <span class="comment">// Top Left
