@@ -209,6 +209,8 @@
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
 <a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 
 <span class="kw">use </span>kludgine::figures::units::UPx;
@@ -401,11 +403,13 @@
     ) -&gt; WrappedLayout {
         <span class="kw">let </span>layout = <span class="self">self</span>.measure(available_space, context);
 
-        Rect::new(
-            Point::new(layout.margin.left, layout.margin.top).into_signed(),
-            layout.content.into_signed(),
-        )
-        .into()
+        WrappedLayout {
+            child: Rect::new(
+                Point::new(layout.margin.left, layout.margin.top).into_signed(),
+                layout.content.into_signed(),
+            ),
+            size: layout.content + layout.margin.size(),
+        }
     }
 }
 

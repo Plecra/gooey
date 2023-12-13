@@ -701,10 +701,6 @@
 <a href="#701" id="701">701</a>
 <a href="#702" id="702">702</a>
 <a href="#703" id="703">703</a>
-<a href="#704" id="704">704</a>
-<a href="#705" id="705">705</a>
-<a href="#706" id="706">706</a>
-<a href="#707" id="707">707</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Widgets that stack in the Z-direction.
 
 </span><span class="kw">use </span>std::fmt;
@@ -957,11 +953,7 @@
 
     <span class="kw">fn </span>hit_test(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Point&lt;Px&gt;, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
         <span class="kw">let </span>state = <span class="self">self</span>.state.lock();
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = state.test_point(location, <span class="bool-val">false</span>, context) {
-            index &gt; <span class="number">0
-        </span>} <span class="kw">else </span>{
-            !(state.overlays.is_empty() || state.point_is_in_root_relative(location, context))
-        }
+        state.test_point(location, <span class="bool-val">false</span>, context).is_some()
     }
 
     <span class="kw">fn </span>hover(

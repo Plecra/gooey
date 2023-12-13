@@ -893,6 +893,21 @@
 <a href="#893" id="893">893</a>
 <a href="#894" id="894">894</a>
 <a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A visual container widget.
 
 </span><span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
@@ -1120,7 +1135,7 @@
 
             <span class="comment">// check if the shadow would be obscured before we try to draw it.
             </span><span class="kw">if </span>child_area.origin != Point::ZERO || child_size != context.gfx.region().size {
-                render_shadow(<span class="kw-2">&amp;</span>child_area, <span class="kw-2">&amp;</span>corner_radii, <span class="kw-2">&amp;</span>shadow, background, context);
+                render_shadow(<span class="kw-2">&amp;</span>child_area, corner_radii, <span class="kw-2">&amp;</span>shadow, background, context);
             }
 
             context.gfx.draw_shape(<span class="kw-2">&amp;</span>Shape::filled_round_rect(
@@ -1141,8 +1156,33 @@
     ) -&gt; Size&lt;UPx&gt; {
         <span class="kw">let </span>child = <span class="self">self</span>.child.mounted(context);
 
-        <span class="kw">let </span>padding = <span class="self">self</span>.padding(context).into_upx(context.gfx.scale());
+        <span class="kw">let </span>corner_radii = context.get(<span class="kw-2">&amp;</span>CornerRadius).into_upx(context.gfx.scale());
+
+        <span class="kw">let </span>max_space = available_space.map(ConstraintLimit::max);
+        <span class="kw">let </span>min_dimension = max_space.width.min(max_space.height);
+        <span class="kw">let </span>max_corner_radii = min_dimension / <span class="number">2</span>;
+
+        <span class="kw">let </span>corner_radii = corner_radii.map(|r| r.min(max_corner_radii));
+
+        <span class="kw">let </span><span class="kw-2">mut </span>padding = <span class="self">self</span>.padding(context).into_upx(context.gfx.scale());
+        padding.left = padding
+            .left
+            .max(corner_radii.top_left / std::f32::consts::PI)
+            .max(corner_radii.bottom_left / std::f32::consts::PI);
+        padding.right = padding
+            .right
+            .max(corner_radii.top_right / std::f32::consts::PI)
+            .max(corner_radii.bottom_right / std::f32::consts::PI);
+        padding.top = padding
+            .top
+            .max(corner_radii.top_right / std::f32::consts::PI)
+            .max(corner_radii.top_left / std::f32::consts::PI);
+        padding.bottom = padding
+            .bottom
+            .max(corner_radii.bottom_right / std::f32::consts::PI)
+            .max(corner_radii.bottom_left / std::f32::consts::PI);
         <span class="kw">let </span>padding_amount = padding.size();
+
         <span class="kw">let </span>shadow = <span class="self">self</span>.effective_shadow(context).into_px(context.gfx.scale());
         <span class="kw">let </span>shadow_spread = shadow.spread.into_unsigned();
 
@@ -1161,22 +1201,8 @@
             .into_signed(),
         );
 
-        <span class="kw">let </span>corner_radii = context.get(<span class="kw-2">&amp;</span>CornerRadius).into_upx(context.gfx.scale());
-        <span class="kw">let </span>max_corner = corner_radii
-            .top_left
-            .max(corner_radii.top_right)
-            .max(corner_radii.bottom_left)
-            .max(corner_radii.bottom_right);
-        <span class="kw">let </span>max_blur = (child_size
-            .width
-            .min(child_size.height)
-            .saturating_sub(shadow.spread.into_unsigned())
-            / <span class="number">2</span>)
-        .saturating_sub(max_corner);
-        <span class="kw">let </span>blur_overage = shadow.blur_radius.into_unsigned().saturating_sub(max_blur);
-
-        child_size + padding_amount + child_shadow_offset_amount + shadow_spread * <span class="number">2 </span>+ blur_overage
-    }
+        child_size + padding_amount + child_shadow_offset_amount + shadow_spread * <span class="number">2
+    </span>}
 
     <span class="kw">fn </span>root_behavior(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1215,7 +1241,7 @@
 <span class="attr">#[allow(clippy::too_many_lines)]
 </span><span class="kw">fn </span>render_shadow(
     child_area: <span class="kw-2">&amp;</span>Rect&lt;Px&gt;,
-    corner_radii: <span class="kw-2">&amp;</span>CornerRadii&lt;Px&gt;,
+    <span class="kw-2">mut </span>corner_radii: CornerRadii&lt;Px&gt;,
     shadow: <span class="kw-2">&amp;</span>ContainerShadow&lt;Px&gt;,
     background: Color,
     context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
@@ -1224,15 +1250,19 @@
     <span class="kw">let </span>shadow_color =
         shadow_color.with_alpha_f32(shadow_color.alpha_f32() * background.alpha_f32());
 
+    <span class="kw">let </span>min_dimension = child_area.size.width.min(child_area.size.height);
+    <span class="kw">let </span>max_corner_radii = min_dimension / <span class="number">2</span>;
+
+    corner_radii = corner_radii.map(|r| r.min(max_corner_radii));
+
     <span class="kw">let </span>max_corner = corner_radii
         .top_left
         .max(corner_radii.top_right)
         .max(corner_radii.bottom_left)
         .max(corner_radii.bottom_right);
 
-    <span class="kw">let </span>max_blur =
-        (child_area.size.width.min(child_area.size.height) - shadow.spread) / <span class="number">2 </span>- max_corner;
-    <span class="kw">let </span>blur = shadow.blur_radius.min(max_blur);
+    <span class="kw">let </span>max_blur = min_dimension / <span class="number">2 </span>- max_corner;
+    <span class="kw">let </span>blur = shadow.blur_radius.min(max_blur).max(Px::ZERO);
     <span class="kw">let </span>gradient_size = shadow.spread + blur;
 
     <span class="kw">if </span>gradient_size &gt; <span class="number">0 </span>{
@@ -1439,7 +1469,7 @@
     } <span class="kw">else </span>{
         context.gfx.draw_shape(<span class="kw-2">&amp;</span>Shape::filled_round_rect(
             Rect::new(shadow.offset.max(Point::ZERO), child_area.size),
-            <span class="kw-2">*</span>corner_radii,
+            corner_radii,
             shadow_color,
         ));
     }
