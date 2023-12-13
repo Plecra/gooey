@@ -717,6 +717,8 @@
 <a href="#717" id="717">717</a>
 <a href="#718" id="718">718</a>
 <a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Widgets that stack in the Z-direction.
 
 </span><span class="kw">use </span>std::fmt;
@@ -728,7 +730,7 @@
 <span class="kw">use </span>kludgine::figures::units::{Px, UPx};
 <span class="kw">use </span>kludgine::figures::{IntoSigned, IntoUnsigned, Point, Rect, Size, Zero};
 
-<span class="kw">use </span><span class="kw">crate</span>::animation::easings::{EaseInQuadradic, EaseOutQuadradic};
+<span class="kw">use </span><span class="kw">crate</span>::animation::easings::EaseOutQuadradic;
 <span class="kw">use </span><span class="kw">crate</span>::animation::{AnimationTarget, Spawn, ZeroToOne};
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, DynamicGuard, Generation, IntoValue, Value};
@@ -924,7 +926,9 @@
             };
 
             <span class="kw">let </span>opacity = child.opacity.get_tracking_refresh(context);
-            context.for_other(mounted).with_opacity(opacity).redraw();
+            <span class="kw">let </span><span class="kw-2">mut </span>context = context.for_other(mounted);
+            context.apply_opacity(opacity);
+            context.redraw();
         }
     }
 

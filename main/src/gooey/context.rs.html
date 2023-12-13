@@ -1456,6 +1456,9 @@
 <a href="#1456" id="1456">1456</a>
 <a href="#1457" id="1457">1457</a>
 <a href="#1458" id="1458">1458</a>
+<a href="#1459" id="1459">1459</a>
+<a href="#1460" id="1460">1460</a>
+<a href="#1461" id="1461">1461</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
@@ -2033,11 +2036,9 @@
     <span class="doccomment">/// Updates `self` to have `opacity`.
     ///
     /// This setting will be mixed with the current opacity value.
-    </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>with_opacity(<span class="kw-2">mut </span><span class="self">self</span>, opacity: <span class="kw">impl </span>Into&lt;ZeroToOne&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>apply_opacity(<span class="kw-2">&amp;mut </span><span class="self">self</span>, opacity: <span class="kw">impl </span>Into&lt;ZeroToOne&gt;) {
         <span class="self">self</span>.gfx.opacity <span class="kw-2">*</span>= opacity.into();
-        <span class="self">self
-    </span>}
+    }
 
     <span class="doccomment">/// Returns a new graphics context that renders to the `clip` rectangle.
     </span><span class="kw">pub fn </span>clipped_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, clip: Rect&lt;Px&gt;) -&gt; GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {
@@ -2126,15 +2127,20 @@
             <span class="string">&quot;redraw called without set_widget_layout&quot;
         </span>);
 
-        <span class="kw">let </span>background = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>WidgetBackground);
-        <span class="self">self</span>.fill(background);
-
-        <span class="self">self</span>.apply_current_font_settings();
-
         <span class="self">self</span>.current_node
             .tree
             .note_widget_rendered(<span class="self">self</span>.current_node.node_id);
-        <span class="self">self</span>.current_node.clone().lock().as_widget().redraw(<span class="self">self</span>);
+        <span class="kw">let </span>widget = <span class="self">self</span>.current_node.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>widget = widget.lock();
+        <span class="kw">if </span>!widget.as_widget().full_control_redraw() {
+            <span class="kw">let </span>background = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>WidgetBackground);
+            <span class="self">self</span>.fill(background);
+
+            <span class="self">self</span>.apply_current_font_settings();
+            <span class="self">self</span>.apply_opacity(<span class="self">self</span>.get(<span class="kw-2">&amp;</span>Opacity));
+        }
+
+        widget.as_widget().redraw(<span class="self">self</span>);
     }
 }
 

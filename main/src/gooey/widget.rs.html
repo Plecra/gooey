@@ -1933,6 +1933,22 @@
 <a href="#1933" id="1933">1933</a>
 <a href="#1934" id="1934">1934</a>
 <a href="#1935" id="1935">1935</a>
+<a href="#1936" id="1936">1936</a>
+<a href="#1937" id="1937">1937</a>
+<a href="#1938" id="1938">1938</a>
+<a href="#1939" id="1939">1939</a>
+<a href="#1940" id="1940">1940</a>
+<a href="#1941" id="1941">1941</a>
+<a href="#1942" id="1942">1942</a>
+<a href="#1943" id="1943">1943</a>
+<a href="#1944" id="1944">1944</a>
+<a href="#1945" id="1945">1945</a>
+<a href="#1946" id="1946">1946</a>
+<a href="#1947" id="1947">1947</a>
+<a href="#1948" id="1948">1948</a>
+<a href="#1949" id="1949">1949</a>
+<a href="#1950" id="1950">1950</a>
+<a href="#1951" id="1951">1951</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1997,6 +2013,22 @@
     </span><span class="kw">fn </span>summarize(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
         Debug::fmt(<span class="self">self</span>, f)
     }
+
+    <span class="doccomment">/// Returns true if this widget handles all built-in style components that
+    /// apply.
+    ///
+    /// These components are:
+    ///
+    /// - [`Opacity`](crate::styles::components::Opacity)
+    /// - [`WidgetBackground`](crate::styles::components::WidgetBackground)
+    /// - [`FontFamily`]
+    /// - [`TextSize`]
+    /// - [`LineHeight`]
+    /// - [`FontStyle`]
+    /// - [`FontWeight`]
+    </span><span class="kw">fn </span>full_control_redraw(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="bool-val">false
+    </span>}
 
     <span class="doccomment">/// Layout this widget and returns the ideal size based on its contents and
     /// the `available_space`.

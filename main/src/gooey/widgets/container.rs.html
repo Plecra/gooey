@@ -908,6 +908,13 @@
 <a href="#908" id="908">908</a>
 <a href="#909" id="909">909</a>
 <a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A visual container widget.
 
 </span><span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
@@ -918,7 +925,7 @@
 <span class="kw">use </span>kludgine::Color;
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{EventContext, GraphicsContext, LayoutContext, WidgetContext};
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{CornerRadius, IntrinsicPadding, SurfaceColor};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{CornerRadius, IntrinsicPadding, Opacity, SurfaceColor};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Component, ContainerLevel, Dimension, Edges, RequireInvalidation, Styles};
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, RootBehavior, Widget, WidgetInstance, WidgetRef};
@@ -1121,9 +1128,16 @@
             .finish()
     }
 
+    <span class="kw">fn </span>full_control_redraw(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="bool-val">true
+    </span>}
+
     <span class="attr">#[allow(clippy::too_many_lines)]
     </span><span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
+        <span class="kw">let </span>opacity = context.get(<span class="kw-2">&amp;</span>Opacity);
+
         <span class="kw">let </span>background = <span class="self">self</span>.effective_background_color(context);
+        <span class="kw">let </span>background = background.with_alpha_f32(background.alpha_f32() * <span class="kw-2">*</span>opacity);
         <span class="kw">if </span>background.alpha() &gt; <span class="number">0 </span>{
             <span class="kw">let </span>shadow = <span class="self">self</span>.effective_shadow(context).into_px(context.gfx.scale());
 
