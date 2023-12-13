@@ -2577,6 +2577,23 @@
 <a href="#2577" id="2577">2577</a>
 <a href="#2578" id="2578">2578</a>
 <a href="#2579" id="2579">2579</a>
+<a href="#2580" id="2580">2580</a>
+<a href="#2581" id="2581">2581</a>
+<a href="#2582" id="2582">2582</a>
+<a href="#2583" id="2583">2583</a>
+<a href="#2584" id="2584">2584</a>
+<a href="#2585" id="2585">2585</a>
+<a href="#2586" id="2586">2586</a>
+<a href="#2587" id="2587">2587</a>
+<a href="#2588" id="2588">2588</a>
+<a href="#2589" id="2589">2589</a>
+<a href="#2590" id="2590">2590</a>
+<a href="#2591" id="2591">2591</a>
+<a href="#2592" id="2592">2592</a>
+<a href="#2593" id="2593">2593</a>
+<a href="#2594" id="2594">2594</a>
+<a href="#2595" id="2595">2595</a>
+<a href="#2596" id="2596">2596</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -2668,7 +2685,7 @@
             name.name().into_owned(),
             StoredComponent {
                 inherited: <span class="bool-val">false</span>,
-                inheritable: <span class="bool-val">false</span>,
+                inheritable: <span class="bool-val">true</span>,
                 component: component.into_value().into_component_value(),
             },
         );
@@ -2774,13 +2791,30 @@
             .unwrap_or_else(|err| err.as_ref().clone())
             .components
         {
-            <span class="kw">if </span>value.inherited || !value.inheritable {
+            <span class="kw">if </span>!value.inheritable || <span class="self">self</span>.<span class="number">0</span>.components.contains_key(<span class="kw-2">&amp;</span>name) {
                 <span class="kw">continue</span>;
             }
 
             value.inherited = <span class="bool-val">true</span>;
             <span class="self">self</span>.insert_named(name, value);
         }
+    }
+
+    <span class="doccomment">/// Returns this collection of styles without any local style definitions.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>into_inherited(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span><span class="self">self</span>.<span class="number">0</span>.components.values().any(|stored| !stored.inheritable) {
+            <span class="self">Self</span>(Arc::new(StyleData {
+                components: Arc::try_unwrap(<span class="self">self</span>.<span class="number">0</span>)
+                    .unwrap_or_else(|err| err.as_ref().clone())
+                    .components
+                    .into_iter()
+                    .filter(|(<span class="kw">_</span>, stored)| stored.inheritable)
+                    .collect(),
+            }))
+        } <span class="kw">else </span>{
+            <span class="self">self
+        </span>}
     }
 }
 

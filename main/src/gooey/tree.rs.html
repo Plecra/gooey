@@ -617,6 +617,10 @@
 <a href="#617" id="617">617</a>
 <a href="#618" id="618">618</a>
 <a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::sync::{Arc, Mutex};
 
@@ -1226,7 +1230,11 @@
     <span class="kw">fn </span>child_styles(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Styles {
         <span class="kw">let </span><span class="kw-2">mut </span>effective_styles = <span class="self">self</span>.effective_styles.clone();
         <span class="kw">if let </span><span class="prelude-val">Some</span>(associated) = <span class="kw-2">&amp;</span><span class="self">self</span>.associated_styles {
-            effective_styles.inherit_from(associated.get());
+            <span class="kw">let </span><span class="kw-2">mut </span>merged = associated.get();
+            merged.inherit_from(effective_styles);
+            effective_styles = merged;
+        } <span class="kw">else </span>{
+            effective_styles = effective_styles.into_inherited();
         }
         effective_styles
     }
