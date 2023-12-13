@@ -1443,6 +1443,19 @@
 <a href="#1443" id="1443">1443</a>
 <a href="#1444" id="1444">1444</a>
 <a href="#1445" id="1445">1445</a>
+<a href="#1446" id="1446">1446</a>
+<a href="#1447" id="1447">1447</a>
+<a href="#1448" id="1448">1448</a>
+<a href="#1449" id="1449">1449</a>
+<a href="#1450" id="1450">1450</a>
+<a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
+<a href="#1453" id="1453">1453</a>
+<a href="#1454" id="1454">1454</a>
+<a href="#1455" id="1455">1455</a>
+<a href="#1456" id="1456">1456</a>
+<a href="#1457" id="1457">1457</a>
+<a href="#1458" id="1458">1458</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types that provide access to the Gooey runtime.
 </span><span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
@@ -1459,11 +1472,12 @@
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
 <span class="kw">use </span>kludgine::{Color, Kludgine};
 
+<span class="kw">use </span><span class="kw">crate</span>::animation::ZeroToOne;
 <span class="kw">use </span><span class="kw">crate</span>::context::sealed::WindowHandle;
 <span class="kw">use </span><span class="kw">crate</span>::graphics::Graphics;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
     CornerRadius, FontFamily, FontStyle, FontWeight, HighlightColor, LayoutOrder, LineHeight,
-    TextSize, WidgetBackground,
+    Opacity, TextSize, WidgetBackground,
 };
 <span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, Styles, Theme, ThemePair};
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
@@ -2000,18 +2014,30 @@
         </span>Widget: ManageWidget,
         Widget::Managed: MapManagedWidget&lt;GraphicsContext&lt;<span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;child</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt;&gt;,
     {
+        <span class="kw">let </span>opacity = <span class="self">self</span>.get(<span class="kw-2">&amp;</span>Opacity);
         widget.manage(<span class="self">self</span>).map(|widget| {
             <span class="kw">let </span>widget = <span class="self">self</span>.widget.for_other(<span class="kw-2">&amp;</span>widget);
             <span class="kw">let </span>layout = widget.last_layout().map_or_else(
                 || Rect::from(<span class="self">self</span>.gfx.clip_rect().size).into_signed(),
                 |rect| rect - <span class="self">self</span>.gfx.region().origin,
             );
+            <span class="kw">let </span><span class="kw-2">mut </span>gfx = <span class="self">self</span>.gfx.clipped_to(layout);
+            gfx.opacity <span class="kw-2">*</span>= opacity;
             GraphicsContext {
                 widget,
-                gfx: Exclusive::Owned(<span class="self">self</span>.gfx.clipped_to(layout)),
+                gfx: Exclusive::Owned(gfx),
             }
         })
     }
+
+    <span class="doccomment">/// Updates `self` to have `opacity`.
+    ///
+    /// This setting will be mixed with the current opacity value.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_opacity(<span class="kw-2">mut </span><span class="self">self</span>, opacity: <span class="kw">impl </span>Into&lt;ZeroToOne&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.gfx.opacity <span class="kw-2">*</span>= opacity.into();
+        <span class="self">self
+    </span>}
 
     <span class="doccomment">/// Returns a new graphics context that renders to the `clip` rectangle.
     </span><span class="kw">pub fn </span>clipped_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, clip: Rect&lt;Px&gt;) -&gt; GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;window</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;gfx</span>, <span class="lifetime">&#39;pass</span>&gt; {

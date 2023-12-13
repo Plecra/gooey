@@ -2136,7 +2136,7 @@
         _window: kludgine::app::Window&lt;<span class="lifetime">&#39;_</span>, WindowCommand&gt;,
         graphics: <span class="kw-2">&amp;mut </span>kludgine::RenderingGraphics&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;pass</span>&gt;,
     ) -&gt; bool {
-        <span class="self">self</span>.contents.render(graphics);
+        <span class="self">self</span>.contents.render(<span class="number">1.</span>, graphics);
 
         !<span class="self">self</span>.should_close
     }

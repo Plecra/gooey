@@ -237,6 +237,9 @@
 <a href="#237" id="237">237</a>
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 
 </span><span class="kw">use </span>kludgine::cosmic_text::{FamilyOwned, Style, Weight};
@@ -245,7 +248,7 @@
 <span class="kw">use </span>kludgine::Color;
 
 <span class="kw">use </span><span class="kw">crate</span>::animation::easings::{EaseInOutQuadradic, EaseInQuadradic, EaseOutQuadradic};
-<span class="kw">use </span><span class="kw">crate</span>::animation::EasingFunction;
+<span class="kw">use </span><span class="kw">crate</span>::animation::{EasingFunction, ZeroToOne};
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Dimension, FocusableWidgets, FontFamilyList, VisualOrder};
 
 <span class="doccomment">/// Defines a set of style components for Gooey.
@@ -474,6 +477,9 @@
         </span>Heading5FontFamily(FontFamilyList, <span class="string">&quot;heading_font_family_5&quot;</span>, @HeadingFontFamily)
         <span class="doccomment">/// The [`FontFamilyList`] to apply to h6 headings.
         </span>Heading6FontFamily(FontFamilyList, <span class="string">&quot;heading_font_family_6&quot;</span>, @HeadingFontFamily)
+
+        <span class="doccomment">/// The opaqueness of drawing calls
+        </span>Opacity(ZeroToOne, <span class="string">&quot;opacity&quot;</span>, ZeroToOne::ONE)
     }
 }
 </code></pre></div></section></main></body></html>
