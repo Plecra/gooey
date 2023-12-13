@@ -2501,6 +2501,82 @@
 <a href="#2501" id="2501">2501</a>
 <a href="#2502" id="2502">2502</a>
 <a href="#2503" id="2503">2503</a>
+<a href="#2504" id="2504">2504</a>
+<a href="#2505" id="2505">2505</a>
+<a href="#2506" id="2506">2506</a>
+<a href="#2507" id="2507">2507</a>
+<a href="#2508" id="2508">2508</a>
+<a href="#2509" id="2509">2509</a>
+<a href="#2510" id="2510">2510</a>
+<a href="#2511" id="2511">2511</a>
+<a href="#2512" id="2512">2512</a>
+<a href="#2513" id="2513">2513</a>
+<a href="#2514" id="2514">2514</a>
+<a href="#2515" id="2515">2515</a>
+<a href="#2516" id="2516">2516</a>
+<a href="#2517" id="2517">2517</a>
+<a href="#2518" id="2518">2518</a>
+<a href="#2519" id="2519">2519</a>
+<a href="#2520" id="2520">2520</a>
+<a href="#2521" id="2521">2521</a>
+<a href="#2522" id="2522">2522</a>
+<a href="#2523" id="2523">2523</a>
+<a href="#2524" id="2524">2524</a>
+<a href="#2525" id="2525">2525</a>
+<a href="#2526" id="2526">2526</a>
+<a href="#2527" id="2527">2527</a>
+<a href="#2528" id="2528">2528</a>
+<a href="#2529" id="2529">2529</a>
+<a href="#2530" id="2530">2530</a>
+<a href="#2531" id="2531">2531</a>
+<a href="#2532" id="2532">2532</a>
+<a href="#2533" id="2533">2533</a>
+<a href="#2534" id="2534">2534</a>
+<a href="#2535" id="2535">2535</a>
+<a href="#2536" id="2536">2536</a>
+<a href="#2537" id="2537">2537</a>
+<a href="#2538" id="2538">2538</a>
+<a href="#2539" id="2539">2539</a>
+<a href="#2540" id="2540">2540</a>
+<a href="#2541" id="2541">2541</a>
+<a href="#2542" id="2542">2542</a>
+<a href="#2543" id="2543">2543</a>
+<a href="#2544" id="2544">2544</a>
+<a href="#2545" id="2545">2545</a>
+<a href="#2546" id="2546">2546</a>
+<a href="#2547" id="2547">2547</a>
+<a href="#2548" id="2548">2548</a>
+<a href="#2549" id="2549">2549</a>
+<a href="#2550" id="2550">2550</a>
+<a href="#2551" id="2551">2551</a>
+<a href="#2552" id="2552">2552</a>
+<a href="#2553" id="2553">2553</a>
+<a href="#2554" id="2554">2554</a>
+<a href="#2555" id="2555">2555</a>
+<a href="#2556" id="2556">2556</a>
+<a href="#2557" id="2557">2557</a>
+<a href="#2558" id="2558">2558</a>
+<a href="#2559" id="2559">2559</a>
+<a href="#2560" id="2560">2560</a>
+<a href="#2561" id="2561">2561</a>
+<a href="#2562" id="2562">2562</a>
+<a href="#2563" id="2563">2563</a>
+<a href="#2564" id="2564">2564</a>
+<a href="#2565" id="2565">2565</a>
+<a href="#2566" id="2566">2566</a>
+<a href="#2567" id="2567">2567</a>
+<a href="#2568" id="2568">2568</a>
+<a href="#2569" id="2569">2569</a>
+<a href="#2570" id="2570">2570</a>
+<a href="#2571" id="2571">2571</a>
+<a href="#2572" id="2572">2572</a>
+<a href="#2573" id="2573">2573</a>
+<a href="#2574" id="2574">2574</a>
+<a href="#2575" id="2575">2575</a>
+<a href="#2576" id="2576">2576</a>
+<a href="#2577" id="2577">2577</a>
+<a href="#2578" id="2578">2578</a>
+<a href="#2579" id="2579">2579</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for styling widgets.
 
 </span><span class="kw">use </span>std::any::Any;
@@ -2552,10 +2628,10 @@
     }
 
     <span class="doccomment">/// Inserts a [`Component`] with a given name.
-    </span><span class="kw">pub fn </span>insert_named(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: ComponentName, component: <span class="kw">impl </span>IntoComponentValue) {
+    </span><span class="kw">pub fn </span>insert_named(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: ComponentName, component: <span class="kw">impl </span>IntoStoredComponent) {
         Arc::make_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>.<span class="number">0</span>)
             .components
-            .insert(name, component.into_component_value());
+            .insert(name, component.into_stored_component());
     }
 
     <span class="doccomment">/// Inserts a [`Component`] using then name provided.
@@ -2588,7 +2664,14 @@
     </span><span class="kw">where
         </span>Value&lt;C::ComponentType&gt;: IntoComponentValue,
     {
-        <span class="self">self</span>.insert(name, component.into_value());
+        <span class="self">self</span>.insert_named(
+            name.name().into_owned(),
+            StoredComponent {
+                inherited: <span class="bool-val">false</span>,
+                inheritable: <span class="bool-val">false</span>,
+                component: component.into_value().into_component_value(),
+            },
+        );
         <span class="self">self
     </span>}
 
@@ -2619,7 +2702,7 @@
             </span>.components
             .get(<span class="kw-2">&amp;</span>component.name())
             .or_else(|| <span class="self">self</span>.<span class="number">0</span>.components.get(<span class="kw-2">&amp;</span>fallback.name()))
-            .and_then(|component| <span class="self">Self</span>::resolve_component(component, context))
+            .and_then(|stored| <span class="self">Self</span>::resolve_component(<span class="kw-2">&amp;</span>stored.component, context))
             .unwrap_or_else(|| fallback.default_value(context))
     }
 
@@ -2666,7 +2749,7 @@
         <span class="self">self</span>.<span class="number">0
             </span>.components
             .get(<span class="kw-2">&amp;</span>component.name())
-            .and_then(|component| <span class="self">Self</span>::resolve_component(component, context))
+            .and_then(|stored| <span class="self">Self</span>::resolve_component(<span class="kw-2">&amp;</span>stored.component, context))
     }
 
     <span class="doccomment">/// Returns the component associated with the given name, or if not found,
@@ -2686,8 +2769,16 @@
 
     <span class="doccomment">/// Inserts all components from `other`, overwriting any existing entries
     /// with the same [`ComponentName`].
-    </span><span class="kw">pub fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: Styles) {
-        <span class="kw">for </span>(name, value) <span class="kw">in </span>other {
+    </span><span class="kw">pub fn </span>inherit_from(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: Styles) {
+        <span class="kw">for </span>(name, <span class="kw-2">mut </span>value) <span class="kw">in </span>Arc::try_unwrap(other.<span class="number">0</span>)
+            .unwrap_or_else(|err| err.as_ref().clone())
+            .components
+        {
+            <span class="kw">if </span>value.inherited || !value.inheritable {
+                <span class="kw">continue</span>;
+            }
+
+            value.inherited = <span class="bool-val">true</span>;
             <span class="self">self</span>.insert_named(name, value);
         }
     }
@@ -2697,11 +2788,11 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
         <span class="kw">let </span><span class="kw-2">mut </span>map = f.debug_struct(<span class="string">&quot;Styles&quot;</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>component_name = String::new();
-        <span class="kw">for </span>(name, component) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>.components {
+        <span class="kw">for </span>(name, stored) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>.components {
             component_name.clear();
             <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>component_name, <span class="string">&quot;{name:?}&quot;</span>)<span class="question-mark">?</span>;
 
-            map.field(<span class="kw-2">&amp;</span>component_name, component);
+            map.field(<span class="kw-2">&amp;</span>component_name, <span class="kw-2">&amp;</span>stored.component);
         }
         map.finish()
     }
@@ -2719,26 +2810,87 @@
 }
 
 <span class="kw">impl </span>IntoIterator <span class="kw">for </span>Styles {
-    <span class="kw">type </span>IntoIter = hash_map::IntoIter&lt;ComponentName, Value&lt;Component&gt;&gt;;
+    <span class="kw">type </span>IntoIter = StylesIntoIter;
     <span class="kw">type </span>Item = (ComponentName, Value&lt;Component&gt;);
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
-        Arc::try_unwrap(<span class="self">self</span>.<span class="number">0</span>)
-            .unwrap_or_else(|err| err.as_ref().clone())
-            .components
-            .into_iter()
+        StylesIntoIter {
+            into_iter: Arc::try_unwrap(<span class="self">self</span>.<span class="number">0</span>)
+                .unwrap_or_else(|err| err.as_ref().clone())
+                .components
+                .into_iter(),
+        }
+    }
+}
+
+<span class="doccomment">/// An iterator that returns the contents of a [`Styles`] collection.
+</span><span class="kw">pub struct </span>StylesIntoIter {
+    into_iter: hash_map::IntoIter&lt;ComponentName, StoredComponent&gt;,
+}
+
+<span class="kw">impl </span>Iterator <span class="kw">for </span>StylesIntoIter {
+    <span class="kw">type </span>Item = (ComponentName, Value&lt;Component&gt;);
+
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="self">self</span>.into_iter
+            .next()
+            .map(|(name, stored)| (name, stored.component))
     }
 }
 
 <span class="attr">#[derive(Default, Clone)]
 </span><span class="kw">struct </span>StyleData {
-    components: AHashMap&lt;ComponentName, Value&lt;Component&gt;&gt;,
+    components: AHashMap&lt;ComponentName, StoredComponent&gt;,
+}
+
+<span class="doccomment">/// A [`Component`] that is stored within a [`Styles`] collection.
+</span><span class="attr">#[derive(Clone)]
+</span><span class="kw">pub struct </span>StoredComponent {
+    inherited: bool,
+    inheritable: bool,
+    component: Value&lt;Component&gt;,
+}
+
+<span class="kw">impl </span>StoredComponent {
+    <span class="doccomment">/// Returns a new component that will not be inherited to children widgets.
+    </span><span class="kw">pub fn </span>local(component: <span class="kw">impl </span>IntoComponentValue) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            inherited: <span class="bool-val">false</span>,
+            inheritable: <span class="bool-val">false</span>,
+            component: component.into_component_value(),
+        }
+    }
 }
 
 <span class="doccomment">/// A value that can be converted into a `Value&lt;Component&gt;`.
 </span><span class="kw">pub trait </span>IntoComponentValue {
     <span class="doccomment">/// Returns `self` stored in a component value.
     </span><span class="kw">fn </span>into_component_value(<span class="self">self</span>) -&gt; Value&lt;Component&gt;;
+}
+
+<span class="doccomment">/// A type that can be converted into a [`StoredComponent`].
+</span><span class="kw">pub trait </span>IntoStoredComponent {
+    <span class="doccomment">/// Returns this value as a stored component.
+    </span><span class="kw">fn </span>into_stored_component(<span class="self">self</span>) -&gt; StoredComponent;
+}
+
+<span class="kw">impl</span>&lt;T&gt; IntoStoredComponent <span class="kw">for </span>T
+<span class="kw">where
+    </span>T: IntoComponentValue,
+{
+    <span class="kw">fn </span>into_stored_component(<span class="self">self</span>) -&gt; StoredComponent {
+        StoredComponent {
+            inherited: <span class="bool-val">false</span>,
+            inheritable: <span class="bool-val">true</span>,
+            component: <span class="self">self</span>.into_component_value(),
+        }
+    }
+}
+
+<span class="kw">impl </span>IntoStoredComponent <span class="kw">for </span>StoredComponent {
+    <span class="kw">fn </span>into_stored_component(<span class="self">self</span>) -&gt; StoredComponent {
+        <span class="self">self
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;T&gt; IntoComponentValue <span class="kw">for </span>T

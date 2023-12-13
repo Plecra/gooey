@@ -189,6 +189,27 @@
 <a href="#189" id="189">189</a>
 <a href="#190" id="190">190</a>
 <a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::context::EventContext;
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{
     FontFamily, FontStyle, FontWeight, Heading1FontFamily, Heading1Style, Heading1Weight,
@@ -199,7 +220,9 @@
     LineHeight8, TextSize, TextSize1, TextSize2, TextSize3, TextSize4, TextSize5, TextSize6,
     TextSize7, TextSize8,
 };
-<span class="kw">use </span><span class="kw">crate</span>::styles::{ComponentDefinition, IntoComponentValue, IntoDynamicComponentValue, Styles};
+<span class="kw">use </span><span class="kw">crate</span>::styles::{
+    ComponentDefinition, IntoComponentValue, IntoDynamicComponentValue, StoredComponent, Styles,
+};
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, WidgetRef, WrapperWidget};
 
@@ -239,6 +262,25 @@
     {
         <span class="self">self</span>.map_styles_mut(|styles| {
             styles.insert(name, component.into_value());
+        });
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Associates a style component with `self`.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_local&lt;C: ComponentDefinition&gt;(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        name: <span class="kw-2">&amp;</span>C,
+        component: <span class="kw">impl </span>IntoValue&lt;C::ComponentType&gt;,
+    ) -&gt; Style
+    <span class="kw">where
+        </span>Value&lt;C::ComponentType&gt;: IntoComponentValue,
+    {
+        <span class="self">self</span>.map_styles_mut(|styles| {
+            styles.insert_named(
+                name.name().into_owned(),
+                StoredComponent::local(component.into_value()),
+            );
         });
         <span class="self">self
     </span>}
