@@ -177,6 +177,24 @@
 <a href="#177" id="177">177</a>
 <a href="#178" id="178">178</a>
 <a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines a collection of [`Children`] widgets into one.
 
 </span><span class="kw">use </span>kludgine::figures::units::UPx;
@@ -184,6 +202,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{AsEventContext, EventContext, GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::IntrinsicPadding;
+<span class="kw">use </span><span class="kw">crate</span>::styles::FlexibleDimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Generation, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{Children, ManagedWidget, Widget, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::grid::{GridDimension, GridLayout, Orientation};
@@ -197,6 +216,8 @@
     orientation: Orientation,
     <span class="doccomment">/// The children widgets that belong to this array.
     </span><span class="kw">pub </span>children: Value&lt;Children&gt;,
+    <span class="doccomment">/// The amount of space to place between each widget.
+    </span><span class="kw">pub </span>gutter: Value&lt;FlexibleDimension&gt;,
     layout: GridLayout,
     layout_generation: <span class="prelude-ty">Option</span>&lt;Generation&gt;,
     <span class="comment">// TODO Refactor synced_children into its own type.
@@ -209,6 +230,7 @@
         <span class="self">Self </span>{
             orientation,
             children: widgets.into_value(),
+            gutter: Value::Constant(FlexibleDimension::Auto),
             layout: GridLayout::new(orientation),
             layout_generation: <span class="prelude-val">None</span>,
             synced_children: Vec::new(),
@@ -224,6 +246,13 @@
     </span><span class="kw">pub fn </span>rows(widgets: <span class="kw">impl </span>IntoValue&lt;Children&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(Orientation::Row, widgets)
     }
+
+    <span class="doccomment">/// Sets the space between each child to `gutter` and returns self.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>gutter(<span class="kw-2">mut </span><span class="self">self</span>, gutter: <span class="kw">impl </span>IntoValue&lt;FlexibleDimension&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.gutter = gutter.into_value();
+        <span class="self">self
+    </span>}
 
     <span class="kw">fn </span>synchronize_children(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>current_generation = <span class="self">self</span>.children.generation();
@@ -315,9 +344,16 @@
     ) -&gt; Size&lt;UPx&gt; {
         <span class="self">self</span>.synchronize_children(<span class="kw-2">&amp;mut </span>context.as_event_context());
 
+        <span class="self">self</span>.gutter.invalidate_when_changed(context);
+        <span class="kw">let </span>gutter = <span class="kw">match </span><span class="self">self</span>.gutter.get() {
+            FlexibleDimension::Auto =&gt; context.get(<span class="kw-2">&amp;</span>IntrinsicPadding),
+            FlexibleDimension::Dimension(dimension) =&gt; dimension,
+        }
+        .into_upx(context.gfx.scale());
+
         <span class="kw">let </span>content_size = <span class="self">self</span>.layout.update(
             available_space,
-            context.get(<span class="kw-2">&amp;</span>IntrinsicPadding).into_upx(context.gfx.scale()),
+            gutter,
             context.gfx.scale(),
             |child_index, _element, constraints, persist| {
                 <span class="kw">let </span><span class="kw-2">mut </span>context = context.for_other(<span class="kw-2">&amp;</span><span class="self">self</span>.synced_children[child_index]);
