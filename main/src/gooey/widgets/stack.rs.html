@@ -185,16 +185,6 @@
 <a href="#185" id="185">185</a>
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that combines a collection of [`Children`] widgets into one.
 
 </span><span class="kw">use </span>kludgine::figures::units::UPx;
@@ -204,7 +194,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::IntrinsicPadding;
 <span class="kw">use </span><span class="kw">crate</span>::styles::FlexibleDimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Generation, IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{Children, ManagedWidget, Widget, WidgetRef};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{Children, ChildrenSyncChange, ManagedWidget, Widget, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::grid::{GridDimension, GridLayout, Orientation};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Expand, Resize};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
@@ -263,24 +253,11 @@
         ) {
             <span class="self">self</span>.layout_generation = <span class="self">self</span>.children.generation();
             <span class="self">self</span>.children.map(|children| {
-                <span class="kw">for </span>(index, widget) <span class="kw">in </span>children.iter().enumerate() {
-                    <span class="kw">if </span><span class="self">self
-                        </span>.synced_children
-                        .get(index)
-                        .map_or(<span class="bool-val">true</span>, |child| child != widget)
-                    {
-                        <span class="comment">// These entries do not match. See if we can find the
-                        // new id somewhere else, if so we can swap the entries.
-                        </span><span class="kw">if let </span><span class="prelude-val">Some</span>((swap_index, <span class="kw">_</span>)) = <span class="self">self
-                            </span>.synced_children
-                            .iter()
-                            .enumerate()
-                            .skip(index + <span class="number">1</span>)
-                            .find(|(<span class="kw">_</span>, child)| <span class="kw-2">*</span>child == widget)
-                        {
-                            <span class="self">self</span>.synced_children.swap(index, swap_index);
-                            <span class="self">self</span>.layout.swap(index, swap_index);
-                        } <span class="kw">else </span>{
+                children.synchronize_with(
+                    <span class="kw-2">&amp;mut </span><span class="self">self</span>.synced_children,
+                    |this, index| this.get(index).map(ManagedWidget::instance),
+                    |this, change| <span class="kw">match </span>change {
+                        ChildrenSyncChange::Insert(index, widget) =&gt; {
                             <span class="comment">// This is a brand new child.
                             </span><span class="kw">let </span>guard = widget.lock();
                             <span class="kw">let </span>(<span class="kw-2">mut </span>widget, dimension) = <span class="kw">if let </span><span class="prelude-val">Some</span>((weight, expand)) =
@@ -309,20 +286,23 @@
                                 )
                             };
                             drop(guard);
-                            <span class="self">self</span>.synced_children.insert(index, widget.mounted(context));
+                            this.insert(index, widget.mounted(context));
 
                             <span class="self">self</span>.layout
                                 .insert(index, dimension, context.kludgine.scale());
                         }
-                    }
-                }
-
-                <span class="comment">// Any children remaining at the end of this process are ones
-                // that have been removed.
-                </span><span class="kw">for </span>removed <span class="kw">in </span><span class="self">self</span>.synced_children.drain(children.len()..) {
-                    context.remove_child(<span class="kw-2">&amp;</span>removed);
-                }
-                <span class="self">self</span>.layout.truncate(children.len());
+                        ChildrenSyncChange::Swap(a, b) =&gt; {
+                            this.swap(a, b);
+                            <span class="self">self</span>.layout.swap(a, b);
+                        }
+                        ChildrenSyncChange::Truncate(length) =&gt; {
+                            <span class="kw">for </span>removed <span class="kw">in </span>this.drain(length..) {
+                                context.remove_child(<span class="kw-2">&amp;</span>removed);
+                            }
+                            <span class="self">self</span>.layout.truncate(length);
+                        }
+                    },
+                );
             });
         }
     }
