@@ -2113,6 +2113,20 @@
 <a href="#2113" id="2113">2113</a>
 <a href="#2114" id="2114">2114</a>
 <a href="#2115" id="2115">2115</a>
+<a href="#2116" id="2116">2116</a>
+<a href="#2117" id="2117">2117</a>
+<a href="#2118" id="2118">2118</a>
+<a href="#2119" id="2119">2119</a>
+<a href="#2120" id="2120">2120</a>
+<a href="#2121" id="2121">2121</a>
+<a href="#2122" id="2122">2122</a>
+<a href="#2123" id="2123">2123</a>
+<a href="#2124" id="2124">2124</a>
+<a href="#2125" id="2125">2125</a>
+<a href="#2126" id="2126">2126</a>
+<a href="#2127" id="2127">2127</a>
+<a href="#2128" id="2128">2128</a>
+<a href="#2129" id="2129">2129</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -2157,7 +2171,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::widgets::layers::{OverlayLayer, Tooltipped};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{
     Align, Button, Checkbox, Collapse, Container, Expand, Layers, Resize, Scroll, Space, Stack,
-    Style, Themed, ThemedMode, Validated,
+    Style, Themed, ThemedMode, Validated, Wrap,
 };
 <span class="kw">use </span><span class="kw">crate</span>::window::{RunningWindow, ThemeMode, Window, WindowBehavior};
 <span class="kw">use crate</span>::{ConstraintLimit, Run};
@@ -3878,6 +3892,13 @@
         Layers::new(<span class="self">self</span>)
     }
 
+    <span class="doccomment">/// Returns a [`Wrap`] that lays the children out horizontally, wrapping
+    /// into additional rows as needed.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>wrap(<span class="self">self</span>) -&gt; Wrap {
+        Wrap::new(<span class="self">self</span>)
+    }
+
     <span class="doccomment">/// Synchronizes this list of children with another collection.
     ///
     /// This function updates `collection` by calling `change_fn` for each
@@ -3943,6 +3964,13 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>into_layers(<span class="self">self</span>) -&gt; Layers {
         Layers::new(<span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Returns a [`Wrap`] that lays the children out horizontally, wrapping
+    /// into additional rows as needed.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>wrap(<span class="self">self</span>) -&gt; Wrap {
+        Wrap::new(<span class="self">self</span>)
     }
 }
 

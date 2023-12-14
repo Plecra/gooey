@@ -225,8 +225,6 @@
 <a href="#225" id="225">225</a>
 <a href="#226" id="226">226</a>
 <a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A widget that displays an image/texture.
 
 </span><span class="kw">use </span>kludgine::figures::units::UPx;
@@ -378,16 +376,14 @@
         available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;UPx&gt; {
-        <span class="self">self</span>.scaling.invalidate_when_changed(context);
-
-        <span class="kw">match </span><span class="self">self</span>.scaling.get() {
+        <span class="kw">match </span><span class="self">self</span>.scaling.get_tracking_invalidate(context) {
             ImageScaling::Aspect { .. } | ImageScaling::Stretch =&gt; {
                 available_space.map(ConstraintLimit::min)
             }
-            ImageScaling::Scale(factor) =&gt; {
-                <span class="self">self</span>.contents.invalidate_when_changed(context);
-                <span class="self">self</span>.contents.map(AnyTexture::size).map(|px| px * factor)
-            }
+            ImageScaling::Scale(factor) =&gt; <span class="self">self
+                </span>.contents
+                .map_tracking_invalidate(context, AnyTexture::size)
+                .map(|px| px * factor),
         }
     }
 }

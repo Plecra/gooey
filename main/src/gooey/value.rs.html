@@ -2436,6 +2436,17 @@
 <a href="#2436" id="2436">2436</a>
 <a href="#2437" id="2437">2437</a>
 <a href="#2438" id="2438">2438</a>
+<a href="#2439" id="2439">2439</a>
+<a href="#2440" id="2440">2440</a>
+<a href="#2441" id="2441">2441</a>
+<a href="#2442" id="2442">2442</a>
+<a href="#2443" id="2443">2443</a>
+<a href="#2444" id="2444">2444</a>
+<a href="#2445" id="2445">2445</a>
+<a href="#2446" id="2446">2446</a>
+<a href="#2447" id="2447">2447</a>
+<a href="#2448" id="2448">2448</a>
+<a href="#2449" id="2449">2449</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for storing and interacting with values in Widgets.
 
 </span><span class="kw">use </span>std::collections::HashMap;
@@ -4085,13 +4096,24 @@
 
     <span class="doccomment">/// Returns a clone of the currently stored value.
     ///
-    /// If `self` is a dynamic, `context` will be invalidated when the value is
+    /// If `self` is a dynamic, `context` will be refreshed when the value is
     /// updated.
     </span><span class="kw">pub fn </span>get_tracked(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
     <span class="kw">where
         </span>T: Clone,
     {
         <span class="self">self</span>.map_tracking_redraw(context, Clone::clone)
+    }
+
+    <span class="doccomment">/// Returns a clone of the currently stored value.
+    ///
+    /// If `self` is a dynamic, `context` will be invalidated when the value is
+    /// updated.
+    </span><span class="kw">pub fn </span>get_tracking_invalidate(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
+    <span class="kw">where
+        </span>T: Clone,
+    {
+        <span class="self">self</span>.map_tracking_invalidate(context, Clone::clone)
     }
 
     <span class="doccomment">/// Returns the current generation of the data stored, if the contained

@@ -929,6 +929,8 @@
 <a href="#929" id="929">929</a>
 <a href="#930" id="930">930</a>
 <a href="#931" id="931">931</a>
+<a href="#932" id="932">932</a>
+<a href="#933" id="933">933</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A visual container widget.
 
 </span><span class="kw">use </span>std::ops::Div;
@@ -1099,11 +1101,6 @@
         .map(|dim| dim.into_px(context.gfx.scale()))
     }
 
-    <span class="kw">fn </span>effective_shadow(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; ContainerShadow {
-        <span class="self">self</span>.shadow.invalidate_when_changed(context);
-        <span class="self">self</span>.shadow.get()
-    }
-
     <span class="kw">fn </span>effective_background_color(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; kludgine::Color {
         <span class="kw">let </span>background = <span class="kw">match </span><span class="self">self</span>.background.get() {
             ContainerBackground::Color(color) =&gt; EffectiveBackground::Color(color),
@@ -1155,7 +1152,10 @@
         <span class="kw">let </span>background = <span class="self">self</span>.effective_background_color(context);
         <span class="kw">let </span>background = background.with_alpha_f32(background.alpha_f32() * <span class="kw-2">*</span>opacity);
         <span class="kw">if </span>background.alpha() &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>shadow = <span class="self">self</span>.effective_shadow(context).into_px(context.gfx.scale());
+            <span class="kw">let </span>shadow = <span class="self">self
+                </span>.shadow
+                .get_tracking_invalidate(context)
+                .into_px(context.gfx.scale());
 
             <span class="kw">let </span>child_shadow_offset = shadow.offset.min(Point::ZERO).abs();
             <span class="kw">let </span>child_size = context.gfx.region().size - shadow.spread * <span class="number">2 </span>- shadow.offset.abs();
@@ -1213,7 +1213,10 @@
             .max(corner_radii.bottom_left / std::f32::consts::PI);
         <span class="kw">let </span>padding_amount = padding.size();
 
-        <span class="kw">let </span>shadow = <span class="self">self</span>.effective_shadow(context).into_px(context.gfx.scale());
+        <span class="kw">let </span>shadow = <span class="self">self
+            </span>.shadow
+            .get_tracking_invalidate(context)
+            .into_px(context.gfx.scale());
         <span class="kw">let </span>shadow_spread = shadow.spread.into_unsigned();
 
         <span class="kw">let </span>child_shadow_offset_amount = shadow.offset.abs().into_unsigned();
@@ -1246,7 +1249,8 @@
             .map(|padding| padding.get().into_px(context.kludgine.scale()))
             .unwrap_or_default();
         <span class="kw">let </span>shadow = <span class="self">self
-            </span>.effective_shadow(context)
+            </span>.shadow
+            .get_tracking_invalidate(context)
             .into_px(context.kludgine.scale());
 
         <span class="kw">if </span>shadow.offset.x &gt;= <span class="number">0 </span>{
