@@ -1949,6 +1949,12 @@
 <a href="#1949" id="1949">1949</a>
 <a href="#1950" id="1950">1950</a>
 <a href="#1951" id="1951">1951</a>
+<a href="#1952" id="1952">1952</a>
+<a href="#1953" id="1953">1953</a>
+<a href="#1954" id="1954">1954</a>
+<a href="#1955" id="1955">1955</a>
+<a href="#1956" id="1956">1956</a>
+<a href="#1957" id="1957">1957</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -1990,6 +1996,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoDynamic, IntoValue, Validation, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::checkbox::{Checkable, CheckboxState};
+<span class="kw">use </span><span class="kw">crate</span>::widgets::layers::{OverlayLayer, Tooltipped};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{
     Align, Button, Checkbox, Collapse, Container, Expand, Layers, Resize, Scroll, Space, Stack,
     Style, Themed, ThemedMode, Validated,
@@ -3027,6 +3034,11 @@
     <span class="doccomment">/// Returns a widget that shows validation errors and/or hints.
     </span><span class="kw">fn </span>validation(<span class="self">self</span>, validation: <span class="kw">impl </span>IntoDynamic&lt;Validation&gt;) -&gt; Validated {
         Validated::new(validation, <span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Returns a widget that shows `tip` on `layer` when `self` is hovered.
+    </span><span class="kw">fn </span>tooltip(<span class="self">self</span>, layer: <span class="kw-2">&amp;</span>OverlayLayer, tip: <span class="kw">impl </span>MakeWidget) -&gt; Tooltipped {
+        layer.new_tooltip(tip, <span class="self">self</span>)
     }
 }
 

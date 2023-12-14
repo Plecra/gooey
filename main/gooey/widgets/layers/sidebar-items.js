@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Direction"],"struct":["Layers","OverlayBuilder","OverlayHandle","OverlayLayer"]};
+window.SIDEBAR_ITEMS = {"enum":["Direction"],"struct":["Layers","OverlayBuilder","OverlayHandle","OverlayLayer","Tooltipped"]};
