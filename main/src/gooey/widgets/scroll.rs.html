@@ -521,8 +521,16 @@
 <a href="#521" id="521">521</a>
 <a href="#522" id="522">522</a>
 <a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A container that scrolls its contents on a virtual surface.
-</span><span class="kw">use </span>std::time::Duration;
+</span><span class="kw">use </span>std::time::{Duration, Instant};
 
 <span class="kw">use </span>intentional::Cast;
 <span class="kw">use </span>kludgine::app::winit::event::{DeviceId, MouseScrollDelta, TouchPhase};
@@ -563,6 +571,7 @@
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">struct </span>OpacityAnimationState {
     will_hide: bool,
+    started_at: Instant,
     handle: AnimationHandle,
 }
 
@@ -579,6 +588,7 @@
             scrollbar_opacity: Dynamic::default(),
             scrollbar_opacity_animation: OpacityAnimationState {
                 handle: AnimationHandle::new(),
+                started_at: Instant::now(),
                 will_hide: <span class="bool-val">true</span>,
             },
             horizontal_bar: ScrollbarInfo::default(),
@@ -624,11 +634,16 @@
         <span class="kw">let </span>should_hide = <span class="self">self</span>.drag.mouse_buttons_down == <span class="number">0</span>;
         <span class="kw">if </span>should_hide != <span class="self">self</span>.scrollbar_opacity_animation.will_hide
             || <span class="self">self</span>.scrollbar_opacity_animation.handle.is_complete()
+            <span class="comment">// Prevent respawning the same animation multiple times if we get a
+            // lot of events.
+            </span>|| <span class="self">self</span>.scrollbar_opacity_animation.started_at.elapsed() &gt; Duration::from_millis(<span class="number">500</span>)
         {
+            <span class="kw">let </span>current_opacity = <span class="self">self</span>.scrollbar_opacity.get();
+            <span class="kw">let </span>transition_time = <span class="kw-2">*</span>current_opacity.one_minus() / <span class="number">4.</span>;
             <span class="kw">let </span>animation = <span class="self">self
                 </span>.scrollbar_opacity
                 .transition_to(ZeroToOne::ONE)
-                .over(Duration::from_millis(<span class="number">300</span>))
+                .over(Duration::from_secs_f32(transition_time))
                 .with_easing(context.get(<span class="kw-2">&amp;</span>EasingIn));
 
             <span class="self">self</span>.scrollbar_opacity_animation.will_hide = should_hide;
@@ -721,8 +736,6 @@
 
         <span class="kw">let </span>(<span class="kw-2">mut </span>scroll, current_max_scroll) = <span class="self">self</span>.constrain_scroll();
 
-        <span class="kw">let </span>control_size =
-            Size::new(available_space.width.max(), available_space.height.max()).into_signed();
         <span class="kw">let </span>max_extents = Size::new(
             <span class="kw">if </span><span class="self">self</span>.enabled.x {
                 ConstraintLimit::SizeToFit(UPx::MAX)
@@ -740,6 +753,20 @@
             .for_other(<span class="kw-2">&amp;</span>managed)
             .layout(max_extents)
             .into_signed();
+
+        <span class="kw">let </span>layout_size = Size::new(
+            <span class="kw">if </span><span class="self">self</span>.enabled.x {
+                constrain_child(available_space.width, new_content_size.width)
+            } <span class="kw">else </span>{
+                new_content_size.width.into_unsigned()
+            },
+            <span class="kw">if </span><span class="self">self</span>.enabled.y {
+                constrain_child(available_space.height, new_content_size.height)
+            } <span class="kw">else </span>{
+                new_content_size.height.into_unsigned()
+            },
+        );
+        <span class="kw">let </span>control_size = layout_size.into_signed();
 
         <span class="self">self</span>.horizontal_bar =
             scrollbar_region(scroll.x, new_content_size.width, control_size.width);
@@ -796,18 +823,7 @@
         );
         context.set_child_layout(<span class="kw-2">&amp;</span>managed, region);
 
-        Size::new(
-            <span class="kw">if </span><span class="self">self</span>.enabled.x {
-                constrain_child(available_space.width, <span class="self">self</span>.content_size.width)
-            } <span class="kw">else </span>{
-                <span class="self">self</span>.content_size.width.into_unsigned()
-            },
-            <span class="kw">if </span><span class="self">self</span>.enabled.y {
-                constrain_child(available_space.height, <span class="self">self</span>.content_size.height)
-            } <span class="kw">else </span>{
-                <span class="self">self</span>.content_size.height.into_unsigned()
-            },
-        )
+        layout_size
     }
 
     <span class="kw">fn </span>mouse_wheel(
@@ -846,10 +862,10 @@
         context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; EventHandling {
         <span class="kw">let </span>relative_x = (<span class="self">self</span>.control_size.width - location.x).max(Px::ZERO);
-        <span class="kw">let </span>in_vertical_area = <span class="self">self</span>.enabled.x &amp;&amp; relative_x &lt;= <span class="self">self</span>.bar_width;
+        <span class="kw">let </span>in_vertical_area = <span class="self">self</span>.enabled.y &amp;&amp; relative_x &lt;= <span class="self">self</span>.bar_width;
 
         <span class="kw">let </span>relative_y = (<span class="self">self</span>.control_size.height - location.y).max(Px::ZERO);
-        <span class="kw">let </span>in_horizontal_area = <span class="self">self</span>.enabled.y &amp;&amp; relative_y &lt;= <span class="self">self</span>.bar_width;
+        <span class="kw">let </span>in_horizontal_area = <span class="self">self</span>.enabled.x &amp;&amp; relative_y &lt;= <span class="self">self</span>.bar_width;
 
         <span class="kw">if </span><span class="macro">matches!</span>(
             (in_horizontal_area, in_vertical_area),

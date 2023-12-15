@@ -132,7 +132,6 @@
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
 <a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A labeled widget with a circular indicator representing a value.
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -233,7 +232,6 @@
         context.gfx.draw_shape(
             Shape::stroked_circle(
                 radius - stroke_options.line_width / <span class="number">2</span>,
-                color,
                 kludgine::Origin::Center,
                 stroke_options.colored(color),
             )
