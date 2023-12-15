@@ -929,8 +929,6 @@
 <a href="#929" id="929">929</a>
 <a href="#930" id="930">930</a>
 <a href="#931" id="931">931</a>
-<a href="#932" id="932">932</a>
-<a href="#933" id="933">933</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A visual container widget.
 
 </span><span class="kw">use </span>std::ops::Div;
@@ -1241,9 +1239,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;(RootBehavior, WidgetInstance)&gt; {
-        <span class="comment">// TODO adjust for shadow, but we need to potentially merge multiple
-        // dimensions into one.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>padding = <span class="self">self
+        <span class="kw">let </span><span class="kw-2">mut </span>padding = <span class="self">self
             </span>.padding
             .as_ref()
             .map(|padding| padding.get().into_px(context.kludgine.scale()))

@@ -125,6 +125,14 @@
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
 <a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A labeled widget with a circular indicator representing a value.
 </span><span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::panic::UnwindSafe;
@@ -136,6 +144,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{GraphicsContext, LayoutContext};
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{LineHeight, OutlineColor, WidgetAccentColor};
+<span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, DynamicReader, IntoDynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithId, Widget, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::button::ButtonKind;
@@ -248,8 +257,15 @@
         _available_space: Size&lt;ConstraintLimit&gt;,
         context: <span class="kw-2">&amp;mut </span>LayoutContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; Size&lt;kludgine::figures::units::UPx&gt; {
-        <span class="kw">let </span>radio_size = context.get(<span class="kw-2">&amp;</span>LineHeight).into_upx(context.gfx.scale()); <span class="comment">// TODO create a component? Same as checkbox
-        </span>Size::squared(radio_size)
+        <span class="kw">let </span>radio_size = context.get(<span class="kw-2">&amp;</span>RadioSize).into_upx(context.gfx.scale());
+        Size::squared(radio_size)
+    }
+}
+
+<span class="macro">define_components! </span>{
+    Radio {
+        <span class="doccomment">/// The size to render a [`Radio`] indicator.
+        </span>RadioSize(Dimension, <span class="string">&quot;size&quot;</span>, @LineHeight)
     }
 }
 </code></pre></div></section></main></body></html>

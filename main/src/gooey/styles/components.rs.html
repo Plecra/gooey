@@ -240,6 +240,14 @@
 <a href="#240" id="240">240</a>
 <a href="#241" id="241">241</a>
 <a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! All style components supported by the built-in widgets.
 
 </span><span class="kw">use </span>kludgine::cosmic_text::{FamilyOwned, Style, Weight};
@@ -387,7 +395,15 @@
         <span class="doccomment">/// The [`Color`] to use when rendering text in a more subdued tone.
         </span>TextColorVariant(Color, <span class="string">&quot;text_color_variant&quot;</span>, .surface.on_color_variant)
         <span class="doccomment">/// A [`Color`] to be used as a highlight color.
-        </span>HighlightColor(Color,<span class="string">&quot;highlight_color&quot;</span>,.primary.color.with_alpha(<span class="number">128</span>))
+        </span>HighlightColor(Color,<span class="string">&quot;highlight_color&quot;</span>, .primary.color.with_alpha(<span class="number">128</span>))
+        <span class="doccomment">/// The primary color from the current theme.
+        </span>PrimaryColor(Color, <span class="string">&quot;primary_color&quot;</span>, .primary.color)
+        <span class="doccomment">/// The secondary color from the current theme.
+        </span>SecondaryColor(Color, <span class="string">&quot;secondary_color&quot;</span>, .secondary.color)
+        <span class="doccomment">/// The tertiary color from the current theme.
+        </span>TertiaryColor(Color, <span class="string">&quot;tertiary_color&quot;</span>, .tertiary.color)
+        <span class="doccomment">/// The error color from the current theme.
+        </span>ErrorColor(Color, <span class="string">&quot;error_color&quot;</span>, .error.color)
         <span class="doccomment">/// Intrinsic, uniform padding for a widget.
         ///
         /// This component is opt-in and does not automatically work for all widgets.

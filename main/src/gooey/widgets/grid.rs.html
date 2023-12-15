@@ -937,8 +937,6 @@
 <a href="#937" id="937">937</a>
 <a href="#938" id="938">938</a>
 <a href="#939" id="939">939</a>
-<a href="#940" id="940">940</a>
-<a href="#941" id="941">941</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A Widget that arranges children into rows and columns.
 </span><span class="comment">// TODO on scale change, all `Lp` children need to resize
 
@@ -1600,12 +1598,10 @@
         <span class="kw">let </span><span class="kw-2">mut </span>offset = UPx::ZERO;
         <span class="kw">for </span>((index, <span class="kw-2">&amp;</span>child), <span class="kw-2">&amp;</span>expected) <span class="kw">in </span>flex.iter().enumerate().zip(expected) {
             <span class="macro">assert_eq!</span>(
+                child.size, expected,
+                <span class="string">&quot;child {index} measured to {}, expected {expected}&quot;</span>,
                 child.size,
-                expected,
-                <span class="string">&quot;child {index} measured to {}, expected {}&quot;</span>,
-                child.size,
-                expected <span class="comment">// TODO Display for UPx
-            </span>);
+            );
             <span class="macro">assert_eq!</span>(child.offset, offset);
             offset += child.size;
         }

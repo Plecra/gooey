@@ -2127,6 +2127,12 @@
 <a href="#2127" id="2127">2127</a>
 <a href="#2128" id="2128">2128</a>
 <a href="#2129" id="2129">2129</a>
+<a href="#2130" id="2130">2130</a>
+<a href="#2131" id="2131">2131</a>
+<a href="#2132" id="2132">2132</a>
+<a href="#2133" id="2133">2133</a>
+<a href="#2134" id="2134">2134</a>
+<a href="#2135" id="2135">2135</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -4206,6 +4212,12 @@
     <span class="kw">fn </span>unique() -&gt; <span class="self">Self </span>{
         <span class="kw">static </span>COUNTER: AtomicU64 = AtomicU64::new(<span class="number">0</span>);
         <span class="self">Self</span>(COUNTER.fetch_add(<span class="number">1</span>, atomic::Ordering::Acquire))
+    }
+
+    <span class="doccomment">/// Finds this widget mounted in this window, if present.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>find_in(<span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+        context.widget().tree.widget(<span class="self">self</span>)
     }
 }
 

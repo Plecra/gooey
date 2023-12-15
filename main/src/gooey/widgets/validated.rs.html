@@ -106,12 +106,31 @@
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+</pre></div><pre class="rust"><code><span class="doccomment">//! A widget that displays the result of validation.
 
-<span class="kw">use </span>kludgine::figures::units::Lp;
+</span><span class="kw">use </span>std::fmt::Debug;
+
 <span class="kw">use </span>kludgine::Color;
 
-<span class="kw">use </span><span class="kw">crate</span>::styles::components::{LineHeight, OutlineColor, TextColor, TextSize};
+<span class="kw">use </span><span class="kw">crate</span>::styles::components::{
+    ErrorColor, LineHeight, LineHeight2, OutlineColor, TextColor, TextSize, TextSize2,
+};
+<span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoDynamic, IntoValue, MapEach, Validation, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithId, WidgetInstance, WidgetRef, WrapperWidget};
 
@@ -179,9 +198,8 @@
                     .and(
                         message
                             .with(<span class="kw-2">&amp;</span>TextColor, color)
-                            <span class="comment">// TODO these should be components
-                            </span>.with(<span class="kw-2">&amp;</span>TextSize, Lp::points(<span class="number">9</span>))
-                            .with(<span class="kw-2">&amp;</span>LineHeight, Lp::points(<span class="number">13</span>))
+                            .with_dynamic(<span class="kw-2">&amp;</span>TextSize, ValidatedTextSize)
+                            .with_dynamic(<span class="kw-2">&amp;</span>LineHeight, ValidatedLineHeight)
                             .align_left(),
                     )
                     .into_rows(),
@@ -209,9 +227,21 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::context::GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     ) {
-        <span class="comment">// TODO move these to components.
-        </span><span class="self">self</span>.error_color.set(context.theme().error.color);
-        <span class="self">self</span>.default_color.set(context.theme().surface.outline);
+        <span class="self">self</span>.error_color.set(context.get(<span class="kw-2">&amp;</span>InvalidTextColor));
+        <span class="self">self</span>.default_color.set(context.get(<span class="kw-2">&amp;</span>HintTextColor));
+    }
+}
+
+<span class="macro">define_components! </span>{
+    Validated {
+        <span class="doccomment">/// The color of the hint text.
+        </span>HintTextColor(Color, <span class="string">&quot;hint_color&quot;</span>, @OutlineColor)
+        <span class="doccomment">/// The color of invalid text.
+        </span>InvalidTextColor(Color, <span class="string">&quot;invalid_color&quot;</span>, @ErrorColor)
+        <span class="doccomment">/// The text size for the validation message in a [`Validated`] widget.
+        </span>ValidatedTextSize(Dimension, <span class="string">&quot;text_size&quot;</span>, @TextSize2)
+        <span class="doccomment">/// The line hgiht for the validation message in a [`Validated`] widget.
+        </span>ValidatedLineHeight(Dimension, <span class="string">&quot;line_height&quot;</span>, @LineHeight2)
     }
 }
 </code></pre></div></section></main></body></html>

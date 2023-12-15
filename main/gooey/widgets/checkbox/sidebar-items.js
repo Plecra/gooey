@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["CheckboxState"],"struct":["Checkbox","CheckboxToBoolError"],"trait":["Checkable"]};
+window.SIDEBAR_ITEMS = {"enum":["CheckboxState"],"struct":["Checkbox","CheckboxSize","CheckboxToBoolError"],"trait":["Checkable"]};

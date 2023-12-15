@@ -1369,8 +1369,6 @@
 <a href="#1369" id="1369">1369</a>
 <a href="#1370" id="1370">1370</a>
 <a href="#1371" id="1371">1371</a>
-<a href="#1372" id="1372">1372</a>
-<a href="#1373" id="1373">1373</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
@@ -2034,10 +2032,8 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(theme) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.theme {
             <span class="kw">if </span>theme.has_updated() {
                 <span class="self">self</span>.current_theme = theme.get();
-                <span class="comment">// TODO invalidate everything, but right now we don&#39;t have much
-                // cached. Maybe widgets should be told the theme has changed in
-                // case some things like images have been cached.
-            </span>}
+                <span class="self">self</span>.root.invalidate();
+            }
         }
 
         <span class="self">self</span>.redraw_status.refresh_received();
