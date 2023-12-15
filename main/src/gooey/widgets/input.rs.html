@@ -1482,6 +1482,15 @@
 <a href="#1482" id="1482">1482</a>
 <a href="#1483" id="1483">1483</a>
 <a href="#1484" id="1484">1484</a>
+<a href="#1485" id="1485">1485</a>
+<a href="#1486" id="1486">1486</a>
+<a href="#1487" id="1487">1487</a>
+<a href="#1488" id="1488">1488</a>
+<a href="#1489" id="1489">1489</a>
+<a href="#1490" id="1490">1490</a>
+<a href="#1491" id="1491">1491</a>
+<a href="#1492" id="1492">1492</a>
+<a href="#1493" id="1493">1493</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A text input widget.
 
 </span><span class="kw">use </span>std::borrow::{Borrow, BorrowMut, Cow};
@@ -1499,7 +1508,7 @@
 <span class="kw">use </span>kludgine::app::winit::window::{CursorIcon, ImePurpose};
 <span class="kw">use </span>kludgine::figures::units::{Lp, Px, UPx};
 <span class="kw">use </span>kludgine::figures::{
-    FloatConversion, IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size,
+    Abs, FloatConversion, IntoSigned, IntoUnsigned, Point, Rect, ScreenScale, Size,
 };
 <span class="kw">use </span>kludgine::shapes::{Shape, StrokeOptions};
 <span class="kw">use </span>kludgine::text::{MeasuredText, Text, TextOrigin};
@@ -2324,12 +2333,15 @@
                     .line_height
                     .saturating_mul(Px::new(i32::try_from(current_line).unwrap_or(i32::MAX)));
             }
-            <span class="kw">let </span>rect = glyph.rect();
+            <span class="kw">let </span><span class="kw-2">mut </span>rect = glyph.rect();
+            <span class="kw">if </span>!glyph.visible() {
+                rect.size.height = cache.measured.line_height;
+            }
             <span class="kw">let </span>relative = location - Point::new(rect.origin.x, current_line_y);
             <span class="kw">if </span>relative.x &gt;= <span class="number">0
                 </span>&amp;&amp; relative.y &gt;= <span class="number">0
-                </span>&amp;&amp; relative.x &lt; rect.size.width
-                &amp;&amp; relative.y &lt; cache.measured.line_height
+                </span>&amp;&amp; relative.x &lt;= rect.size.width
+                &amp;&amp; relative.y &lt;= cache.measured.line_height
             {
                 <span class="kw">return if </span>relative.x &gt; rect.size.width / <span class="number">2 </span>{
                     <span class="kw">if </span>glyph.info.start + <span class="number">1 </span>&lt; cache.bytes {
@@ -2353,10 +2365,15 @@
 
             <span class="comment">// Make relative be relative to the center of the glyph for a nearest search.
             </span><span class="kw">let </span>relative = relative + rect.size / <span class="number">2</span>;
+
+            <span class="kw">let </span>line_height = cache.measured.line_height.get();
             <span class="kw">let </span>xy = relative
                 .x
                 .get()
-                .saturating_mul(current_line_y.get().saturating_pow(<span class="number">2</span>))
+                .saturating_mul(
+                    ((relative.y.get() + line_height - <span class="number">1</span>) / line_height * line_height)
+                        .saturating_pow(<span class="number">2</span>),
+                )
                 .saturating_abs();
             <span class="kw">let </span>cursor = Cursor {
                 offset: <span class="kw">if </span>relative.x &lt; <span class="number">0 </span>|| relative.y &lt; <span class="number">0 </span>{
@@ -2382,7 +2399,8 @@
             // so that it&#39;s easier to inspect and detect when there&#39;s
             // whitespace. For now, this is just a hack that helps get *some*
             // selection at the end of the input for trailing whitespace.
-            </span><span class="kw">if </span>relative.x &lt; <span class="number">0 </span>&amp;&amp; index &lt; cache.measured.glyphs.len() {
+            </span><span class="kw">if </span>relative.x.abs() &lt; cache.measured.line_height &amp;&amp; index &lt; cache.measured.glyphs.len()
+            {
                 <span class="kw">return </span>closest;
             }
         }
