@@ -2,12 +2,24 @@
 <a href="https://crates.io/crates/gooey"><img src="https://img.shields.io/crates/v/gooey.svg" alt="crate version" /></a>
 <a href="https://gooey.rs/main/gooey/"><img src="https://img.shields.io/badge/docs-main-informational" alt="Documentation for main branch" /></a></p>
 <p>Gooey is an experimental Graphical User Interface (GUI) crate for the Rust
-programming language. It is built using <a href="https://github.com/khonsulabs/kludgine"><code>Kludgine</code></a>, which is powered
-by <a href="https://github.com/rust-windowing/winit"><code>winit</code></a> and <a href="https://github.com/gfx-rs/wgpu"><code>wgpu</code></a>. It is incredibly early in development,
-and is being developed for a game that will hopefully be developed shortly.</p>
+programming language. It is powered by:</p>
+<ul>
+<li><a href="https://github.com/khonsulabs/kludgine"><code>Kludgine</code></a>, a 2d graphics library powered by:
+<ul>
+<li><a href="https://github.com/rust-windowing/winit"><code>winit</code></a> for windowing/input</li>
+<li><a href="https://github.com/gfx-rs/wgpu"><code>wgpu</code></a> for graphics</li>
+<li><a href="https://github.com/pop-os/cosmic-text"><code>cosmic_text</code></a> for text layout + rasterization</li>
+</ul>
+</li>
+<li><a href="https://github.com/Ogeon/palette"><code>palette</code></a> for OKLab-based HSL color calculations</li>
+<li><a href="https://github.com/1Password/arboard"><code>arboard</code></a> for clipboard support</li>
+<li><a href="https://github.com/khonsulabs/figures"><code>figures</code></a> for integer-based 2d math</li>
+</ul>
+<h3 id="getting-started-with-gooey"><a href="#getting-started-with-gooey">Getting Started with Gooey</a></h3>
 <p>The <a href="widget/trait.Widget.html" title="trait gooey::widget::Widget"><code>Widget</code></a> trait is the building block of Gooey: Every user
-interface element implements <code>Widget</code>. A full list of built-in widgets can be
-found in the <a href="widgets/index.html" title="mod gooey::widgets"><code>gooey::widgets</code></a> module.</p>
+interface element implements <code>Widget</code>. The <code>Widget</code> trait
+<a href="widget/trait.Widget.html" title="trait gooey::widget::Widget">documentation</a> has an overview of how Gooey works. A list of built-in
+widgets can be found in the <a href="widgets/index.html" title="mod gooey::widgets"><code>gooey::widgets</code></a> module.</p>
 <p>Gooey uses a reactive data model. To see <a href="https://github.com/khonsulabs/gooey/tree/main/examples/basic-button.rs">an example</a> of how
 reactive data models work, consider this example that displays a button that
 increments its own label:</p>
@@ -22,10 +34,23 @@ increments its own label:</p>
     </span>count_label
         .into_button()
         <span class="comment">// Set the `on_click` callback to a closure that increments the counter.
-        </span>.on_click(count.with_clone(|count| <span class="kw">move </span>|<span class="kw">_</span>| count.set(count.get() + <span class="number">1</span>)))
+        </span>.on_click(<span class="kw">move </span>|<span class="kw">_</span>| count.set(count.get() + <span class="number">1</span>))
         <span class="comment">// Run the application
         </span>.run()
 }</code></pre></div>
+<p>A great way to learn more about Gooey is to explore the <a href="https://github.com/khonsulabs/gooey/tree/main/examples/">examples
+directory</a>. Nearly every feature in Gooey was initially tested by
+creating an example.</p>
+<h3 id="project-status"><a href="#project-status">Project Status</a></h3>
+<p>This project is early in development, but is quickly becoming a decent
+framework. It is considered experimental and unspported at this time, and the
+primary focus for <a href="https://github.com/khonsulabs/ecton">@ecton</a> is to use this for his own projects. Feature
+requests and bug fixes will be prioritized based on @ecton’s own needs.</p>
+<p>If you would like to contribute, bug fixes are always appreciated. Before
+working on a new feature, please <a href="https://github.com/khonsulabs/gooey/issues">open an issue</a> proposing the feature
+and problem it aims to solve. Doing so will help prevent friction in merging
+pull requests, as it ensures changes fit the vision the maintainers have for
+Gooey.</p>
 <h3 id="open-source-licenses"><a href="#open-source-licenses">Open-source Licenses</a></h3>
 <p>This project, like all projects from <a href="https://khonsulabs.com/">Khonsu Labs</a>, is open-source.
 This repository is available under the <a href="./LICENSE-MIT">MIT License</a> or the

@@ -2133,6 +2133,26 @@
 <a href="#2133" id="2133">2133</a>
 <a href="#2134" id="2134">2134</a>
 <a href="#2135" id="2135">2135</a>
+<a href="#2136" id="2136">2136</a>
+<a href="#2137" id="2137">2137</a>
+<a href="#2138" id="2138">2138</a>
+<a href="#2139" id="2139">2139</a>
+<a href="#2140" id="2140">2140</a>
+<a href="#2141" id="2141">2141</a>
+<a href="#2142" id="2142">2142</a>
+<a href="#2143" id="2143">2143</a>
+<a href="#2144" id="2144">2144</a>
+<a href="#2145" id="2145">2145</a>
+<a href="#2146" id="2146">2146</a>
+<a href="#2147" id="2147">2147</a>
+<a href="#2148" id="2148">2148</a>
+<a href="#2149" id="2149">2149</a>
+<a href="#2150" id="2150">2150</a>
+<a href="#2151" id="2151">2151</a>
+<a href="#2152" id="2152">2152</a>
+<a href="#2153" id="2153">2153</a>
+<a href="#2154" id="2154">2154</a>
+<a href="#2155" id="2155">2155</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for creating reusable widgets (aka components or views).
 
 </span><span class="kw">use </span>std::any::Any;
@@ -2186,6 +2206,26 @@
 ///
 /// This type can go by many names in other UI frameworks: View, Component,
 /// Control.
+///
+/// # How layout and rendering works
+///
+/// TODO write layout + rendering docs
+///
+/// # Hit Testing
+///
+/// TODO write hit testing docs
+///
+/// # Mouse Button Events
+///
+/// TODO write mouse button docs
+///
+/// # User Input Focus
+///
+/// TODO write focus docs
+///
+/// # Styling
+///
+/// TODO write styling docs
 </span><span class="kw">pub trait </span>Widget: Send + UnwindSafe + Debug + <span class="lifetime">&#39;static </span>{
     <span class="doccomment">/// Redraw the contents of this widget.
     </span><span class="kw">fn </span>redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>GraphicsContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;);
