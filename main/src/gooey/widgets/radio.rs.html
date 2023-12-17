@@ -145,7 +145,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{LineHeight, OutlineColor, WidgetAccentColor};
 <span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, DynamicReader, IntoDynamic, IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithId, Widget, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithTag, Widget, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::button::ButtonKind;
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -185,11 +185,11 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;T&gt; MakeWidgetWithId <span class="kw">for </span>Radio&lt;T&gt;
+<span class="kw">impl</span>&lt;T&gt; MakeWidgetWithTag <span class="kw">for </span>Radio&lt;T&gt;
 <span class="kw">where
     </span>T: Clone + Debug + Eq + UnwindSafe + Send + <span class="lifetime">&#39;static</span>,
 {
-    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
+    <span class="kw">fn </span>make_with_tag(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
         RadioOrnament {
             value: <span class="self">self</span>.value.clone(),
             state: <span class="self">self</span>.state.create_reader(),
@@ -201,7 +201,7 @@
             <span class="self">self</span>.state.set(<span class="self">self</span>.value.clone());
         })
         .kind(<span class="self">self</span>.kind)
-        .make_with_id(id)
+        .make_with_tag(id)
     }
 }
 

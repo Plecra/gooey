@@ -276,7 +276,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::{LineHeight, OutlineColor, TextColor, WidgetAccentColor};
 <span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, DynamicReader, IntoDynamic, IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithId, Widget, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithTag, Widget, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::button::ButtonKind;
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -316,8 +316,8 @@
     </span>}
 }
 
-<span class="kw">impl </span>MakeWidgetWithId <span class="kw">for </span>Checkbox {
-    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
+<span class="kw">impl </span>MakeWidgetWithTag <span class="kw">for </span>Checkbox {
+    <span class="kw">fn </span>make_with_tag(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
         CheckboxOrnament {
             value: <span class="self">self</span>.state.create_reader(),
         }
@@ -329,7 +329,7 @@
             <span class="kw-2">*</span>value = !<span class="kw-2">*</span>value;
         })
         .kind(<span class="self">self</span>.kind)
-        .make_with_id(id)
+        .make_with_tag(id)
     }
 }
 
@@ -457,7 +457,7 @@
         );
 
         <span class="kw">let </span>stroke_options = StrokeOptions::lp_wide(Lp::points(<span class="number">2</span>)).into_px(context.gfx.scale());
-        <span class="kw">match </span><span class="self">self</span>.value.get_tracking_refresh(context) {
+        <span class="kw">match </span><span class="self">self</span>.value.get_tracking_redraw(context) {
             state @ (CheckboxState::Checked | CheckboxState::Indeterminant) =&gt; {
                 <span class="kw">let </span>color = context.get(<span class="kw-2">&amp;</span>WidgetAccentColor);
                 context

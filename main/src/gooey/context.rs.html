@@ -1486,7 +1486,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::{IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{
-    EventHandling, ManagedWidget, RootBehavior, WidgetId, WidgetInstance, WidgetRef,
+    EventHandling, MountedWidget, RootBehavior, WidgetId, WidgetInstance, WidgetRef,
 };
 <span class="kw">use </span><span class="kw">crate</span>::window::{CursorState, RunningWindow, ThemeMode};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
@@ -1811,7 +1811,7 @@
         }
     }
 
-    <span class="kw">fn </span>next_focus_after(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>focus: ManagedWidget, advance: bool) -&gt; <span class="prelude-ty">Option</span>&lt;WidgetId&gt; {
+    <span class="kw">fn </span>next_focus_after(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>focus: MountedWidget, advance: bool) -&gt; <span class="prelude-ty">Option</span>&lt;WidgetId&gt; {
         <span class="comment">// First, look within the current focus for any focusable children.
         </span><span class="kw">let </span>stop_at = focus.id();
         <span class="kw">if let </span><span class="prelude-val">Some</span>(focus) = <span class="self">self</span>.next_focus_within(<span class="kw-2">&amp;</span>focus, <span class="prelude-val">None</span>, stop_at, advance) {
@@ -1836,7 +1836,7 @@
 
     <span class="kw">fn </span>next_focus_sibling(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        focus: <span class="kw-2">&amp;</span>ManagedWidget,
+        focus: <span class="kw-2">&amp;</span>MountedWidget,
         stop_at: WidgetId,
         advance: bool,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;WidgetId&gt; {
@@ -1848,7 +1848,7 @@
     /// that returns true from `accept_focus`.
     </span><span class="kw">fn </span>next_focus_within(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        focus: <span class="kw-2">&amp;</span>ManagedWidget,
+        focus: <span class="kw-2">&amp;</span>MountedWidget,
         start_at: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
         stop_at: WidgetId,
         advance: bool,
@@ -2243,7 +2243,7 @@
     <span class="doccomment">/// Sets the layout for `child` to `layout`.
     ///
     /// `layout` is relative to the current widget&#39;s controls.
-    </span><span class="kw">pub fn </span>set_child_layout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, child: <span class="kw-2">&amp;</span>ManagedWidget, layout: Rect&lt;Px&gt;) {
+    </span><span class="kw">pub fn </span>set_child_layout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, child: <span class="kw-2">&amp;</span>MountedWidget, layout: Rect&lt;Px&gt;) {
         <span class="comment">// TODO verify that `child` belongs to the current node.
         </span><span class="kw">if </span><span class="self">self</span>.persist_layout {
             child.set_layout(layout);
@@ -2285,7 +2285,7 @@
     <span class="doccomment">/// Pushes a new child widget into the widget hierarchy beneathq the
     /// context&#39;s widget.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">fn </span>push_child(<span class="kw-2">&amp;mut </span><span class="self">self</span>, child: WidgetInstance) -&gt; ManagedWidget {
+    </span><span class="kw">fn </span>push_child(<span class="kw-2">&amp;mut </span><span class="self">self</span>, child: WidgetInstance) -&gt; MountedWidget {
         <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="self">self</span>.as_event_context();
         <span class="kw">let </span>pushed_widget = context
             .current_node
@@ -2299,7 +2299,7 @@
     }
 
     <span class="doccomment">/// Removes a widget from the hierarchy.
-    </span><span class="kw">fn </span>remove_child(<span class="kw-2">&amp;mut </span><span class="self">self</span>, child: <span class="kw-2">&amp;</span>ManagedWidget) {
+    </span><span class="kw">fn </span>remove_child(<span class="kw-2">&amp;mut </span><span class="self">self</span>, child: <span class="kw-2">&amp;</span>MountedWidget) {
         <span class="kw">let </span><span class="kw-2">mut </span>context = <span class="self">self</span>.as_event_context();
         child
             .lock()
@@ -2329,7 +2329,7 @@
 /// This type provides access to the widget hierarchy from the perspective of a
 /// specific widget.
 </span><span class="kw">pub struct </span>WidgetContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; {
-    current_node: ManagedWidget,
+    current_node: MountedWidget,
     redraw_status: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>InvalidationStatus,
     window: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt;,
     theme: Cow&lt;<span class="lifetime">&#39;context</span>, ThemePair&gt;,
@@ -2341,7 +2341,7 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; WidgetContext&lt;<span class="lifetime">&#39;context</span>, <span class="lifetime">&#39;window</span>&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
-        current_node: ManagedWidget,
+        current_node: MountedWidget,
         redraw_status: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>InvalidationStatus,
         theme: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span>ThemePair,
         window: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>RunningWindow&lt;<span class="lifetime">&#39;window</span>&gt;,
@@ -2403,12 +2403,12 @@
         widget.manage(<span class="self">self</span>).map(|current_node| {
             <span class="kw">let </span>(effective_styles, theme, theme_mode) = current_node.overidden_theme();
             <span class="kw">let </span>theme = <span class="kw">if let </span><span class="prelude-val">Some</span>(theme) = theme {
-                Cow::Owned(theme.get_tracked(<span class="self">self</span>))
+                Cow::Owned(theme.get_tracking_redraw(<span class="self">self</span>))
             } <span class="kw">else </span>{
                 Cow::Borrowed(<span class="self">self</span>.theme.as_ref())
             };
             <span class="kw">let </span>theme_mode = <span class="kw">if let </span><span class="prelude-val">Some</span>(mode) = theme_mode {
-                mode.get_tracked(<span class="self">self</span>)
+                mode.get_tracking_redraw(<span class="self">self</span>)
             } <span class="kw">else </span>{
                 <span class="self">self</span>.cache.theme_mode
             };
@@ -2442,7 +2442,7 @@
         <span class="self">self</span>.cache.enabled
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;MountedWidget&gt; {
         <span class="self">self</span>.current_node.parent()
     }
 
@@ -2557,7 +2557,7 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>focused(<span class="kw-2">&amp;</span><span class="self">self</span>, check_window: bool) -&gt; bool {
         <span class="self">self</span>.pending_state.focus == <span class="prelude-val">Some</span>(<span class="self">self</span>.current_node.id())
-            &amp;&amp; (!check_window || <span class="self">self</span>.window.focused().get_tracking_refresh(<span class="self">self</span>))
+            &amp;&amp; (!check_window || <span class="self">self</span>.window.focused().get_tracking_redraw(<span class="self">self</span>))
     }
 
     <span class="doccomment">/// Returns true if this widget is the target to activate when the user
@@ -2584,7 +2584,7 @@
 
     <span class="doccomment">/// Returns the widget this context is for.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub const fn </span>widget(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ManagedWidget {
+    </span><span class="kw">pub const fn </span>widget(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>MountedWidget {
         <span class="kw-2">&amp;</span><span class="self">self</span>.current_node
     }
 
@@ -2776,18 +2776,18 @@
     }
 }
 
-<span class="doccomment">/// A type chat can convert to a [`ManagedWidget`] through a [`WidgetContext`].
+<span class="doccomment">/// A type chat can convert to a [`MountedWidget`] through a [`WidgetContext`].
 </span><span class="kw">pub trait </span>ManageWidget {
-    <span class="doccomment">/// The managed type, which can be `Option&lt;ManagedWidget&gt;` or
-    /// `ManagedWidget`.
-    </span><span class="kw">type </span>Managed: MapManagedWidget&lt;ManagedWidget&gt;;
+    <span class="doccomment">/// The managed type, which can be `Option&lt;MountedWidget&gt;` or
+    /// `MountedWidget`.
+    </span><span class="kw">type </span>Managed: MapManagedWidget&lt;MountedWidget&gt;;
 
-    <span class="doccomment">/// Resolve `self` into a [`ManagedWidget`].
+    <span class="doccomment">/// Resolve `self` into a [`MountedWidget`].
     </span><span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed;
 }
 
 <span class="kw">impl </span>ManageWidget <span class="kw">for </span>WidgetId {
-    <span class="kw">type </span>Managed = <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;;
+    <span class="kw">type </span>Managed = <span class="prelude-ty">Option</span>&lt;MountedWidget&gt;;
 
     <span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed {
         context.current_node.tree.widget(<span class="kw-2">*</span><span class="self">self</span>)
@@ -2795,7 +2795,7 @@
 }
 
 <span class="kw">impl </span>ManageWidget <span class="kw">for </span>WidgetInstance {
-    <span class="kw">type </span>Managed = <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;;
+    <span class="kw">type </span>Managed = <span class="prelude-ty">Option</span>&lt;MountedWidget&gt;;
 
     <span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed {
         context.current_node.tree.widget(<span class="self">self</span>.id())
@@ -2803,7 +2803,7 @@
 }
 
 <span class="kw">impl </span>ManageWidget <span class="kw">for </span>WidgetRef {
-    <span class="kw">type </span>Managed = <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;;
+    <span class="kw">type </span>Managed = <span class="prelude-ty">Option</span>&lt;MountedWidget&gt;;
 
     <span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed {
         <span class="kw">match </span><span class="self">self </span>{
@@ -2813,7 +2813,7 @@
     }
 }
 
-<span class="kw">impl </span>ManageWidget <span class="kw">for </span>ManagedWidget {
+<span class="kw">impl </span>ManageWidget <span class="kw">for </span>MountedWidget {
     <span class="kw">type </span>Managed = <span class="self">Self</span>;
 
     <span class="kw">fn </span>manage(<span class="kw-2">&amp;</span><span class="self">self</span>, _context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self</span>::Managed {
@@ -2821,27 +2821,27 @@
     }
 }
 
-<span class="doccomment">/// A type that can produce another type when provided a [`ManagedWidget`].
+<span class="doccomment">/// A type that can produce another type when provided a [`MountedWidget`].
 </span><span class="kw">pub trait </span>MapManagedWidget&lt;T&gt; {
     <span class="doccomment">/// The result of the mapping operation.
     </span><span class="kw">type </span><span class="prelude-ty">Result</span>;
 
-    <span class="doccomment">/// Call `map` with a [`ManagedWidget`].
-    </span><span class="kw">fn </span>map(<span class="self">self</span>, map: <span class="kw">impl </span>FnOnce(ManagedWidget) -&gt; T) -&gt; <span class="self">Self</span>::Result;
+    <span class="doccomment">/// Call `map` with a [`MountedWidget`].
+    </span><span class="kw">fn </span>map(<span class="self">self</span>, map: <span class="kw">impl </span>FnOnce(MountedWidget) -&gt; T) -&gt; <span class="self">Self</span>::Result;
 }
 
-<span class="kw">impl</span>&lt;T&gt; MapManagedWidget&lt;T&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+<span class="kw">impl</span>&lt;T&gt; MapManagedWidget&lt;T&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;MountedWidget&gt; {
     <span class="kw">type </span><span class="prelude-ty">Result </span>= <span class="prelude-ty">Option</span>&lt;T&gt;;
 
-    <span class="kw">fn </span>map(<span class="self">self</span>, map: <span class="kw">impl </span>FnOnce(ManagedWidget) -&gt; T) -&gt; <span class="self">Self</span>::Result {
+    <span class="kw">fn </span>map(<span class="self">self</span>, map: <span class="kw">impl </span>FnOnce(MountedWidget) -&gt; T) -&gt; <span class="self">Self</span>::Result {
         <span class="self">self</span>.map(map)
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; MapManagedWidget&lt;T&gt; <span class="kw">for </span>ManagedWidget {
+<span class="kw">impl</span>&lt;T&gt; MapManagedWidget&lt;T&gt; <span class="kw">for </span>MountedWidget {
     <span class="kw">type </span><span class="prelude-ty">Result </span>= T;
 
-    <span class="kw">fn </span>map(<span class="self">self</span>, map: <span class="kw">impl </span>FnOnce(ManagedWidget) -&gt; T) -&gt; <span class="self">Self</span>::Result {
+    <span class="kw">fn </span>map(<span class="self">self</span>, map: <span class="kw">impl </span>FnOnce(MountedWidget) -&gt; T) -&gt; <span class="self">Self</span>::Result {
         map(<span class="self">self</span>)
     }
 }

@@ -633,7 +633,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::styles::{Styles, ThemePair, VisualOrder};
 <span class="kw">use </span><span class="kw">crate</span>::utils::IgnorePoison;
 <span class="kw">use </span><span class="kw">crate</span>::value::Value;
-<span class="kw">use </span><span class="kw">crate</span>::widget::{ManagedWidget, WidgetId, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MountedWidget, WidgetId, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::window::ThemeMode;
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
@@ -646,8 +646,8 @@
     <span class="kw">pub fn </span>push_boxed(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         widget: WidgetInstance,
-        parent: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ManagedWidget&gt;,
-    ) -&gt; ManagedWidget {
+        parent: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>MountedWidget&gt;,
+    ) -&gt; MountedWidget {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         <span class="kw">let </span>id = widget.id();
         <span class="kw">let </span>(effective_styles, parent_id) = <span class="kw">if let </span><span class="prelude-val">Some</span>(parent) = parent {
@@ -683,14 +683,14 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(next_focus) = widget.next_focus() {
             data.previous_focuses.insert(next_focus, id);
         }
-        ManagedWidget {
+        MountedWidget {
             node_id,
             widget,
             tree: <span class="self">self</span>.clone(),
         }
     }
 
-    <span class="kw">pub fn </span>remove_child(<span class="kw-2">&amp;</span><span class="self">self</span>, child: <span class="kw-2">&amp;</span>ManagedWidget, parent: <span class="kw-2">&amp;</span>ManagedWidget) {
+    <span class="kw">pub fn </span>remove_child(<span class="kw-2">&amp;</span><span class="self">self</span>, child: <span class="kw-2">&amp;</span>MountedWidget, parent: <span class="kw-2">&amp;</span>MountedWidget) {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         data.remove_child(child.node_id, parent.node_id);
 
@@ -786,11 +786,11 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         parent: LotId,
         order: VisualOrder,
-    ) -&gt; Vec&lt;ManagedWidget&gt; {
+    ) -&gt; Vec&lt;MountedWidget&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         <span class="kw">let </span>node = <span class="kw-2">&amp;</span>data.nodes[parent];
         <span class="kw">let </span><span class="kw-2">mut </span>unordered = node.children.clone();
-        <span class="kw">let </span><span class="kw-2">mut </span>ordered = Vec::&lt;ManagedWidget&gt;::with_capacity(unordered.len());
+        <span class="kw">let </span><span class="kw-2">mut </span>ordered = Vec::&lt;MountedWidget&gt;::with_capacity(unordered.len());
         <span class="kw">loop </span>{
             <span class="comment">// Identify the next &quot;row&quot; of widgets by finding the top of a widget that is the closest to the origin of
             </span><span class="kw">let </span><span class="kw-2">mut </span>min_vertical = order.vertical.max_px();
@@ -848,13 +848,13 @@
         data.nodes[id].effective_styles.clone()
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>hover(<span class="kw-2">&amp;</span><span class="self">self</span>, new_hover: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ManagedWidget&gt;) -&gt; HoverResults {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>hover(<span class="kw-2">&amp;</span><span class="self">self</span>, new_hover: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>MountedWidget&gt;) -&gt; HoverResults {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         <span class="kw">let </span>hovered = new_hover
             .map(|new_hover| data.widget_hierarchy(new_hover.node_id, <span class="self">self</span>))
             .unwrap_or_default();
         <span class="kw">let </span>unhovered =
-            <span class="kw">match </span>data.update_tracked_widget(new_hover.map(ManagedWidget::id), <span class="self">self</span>, |data| {
+            <span class="kw">match </span>data.update_tracked_widget(new_hover.map(MountedWidget::id), <span class="self">self</span>, |data| {
                 <span class="kw-2">&amp;mut </span>data.hover
             }) {
                 <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(old_hover)) =&gt; {
@@ -873,12 +873,12 @@
         HoverResults { unhovered, hovered }
     }
 
-    <span class="kw">pub fn </span>focus(<span class="kw-2">&amp;</span><span class="self">self</span>, new_focus: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;, ()&gt; {
+    <span class="kw">pub fn </span>focus(<span class="kw-2">&amp;</span><span class="self">self</span>, new_focus: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;MountedWidget&gt;, ()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         data.update_tracked_widget(new_focus, <span class="self">self</span>, |data| <span class="kw-2">&amp;mut </span>data.focus)
     }
 
-    <span class="kw">pub fn </span>previous_focus(<span class="kw-2">&amp;</span><span class="self">self</span>, focus: WidgetId) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+    <span class="kw">pub fn </span>previous_focus(<span class="kw-2">&amp;</span><span class="self">self</span>, focus: WidgetId) -&gt; <span class="prelude-ty">Option</span>&lt;MountedWidget&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         <span class="kw">let </span>previous = <span class="kw-2">*</span>data.previous_focuses.get(<span class="kw-2">&amp;</span>focus)<span class="question-mark">?</span>;
         data.widget_from_id(previous, <span class="self">self</span>)
@@ -886,20 +886,20 @@
 
     <span class="kw">pub fn </span>activate(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        new_active: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ManagedWidget&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;, ()&gt; {
+        new_active: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>MountedWidget&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;MountedWidget&gt;, ()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="self">self</span>.data.lock().ignore_poison();
-        data.update_tracked_widget(new_active.map(ManagedWidget::id), <span class="self">self</span>, |data| {
+        data.update_tracked_widget(new_active.map(MountedWidget::id), <span class="self">self</span>, |data| {
             <span class="kw-2">&amp;mut </span>data.active
         })
     }
 
-    <span class="kw">pub fn </span>widget(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+    <span class="kw">pub fn </span>widget(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId) -&gt; <span class="prelude-ty">Option</span>&lt;MountedWidget&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         data.widget_from_id(id, <span class="self">self</span>)
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>widget_from_node(<span class="kw-2">&amp;</span><span class="self">self</span>, id: LotId) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>widget_from_node(<span class="kw-2">&amp;</span><span class="self">self</span>, id: LotId) -&gt; <span class="prelude-ty">Option</span>&lt;MountedWidget&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         data.widget_from_node(id, <span class="self">self</span>)
     }
@@ -956,7 +956,7 @@
         <span class="self">self</span>.data.lock().ignore_poison().focus
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>widgets_under_point(<span class="kw-2">&amp;</span><span class="self">self</span>, point: Point&lt;Px&gt;) -&gt; Vec&lt;ManagedWidget&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>widgets_under_point(<span class="kw-2">&amp;</span><span class="self">self</span>, point: Point&lt;Px&gt;) -&gt; Vec&lt;MountedWidget&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data.lock().ignore_poison();
         data.render_info.widgets_under_point(point, <span class="kw-2">&amp;</span>data, <span class="self">self</span>)
     }
@@ -1021,8 +1021,8 @@
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>HoverResults {
-    <span class="kw">pub </span>unhovered: Vec&lt;ManagedWidget&gt;,
-    <span class="kw">pub </span>hovered: Vec&lt;ManagedWidget&gt;,
+    <span class="kw">pub </span>unhovered: Vec&lt;MountedWidget&gt;,
+    <span class="kw">pub </span>hovered: Vec&lt;MountedWidget&gt;,
 }
 
 <span class="attr">#[derive(Default)]
@@ -1039,17 +1039,17 @@
 }
 
 <span class="kw">impl </span>TreeData {
-    <span class="kw">fn </span>widget_from_id(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId, tree: <span class="kw-2">&amp;</span>Tree) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+    <span class="kw">fn </span>widget_from_id(<span class="kw-2">&amp;</span><span class="self">self</span>, id: WidgetId, tree: <span class="kw-2">&amp;</span>Tree) -&gt; <span class="prelude-ty">Option</span>&lt;MountedWidget&gt; {
         <span class="kw">let </span>node_id = <span class="kw-2">*</span><span class="self">self</span>.nodes_by_id.get(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>;
-        <span class="prelude-val">Some</span>(ManagedWidget {
+        <span class="prelude-val">Some</span>(MountedWidget {
             node_id,
             widget: <span class="self">self</span>.nodes[node_id].widget.clone(),
             tree: tree.clone(),
         })
     }
 
-    <span class="kw">fn </span>widget_from_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node_id: LotId, tree: <span class="kw-2">&amp;</span>Tree) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
-        <span class="prelude-val">Some</span>(ManagedWidget {
+    <span class="kw">fn </span>widget_from_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node_id: LotId, tree: <span class="kw-2">&amp;</span>Tree) -&gt; <span class="prelude-ty">Option</span>&lt;MountedWidget&gt; {
+        <span class="prelude-val">Some</span>(MountedWidget {
             node_id,
             widget: <span class="self">self</span>.nodes.get(node_id)<span class="question-mark">?</span>.widget.clone(),
             tree: tree.clone(),
@@ -1112,7 +1112,7 @@
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>widget_hierarchy(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>widget: LotId, tree: <span class="kw-2">&amp;</span>Tree) -&gt; Vec&lt;ManagedWidget&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>widget_hierarchy(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>widget: LotId, tree: <span class="kw-2">&amp;</span>Tree) -&gt; Vec&lt;MountedWidget&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>hierarchy = Vec::new();
         <span class="kw">while let </span><span class="prelude-val">Some</span>(managed) = <span class="self">self</span>.widget_from_node(widget, tree) {
             hierarchy.push(managed);
@@ -1132,7 +1132,7 @@
         new_widget: <span class="prelude-ty">Option</span>&lt;WidgetId&gt;,
         tree: <span class="kw-2">&amp;</span>Tree,
         property: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span><span class="self">Self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;LotId&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ManagedWidget&gt;, ()&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;MountedWidget&gt;, ()&gt; {
         <span class="kw">let </span>new_widget = new_widget.and_then(|w| <span class="self">self</span>.widget_from_id(w, tree));
         <span class="kw">match </span>(
             mem::replace(property(<span class="self">self</span>), new_widget.as_ref().map(|w| w.node_id)),
@@ -1178,7 +1178,7 @@
         point: Point&lt;Px&gt;,
         tree_data: <span class="kw-2">&amp;</span>TreeData,
         tree: <span class="kw-2">&amp;</span>Tree,
-    ) -&gt; Vec&lt;ManagedWidget&gt; {
+    ) -&gt; Vec&lt;MountedWidget&gt; {
         <span class="comment">// We pessimistically allocate a vector as if all widgets match, up to a
         // reasonable limit. This should ensure minimal allocations in all but
         // extreme circumstances where widgets are nested with a significant

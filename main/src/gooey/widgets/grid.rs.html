@@ -952,7 +952,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::IntrinsicPadding;
 <span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Generation, IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, ManagedWidget, Widget, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MountedWidget, Widget, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
 
 <span class="doccomment">/// A 2D grid of widgets.
@@ -960,7 +960,7 @@
 </span><span class="kw">pub struct </span>Grid&lt;<span class="kw">const </span>ELEMENTS: usize&gt; {
     columns: Value&lt;[GridDimension; ELEMENTS]&gt;,
     rows: Value&lt;GridWidgets&lt;ELEMENTS&gt;&gt;,
-    live_rows: Vec&lt;[ManagedWidget; ELEMENTS]&gt;,
+    live_rows: Vec&lt;[MountedWidget; ELEMENTS]&gt;,
     layout: GridLayout,
     layout_generation: <span class="prelude-ty">Option</span>&lt;Generation&gt;,
     spec_generation: <span class="prelude-ty">Option</span>&lt;Generation&gt;,

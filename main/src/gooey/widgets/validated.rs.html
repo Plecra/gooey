@@ -132,7 +132,7 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::styles::Dimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, IntoDynamic, IntoValue, MapEach, Validation, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithId, WidgetInstance, WidgetRef, WrapperWidget};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{MakeWidget, MakeWidgetWithTag, WidgetInstance, WidgetRef, WrapperWidget};
 
 <span class="doccomment">/// A widget that displays validation information around another widget.
 ///
@@ -169,8 +169,8 @@
     </span>}
 }
 
-<span class="kw">impl </span>MakeWidgetWithId <span class="kw">for </span>Validated {
-    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
+<span class="kw">impl </span>MakeWidgetWithTag <span class="kw">for </span>Validated {
+    <span class="kw">fn </span>make_with_tag(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
         <span class="kw">let </span>message = <span class="kw">match </span><span class="self">self</span>.hint {
             Value::Constant(hint) =&gt; <span class="self">self
                 </span>.validation
@@ -207,7 +207,7 @@
             error_color,
             default_color,
         }
-        .make_with_id(id)
+        .make_with_tag(id)
     }
 }
 

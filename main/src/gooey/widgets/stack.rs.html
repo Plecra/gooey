@@ -194,7 +194,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::styles::components::IntrinsicPadding;
 <span class="kw">use </span><span class="kw">crate</span>::styles::FlexibleDimension;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Generation, IntoValue, Value};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{Children, ChildrenSyncChange, ManagedWidget, Widget, WidgetRef};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{Children, ChildrenSyncChange, MountedWidget, Widget, WidgetRef};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::grid::{GridDimension, GridLayout, Orientation};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Expand, Resize};
 <span class="kw">use </span><span class="kw">crate</span>::ConstraintLimit;
@@ -211,7 +211,7 @@
     layout: GridLayout,
     layout_generation: <span class="prelude-ty">Option</span>&lt;Generation&gt;,
     <span class="comment">// TODO Refactor synced_children into its own type.
-    </span>synced_children: Vec&lt;ManagedWidget&gt;,
+    </span>synced_children: Vec&lt;MountedWidget&gt;,
 }
 
 <span class="kw">impl </span>Stack {
@@ -255,7 +255,7 @@
             <span class="self">self</span>.children.map(|children| {
                 children.synchronize_with(
                     <span class="kw-2">&amp;mut </span><span class="self">self</span>.synced_children,
-                    |this, index| this.get(index).map(ManagedWidget::instance),
+                    |this, index| this.get(index).map(MountedWidget::instance),
                     |this, change| <span class="kw">match </span>change {
                         ChildrenSyncChange::Insert(index, widget) =&gt; {
                             <span class="comment">// This is a brand new child.

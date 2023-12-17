@@ -1354,9 +1354,9 @@
         <span class="kw">let </span>half_knob = knob_size / <span class="number">2</span>;
 
         <span class="kw">let </span>(<span class="kw-2">mut </span>start_value, <span class="kw-2">mut </span>end_value) =
-            T::into_parts(<span class="self">self</span>.value.get_tracking_refresh(context));
-        <span class="kw">let </span>min = <span class="self">self</span>.minimum.get_tracked(context);
-        <span class="kw">let </span><span class="kw-2">mut </span>max = <span class="self">self</span>.maximum.get_tracked(context);
+            T::into_parts(<span class="self">self</span>.value.get_tracking_redraw(context));
+        <span class="kw">let </span>min = <span class="self">self</span>.minimum.get_tracking_redraw(context);
+        <span class="kw">let </span><span class="kw-2">mut </span>max = <span class="self">self</span>.maximum.get_tracking_redraw(context);
 
         <span class="kw">if </span>max &lt; min {
             <span class="self">self</span>.maximum.map_mut(|max| <span class="kw-2">*</span>max = min.clone());

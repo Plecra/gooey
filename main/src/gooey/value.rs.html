@@ -2471,7 +2471,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::context::sealed::WindowHandle;
 <span class="kw">use </span><span class="kw">crate</span>::context::{<span class="self">self</span>, WidgetContext};
 <span class="kw">use </span><span class="kw">crate</span>::utils::{run_in_bg, IgnorePoison, UnwindsafeCondvar, WithClone};
-<span class="kw">use </span><span class="kw">crate</span>::widget::{Children, MakeWidget, MakeWidgetWithId, WidgetId, WidgetInstance};
+<span class="kw">use </span><span class="kw">crate</span>::widget::{Children, MakeWidget, MakeWidgetWithTag, WidgetId, WidgetInstance};
 <span class="kw">use </span><span class="kw">crate</span>::widgets::{Radio, Select, Space, Switcher};
 
 <span class="doccomment">/// An instance of a value that provides APIs to observe and react to its
@@ -2826,7 +2826,7 @@
     /// This function panics if this value is already locked by the current
     /// thread.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>get_tracking_refresh(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
+    </span><span class="kw">pub fn </span>get_tracking_redraw(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
     <span class="kw">where
         </span>T: Clone,
     {
@@ -3087,20 +3087,20 @@
     }
 }
 
-<span class="kw">impl </span>MakeWidgetWithId <span class="kw">for </span>Dynamic&lt;WidgetInstance&gt; {
-    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
-        <span class="self">self</span>.into_switcher().make_with_id(id)
+<span class="kw">impl </span>MakeWidgetWithTag <span class="kw">for </span>Dynamic&lt;WidgetInstance&gt; {
+    <span class="kw">fn </span>make_with_tag(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
+        <span class="self">self</span>.into_switcher().make_with_tag(id)
     }
 }
 
-<span class="kw">impl </span>MakeWidgetWithId <span class="kw">for </span>Dynamic&lt;<span class="prelude-ty">Option</span>&lt;WidgetInstance&gt;&gt; {
-    <span class="kw">fn </span>make_with_id(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
+<span class="kw">impl </span>MakeWidgetWithTag <span class="kw">for </span>Dynamic&lt;<span class="prelude-ty">Option</span>&lt;WidgetInstance&gt;&gt; {
+    <span class="kw">fn </span>make_with_tag(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
         <span class="self">self</span>.map_each(|widget| {
             widget
                 .as_ref()
                 .map_or_else(|| Space::clear().make_widget(), Clone::clone)
         })
-        .make_with_id(id)
+        .make_with_tag(id)
     }
 }
 
@@ -3709,7 +3709,7 @@
     /// This function panics if this value is already locked by the current
     /// thread.
     </span><span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>get_tracking_refresh(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
+    </span><span class="kw">pub fn </span>get_tracking_redraw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
     <span class="kw">where
         </span>T: Clone,
     {
@@ -4098,7 +4098,7 @@
     ///
     /// If `self` is a dynamic, `context` will be refreshed when the value is
     /// updated.
-    </span><span class="kw">pub fn </span>get_tracked(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
+    </span><span class="kw">pub fn </span>get_tracking_redraw(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>WidgetContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; T
     <span class="kw">where
         </span>T: Clone,
     {

@@ -205,9 +205,9 @@
 
 <span class="macro">macro_rules! </span>impl_make_widget {
     ($(<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>),<span class="kw-2">*</span>) =&gt; {
-        $(<span class="kw">impl </span><span class="kw">crate</span>::widget::MakeWidgetWithId <span class="kw">for </span><span class="macro-nonterminal">$</span><span class="kw">type </span>{
-            <span class="kw">fn </span><span class="macro-nonterminal">make_with_id</span>(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
-                Label::new(<span class="self">self</span>).make_with_id(id)
+        $(<span class="kw">impl </span><span class="kw">crate</span>::widget::MakeWidgetWithTag <span class="kw">for </span><span class="macro-nonterminal">$</span><span class="kw">type </span>{
+            <span class="kw">fn </span><span class="macro-nonterminal">make_with_tag</span>(<span class="self">self</span>, id: <span class="kw">crate</span>::widget::WidgetTag) -&gt; WidgetInstance {
+                Label::new(<span class="self">self</span>).make_with_tag(id)
             }
         })*
     };

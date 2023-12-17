@@ -302,7 +302,7 @@
         <span class="kw">let </span>loupe_size = Lp::mm(<span class="number">3</span>).into_px(context.gfx.scale());
         <span class="kw">let </span>size = context.gfx.region().size;
 
-        <span class="kw">let </span>value = <span class="self">self</span>.value.get_tracking_refresh(context);
+        <span class="kw">let </span>value = <span class="self">self</span>.value.get_tracking_redraw(context);
         <span class="kw">let </span>value_pos = <span class="self">self</span>.visible_rect.origin
             + Point::new(
                 <span class="kw">if </span><span class="self">self</span>.hue_is_360 {
@@ -313,7 +313,7 @@
                 <span class="self">self</span>.visible_rect.size.height * <span class="kw-2">*</span>value.saturation.one_minus(),
             );
 
-        <span class="kw">let </span>lightness = <span class="self">self</span>.lightness.get_tracked(context);
+        <span class="kw">let </span>lightness = <span class="self">self</span>.lightness.get_tracking_redraw(context);
         <span class="kw">let </span>value_color = value.color(lightness);
 
         <span class="kw">let </span>outline_color = <span class="kw">if </span>context.focused(<span class="bool-val">true</span>) {

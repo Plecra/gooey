@@ -2512,7 +2512,7 @@
         }
 
         <span class="self">self</span>.blink_state.update(context.elapsed());
-        <span class="kw">let </span>window_focused = context.window().focused().get_tracking_refresh(context);
+        <span class="kw">let </span>window_focused = context.window().focused().get_tracking_redraw(context);
         <span class="kw">if </span>window_focused != <span class="self">self</span>.window_focused {
             <span class="kw">if </span>window_focused {
                 <span class="self">self</span>.blink_state.force_on();

@@ -1410,7 +1410,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::utils::ModifiersExt;
 <span class="kw">use </span><span class="kw">crate</span>::value::{Dynamic, DynamicReader, IntoDynamic, IntoValue, Value};
 <span class="kw">use </span><span class="kw">crate</span>::widget::{
-    EventHandling, ManagedWidget, RootBehavior, Widget, WidgetId, WidgetInstance, HANDLED, IGNORED,
+    EventHandling, MountedWidget, RootBehavior, Widget, WidgetId, WidgetInstance, HANDLED, IGNORED,
 };
 <span class="kw">use </span><span class="kw">crate</span>::window::sealed::WindowCommand;
 <span class="kw">use crate</span>::{initialize_tracing, ConstraintLimit, Run};
@@ -1709,7 +1709,7 @@
 
 <span class="kw">struct </span>GooeyWindow&lt;T&gt; {
     behavior: T,
-    root: ManagedWidget,
+    root: MountedWidget,
     contents: Drawing,
     should_close: bool,
     cursor: CursorState,
@@ -2592,7 +2592,7 @@
 <span class="kw">fn </span>recursively_handle_event(
     context: <span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
     <span class="kw-2">mut </span>each_widget: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;mut </span>EventContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; EventHandling,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ManagedWidget&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;MountedWidget&gt; {
     <span class="kw">match </span>each_widget(context) {
         HANDLED =&gt; <span class="prelude-val">Some</span>(context.widget().clone()),
         IGNORED =&gt; context.parent().and_then(|parent| {
