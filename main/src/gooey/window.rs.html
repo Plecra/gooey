@@ -1368,7 +1368,6 @@
 <a href="#1368" id="1368">1368</a>
 <a href="#1369" id="1369">1369</a>
 <a href="#1370" id="1370">1370</a>
-<a href="#1371" id="1371">1371</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Types for displaying a [`Widget`] inside of a desktop window.
 
 </span><span class="kw">use </span>std::cell::RefCell;
@@ -1376,7 +1375,6 @@
 <span class="kw">use </span>std::ops::{Deref, DerefMut, Not};
 <span class="kw">use </span>std::panic::{AssertUnwindSafe, UnwindSafe};
 <span class="kw">use </span>std::path::Path;
-<span class="kw">use </span>std::process::Command;
 <span class="kw">use </span>std::string::ToString;
 <span class="kw">use </span>std::sync::{MutexGuard, OnceLock};
 
@@ -2711,7 +2709,7 @@
 }
 
 <span class="attr">#[cfg(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;windows&quot;</span>))]
-</span><span class="kw">fn </span>default_family(query: Family&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;FamilyOwned&gt; {
+</span><span class="kw">fn </span>default_family(_query: Family&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;FamilyOwned&gt; {
     <span class="comment">// fontdb uses system APIs to determine these defaults.
     </span><span class="prelude-val">None
 </span>}
@@ -2731,7 +2729,7 @@
         Family::Name(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
     };
 
-    Command::new(<span class="string">&quot;fc-match&quot;</span>)
+    std::process::Command::new(<span class="string">&quot;fc-match&quot;</span>)
         .arg(<span class="string">&quot;-f&quot;</span>)
         .arg(<span class="string">&quot;%{family}&quot;</span>)
         .arg(query)

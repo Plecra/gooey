@@ -209,13 +209,13 @@
 <span class="kw">use </span>kludgine::app::winit::event::Modifiers;
 <span class="kw">use </span>kludgine::app::winit::keyboard::ModifiersState;
 
-<span class="doccomment">/// This [`Condvar`] is a wrapper that on Mac OS/iOS asserts unwind safety. On
+<span class="doccomment">/// This [`Condvar`] is a wrapper that on Mac OS/iOS/Windows asserts unwind safety. On
 /// all other platforms, this is a transparent wrapper around `Condvar`. See
 /// &lt;https://github.com/rust-lang/rust/issues/118009&gt; for more information.
 </span><span class="attr">#[derive(Debug, Default)]
 </span><span class="kw">pub struct </span>UnwindsafeCondvar(
-    <span class="attr">#[cfg(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>))] </span>std::panic::AssertUnwindSafe&lt;Condvar&gt;,
-    <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>)))] </span>Condvar,
+    <span class="attr">#[cfg(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;windows&quot;</span>))] </span>std::panic::AssertUnwindSafe&lt;Condvar&gt;,
+    <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;windows&quot;</span>)))] </span>Condvar,
 );
 
 <span class="kw">impl </span>Deref <span class="kw">for </span>UnwindsafeCondvar {
@@ -228,12 +228,12 @@
 
 <span class="kw">impl </span>UnwindsafeCondvar {
     <span class="kw">pub const fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="attr">#[cfg(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>))]
+        <span class="attr">#[cfg(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;windows&quot;</span>))]
         </span>{
             <span class="self">Self</span>(std::panic::AssertUnwindSafe(Condvar::new()))
         }
 
-        <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>)))]
+        <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;windows&quot;</span>)))]
         </span>{
             <span class="self">Self</span>(Condvar::new())
         }
